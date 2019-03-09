@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "scripts",
+  "version": "0.0.1",
+  "description": "nem2-dojo example scripts",
+  "keywords": [
+    "nem2"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/44uk/nem2-dojo.git"
+  },
+  "author": "Yoshiyuki Ieyama",
+  "license": "MIT",
+  "dependencies": {
+    "js-sha3": "^0.8.0",
+    "nem2-sdk": "0.11.1",
+    "rxjs": "^6.4.0"
+  }
+}

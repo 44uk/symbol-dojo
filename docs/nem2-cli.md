@@ -55,7 +55,7 @@ $ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile 
 
 ここでは初期分配されたアカウントを登録してみましょう。
 
-`addresses.yml`から任意のアカウントの秘密鍵を選んでください。
+`addresses.yml`の`nemesis_addresses:`セクションのうち、前２２件から任意のアカウントの秘密鍵を選んでください。
 
 ```shell
 $ nem2-cli profile create -n MIJIN_TEST -p B0C900E7E4270B60BB0B1199205A190F77BD1D0BBCD1B305E8790290A08C23F6 -u http://localhost:3000 --profile nemesis1

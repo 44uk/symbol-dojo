@@ -302,7 +302,7 @@ owner:          SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 supply:         0
 ```
 
-この時点ではまだ供給量を設定していないので、定義だけが存在していてモザイクは発行されていない状態なので`supply 0`と表示されています。
+この時点ではまだ供給量を設定していないので、定義だけが存在していてモザイクは発行されていない状態なので`supply 0`と表示されています。
 
 次に`scripts/mutate_mosaic_supply.js`を実行してください。
 

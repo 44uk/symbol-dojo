@@ -13,11 +13,22 @@ APIエンドポイントはデフォルト設定で`http://localhost:3000`です
 
 ## 有志によるプライベートネットワーク
 
-有志によるネットワークが稼働しています。
+NEM財団と有志によるネットワークが稼働しています。
 
 ローカルにネットワークと立ち上げることが困難である場合は以下のネットワークを利用することができます。
 
 ただし、各ネットワークの管理者の都合により稼働が止まったり、チェーンが初期化される場合があります。
+
+
+### NEM Foundation's Catapult Testnet Web Wallet
+
+- [NEM NETWORK EXPLORER](http://3.17.139.170:8080/)
+- [Endpoint 13.114.200.132](http://13.114.200.132:3000)
+- [Endpoint 40.90.163.184](http://40.90.163.184:3000)
+- [Endpoint 52.194.207.217](http://52.194.207.217:3000)
+- [Endpoint 47.107.245.217](http://47.107.245.217:3000)
+- [エクスプローラ](http://40.90.163.184:8000/#/blocks/0)
+- [ウォレット](http://nfwallet.z31.web.core.windows.net/)
 
 
 ### catapult-test.44uk.net
@@ -25,6 +36,7 @@ APIエンドポイントはデフォルト設定で`http://localhost:3000`です
 - [APIエンドポイント](http://catapult-test.44uk.net:3000)
 - [エクスプローラ](http://catapult-test.44uk.net:8000)
 - [フォーセット](http://catapult-test.44uk.net:4000)
+
 
 ### catapult48gh23s.xyz
 

@@ -89,9 +89,12 @@ $ docker-compose -f docker-compose-with-explorer.yml up -d
 ## 初期分配の確認
 
 初期分配された基軸モザイクは初期生成アドレスへ分配されています。
-初期アドレスは`./build/generated_addresses/address.yml`にあるので開いてください。
+
+初期アドレスは`./build/generated_addresses/address.yml`にあります。
 
 `nemesis_addresses:`という箇所から下が初期アドレスです。以下は一例です。
+
+なお、以降に出てくる`鍵`や`アドレス`はご自分の使用しているものに置き換えて実行してください。
 
 ```yaml
 nemesis_addresses:
@@ -107,6 +110,7 @@ nemesis_addresses:
 ```
 
 初期分配時に使われるファイルを見てみると、前の**22**アカウントへ分配しています。
+
 (現時点での仕様です。今後コードは変更されるかもしれません)
 
 - [catapult\-service\-bootstrap/template\_bindings\.rb at master · tech\-bureau/catapult\-service\-bootstrap](https://github.com/tech-bureau/catapult-service-bootstrap/blob/master/ruby/lib/catapult/config/nemesis_properties_file/template_bindings.rb#L18)
@@ -115,9 +119,9 @@ nemesis_addresses:
 
 APIにアクセスして確認してみましょう。
 
-`http://localhost:3000/account/SBPKTXJYSCHBGHRAFEETGITGW6AS22KX4GI5WZ25`
+- http://localhost:3000/account/SBPKTXJYSCHBGHRAFEETGITGW6AS22KX4GI5WZ25
 
-整形していますが、次のような`json`レスポンスが得られます。
+ここでは整形していますが、次のような`json`レスポンスが得られます。
 
 ```json
 {
@@ -171,7 +175,7 @@ APIにアクセスして確認してみましょう。
 
 ```shell
 $ cd scripts
-$ node -e "let uint64 = require('nem2-sdk').UInt64; console.log(new uint64([3863990592,95248]).compact())"
+$ node -e "let uint64 = require('nem2-sdk').UInt64;console.log(new uint64([3863990592,95248]).compact())"
 409090909000000 # 整数値による表現
 ```
 
@@ -181,25 +185,30 @@ $ node -e "let uint64 = require('nem2-sdk').UInt64; console.log(new uint64([3863
 ## クラスタ立ち上げ時のトラブルシューティング
 
 執筆時点でクラスタを立ち上げる際にブロック生成が進まない問題が発生することがあります。
+
 動作確認でつまづいた場合、以下を試してみてください。
 
 
 ### ブロック生成が進まない
 
 ブロック情報の破損、設定ファイルの食い違いなどの問題があるようです。
+
 `./clean-all`というスクリプトを実行すると、環境を初期化できます。
+
 初期化後、`docker-compose up`でクラスタを立ち上げ直してみてください。
 
 
 ### レスポンスが帰ってこない
 
 APIサーバの起動に失敗している可能性があります。
+
 `./clean-all`で環境を初期化後、クラスタを立ち上げ直してみてください。
 
 
 ### クラスタを停止後、動かそうとすると動かない
 
 正しくコンテナが終了しなかったりすると、ロックファイル`file.lock`が残る場合があります。
+
 `./data/{node}/file.lock`を削除してから立ち上げてみてください。
 
 
@@ -211,13 +220,16 @@ APIサーバの起動に失敗している可能性があります。
 ### ブロックチェーンをリセットしたい・消したい
 
 クラスタを停止してから`./clean-data`を使ってください。
+
 こちらはブロック情報だけを削除します。
+
 削除後に`docker-compose up`すれば`1`ブロック目から生成が始まります。
 
 
 ### 初期キーペア以外をリセットしたい
 
 `./clean-data`を開いて、以下の行をコメントアウトしてください。
+
 次に`docker-compose up`した際に、残した初期キーペアが使用されます。
 
 ```bash

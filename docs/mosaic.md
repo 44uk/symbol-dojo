@@ -122,7 +122,7 @@ owner:          SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 supply:         10000
 ```
 
-今度は`supply`に指定した量が表示されています。さらに、`alice`の持っているモザイクにも現れました。
+今度は`supply`に指定した量が表示されています。さらに`alice`の持っているモザイクにも現れました。
 
 ```shell
 $ nem2-cli account info --profile alice

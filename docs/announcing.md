@@ -550,11 +550,11 @@ const aggregateTx = nem.AggregateTransaction.createComplete(
 
 `scripts/transfer/create_pullfunds.js`を実行してみましょう。
 
-このコードは`bob`が`10 cat.currency`送るように`alice`から支払いを請求します。
+このコードは`bob`が`10 cat.currency`を`alice`に送るよう支払いの請求を行います。
 
-内容を確認した`bob`はアグリゲートトランザクションに署名をして、アグリゲートトランザクションが承認されます。
+内容を確認した`bob`がアグリゲートトランザクションに署名することで、アグリゲートトランザクションが承認されます。
 
-このコードでは、`bob`も署名をするので秘密鍵を渡します。
+このコードでは`bob`も署名する必要があるので秘密鍵を渡します。
 
 アグリゲートボンドの作成から署名し承認されるまでの流れを一つのスクリプト内で行います。
 
@@ -610,8 +610,12 @@ Amount: Mosaic {
 
 `alice`から`bob`へ`10 cat.currency`が届いていることを確認してみてください。
 
+なお、この動作は`nem2-cli transfer pullfunds`として実装されているので、こちらも試してみてください。
 
-## コード解説
+- [プルトランザクションの送信 | トランザクション - クライアント — NEM Developer Center](https://nemtech.github.io/ja/cli.html#transaction)
+
+
+### コード解説
 
 ```javascript
 const fromInitiaterTx = nem.TransferTransaction.create(
@@ -680,7 +684,7 @@ util.listener(url, debtor.address, {
 })
 ```
 
-アグリゲートトランザクションが承認されたら、`bob`がその内容を確認して、署名するという動作をしています。
+アグリゲートトランザクションが承認されたら、`bob`がその内容を確認して署名するという動作をしています。
 
 ```javascript
 ;(async () => {

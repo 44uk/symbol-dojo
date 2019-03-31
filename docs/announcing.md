@@ -37,8 +37,8 @@ alice->
 ターミナルで以下のように環境変数をセットしてください。
 
 ```shell
-export PRIVATE_KEY=25E7E5A21DD0C863B3CC3767C5CC6C081A7C7795BA4115231C74F491A97D6ED7
 export API_URL=http://localhost:3000
+export PRIVATE_KEY=25E7E5A21DD0C863B3CC3767C5CC6C081A7C7795BA4115231C74F491A97D6ED7
 ```
 
 以降、サンプルコードでは`alice`の秘密鍵がトランザクションの発信に使用されます。
@@ -198,6 +198,7 @@ const transferTx = nem.TransferTransaction.create(
 
 `js-joda`の時間単位を一緒に渡すことで、より細かい単位の時間を設定できます。
 
+
 ```javascript
 // トランザクション成功/失敗,未承認,承認のモニタリング接続
 util.listener(url, initiater.address, {
@@ -214,7 +215,7 @@ util.listener(url, initiater.address, {
 トランザクションの未承認・承認のタイミングで通知が表示されます。
 
 
-## util.js
+### util.jsの解説
 
 `util.js`の中身も解説しておきます。
 
@@ -237,6 +238,7 @@ exports.listener = (url, address, hooks = {}) => {
 アカウントのステータスをモニタリングするにはリスナーオブジェクトを作ります。
 
 APIのURLを渡してオブジェクトを作成します。
+
 
 ```javascript
   // リスナーを開いて接続を試みる
@@ -266,9 +268,7 @@ APIのURLを渡してオブジェクトを作成します。
 };
 ```
 
-`listener`には各イベントを購読するためのメソッドがあります。
-
-アドレスを渡すことで購読を設定します。
+アドレスを渡して作成した`listener`には各イベントを購読するためのメソッドがあります。
 
 `subscribe`によってその購読が開始されます。
 

@@ -1,6 +1,6 @@
 # テスト用ネットワークの環境構築
 
-ローカル環境にネットワークを構築して学習する場合に行うステップです。
+お手元のマシン上にローカルネットワーク環境を構築して学習する場合に行います。
 
 - [ワークステーションのセットアップ — NEM Developer Center](https://nemtech.github.io/ja/getting-started/setup-workstation.html)
 
@@ -11,11 +11,11 @@ APIエンドポイントはデフォルト設定で`http://localhost:3000`です
 用意されたネットワークを使用する場合は、以降のドキュメントでは接続するURLのホストとポートは各自の環境で読み替えてください。
 
 
-## 有志によるプライベートネットワーク
+## 開発用プライベートネットワーク
 
 NEM財団と有志によるネットワークが稼働しています。
 
-ローカルにネットワークと立ち上げることが困難である場合は以下のネットワークを利用することができます。
+ローカルネットワークと立ち上げることが困難である場合は以下のネットワークを利用することができます。
 
 ただし、各ネットワークの管理者の都合により稼働が止まったり、チェーンが初期化される場合があります。
 
@@ -58,7 +58,7 @@ NEM財団と有志によるネットワークが稼働しています。
 $ git clone https://github.com/tech-bureau/catapult-service-bootstrap.git
 ```
 
-展開したディレクトリに移動し、`docker-compose`コマンドでコンテナクラスタを立ち上げます。
+展開したディレクトリに移動して、`docker-compose`コマンドの実行でコンテナクラスタを立ち上げます。
 
 ＊ `docker-compose-with-explorer.yml`はブロックエクスプローラが起動する設定ファイルです。
 
@@ -72,27 +72,18 @@ $ docker-compose -f docker-compose-with-explorer.yml up -d
 
 ## クラスタの動作確認
 
-### APIの疎通を確認
+### APIの疎通確認
 
 - http://localhost:3000/block/1
 
 ブラウザでアクセスしてください。初期ブロックのレスポンスが得られます。
 
 
-### エクスプローラの疎通を確認
+### エクスプローラの疎通確認
 
 - http://localhost:8000
 
 ブラウザでアクセスしてください。ブロックチェーンエクスプローラが表示されます。
-
-
-### ブロック生成を確認
-
-```shell
-$ nem2-cli monitor block
-```
-
-コマンドを実行してください。ブロックが生成されるたびにブロック情報が流れてきます。
 
 
 ## 初期分配の確認
@@ -120,28 +111,68 @@ nemesis_addresses:
 
 - [catapult\-service\-bootstrap/template\_bindings\.rb at master · tech\-bureau/catapult\-service\-bootstrap](https://github.com/tech-bureau/catapult-service-bootstrap/blob/master/ruby/lib/catapult/config/nemesis_properties_file/template_bindings.rb#L18)
 
-基軸モザイクの発行枚数は`8,999,999,998.000,000`、可分性は`6`なので、
-4億9百9万9百9XEM(`8,999,999,998.000,000 / 22 = 409,090,909.000,000`)ずつ分配されることになります。
+基軸モザイクの発行枚数は`8,999,999,998.000,000`、可分性は`6`なので、4億9百9万9百9`cat.currency`(`8,999,999,998.000,000 / 22 = 409,090,909.000,000`)ずつ分配されます。
 
-実際に確認してみましょう。
-`nemesis_addresses:`の前から22件、お好きにアドレスを選んで、以下のコマンドで残高を確認してください。
+APIにアクセスして確認してみましょう。
+
+`http://localhost:3000/account/SBPKTXJYSCHBGHRAFEETGITGW6AS22KX4GI5WZ25`
+
+整形していますが、次のような`json`レスポンスが得られます。
+
+```json
+{
+    "meta": {},
+    "account": {
+        "address": "90395E25D18A3684B290A669BD1E5A0CC44D847AD89EC17DEB",
+        "addressHeight": [
+            1,
+            0
+        ],
+        "publicKey": "0000000000000000000000000000000000000000000000000000000000000000",
+        "publicKeyHeight": [
+            0,
+            0
+        ],
+        "accountType": 0,
+        "linkedAccountKey": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mosaics": [
+            {
+                "id": [
+                    1812672056,
+                    2097790768
+                ],
+                "amount": [
+                    3863990592,
+                    95248
+                ]
+            }
+        ],
+        "importance": [
+            0,
+            0
+        ],
+        "importanceHeight": [
+            0,
+            0
+        ]
+    }
+}
+```
+
+`amount`の値を確認すると`[3863990592, 95248]`となっています。
+
+これは`JavaScript`で`64bit`の大きな値を扱うために上下位`32bit`ずつに分けた表示です。
+
+(`JavaScript`の言語仕様上`53bit`の整数値までしか扱えません。)
+
+(`53bit`以下に収まる)表現可能な数値であれば、整数値として表示することができます。
+
+`scripts`ディレクトリへ移動して、次のワンライナースクリプトを実行してみてください。
 
 ```shell
-$ nem2-cli account info -a SBPKTXJYSCHBGHRAFEETGITGW6AS22KX4GI5WZ25
-Account:        SBPKTX-JYSCHB-GHRAFE-ETGITG-W6AS22-KX4GI5-WZ25
--------------------------------------------------------
-
-Address:        SBPKTX-JYSCHB-GHRAFE-ETGITG-W6AS22-KX4GI5-WZ25
-at height:      1
-
-PublicKey:      0000000000000000000000000000000000000000000000000000000000000000
-at height:      0
-
-Importance:     409090909
-at height:      1
-
-Mosaics
-7d09bf306c0b2e38:       409090909
+$ cd scripts
+$ node -e "let uint64 = require('nem2-sdk').UInt64; console.log(new uint64([3863990592,95248]).compact())"
+409090909000000 # 整数値による表現
 ```
 
 `409,090,909.000,000`cat.currencyが配布された状態であることが確認できました。

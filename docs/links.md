@@ -2,6 +2,11 @@
 
 公式・有志の情報が集まっているサイトのリンク集です。
 
+## 公式ドキュメント
+
+- [NEM Foundation Roadmap \| NEM Documentation](https://docs.nem.io/en/roadmap)
+- [NEM Catapult Testnet \| NEM Documentation](https://docs.nem.io/en/testnet)
+
 
 ## APIドキュメント
 

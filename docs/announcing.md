@@ -615,6 +615,10 @@ Amount: Mosaic {
 
 - [プルトランザクションの送信 | トランザクション - クライアント — NEM Developer Center](https://nemtech.github.io/ja/cli.html#transaction)
 
+今回は`alice`からはメッセージだけを送りましたが、相手方とモザイクを交換したい場合にも同じ操作をすることで、安全に交換することができます。
+
+- [アグリゲートボンドトランザクションを使ったエスクローの作成 — NEM Developer Center](https://nemtech.github.io/ja/guides/transaction/creating-an-escrow-with-aggregate-bonded-transaction.html)
+
 
 ### コード解説
 

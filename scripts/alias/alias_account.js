@@ -1,5 +1,5 @@
 /**
- * $ node scripts/namespace/link_account.js namespaceString address
+ * $ node scripts/alias/alias_account.js namespaceString address
  */
 const nem = require('nem2-sdk');
 const util = require('../util');
@@ -34,7 +34,7 @@ const aliasTx = nem.AddressAliasTransaction.create(
 
 util.listener(url, initiater.address, {
   onOpen: () => {
-    const signedTransaction = initiater.sign(aliasTx);
-    util.announce(url, signedTransaction);
+    const signedTx = initiater.sign(aliasTx);
+    util.announce(url, signedTx);
   }
 });

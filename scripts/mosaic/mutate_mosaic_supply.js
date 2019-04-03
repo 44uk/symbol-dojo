@@ -37,7 +37,7 @@ const supplyTx = nem.MosaicSupplyChangeTransaction.create(
 
 util.listener(url, initiater.address, {
   onOpen: () => {
-    const signedTransaction = initiater.sign(supplyTx);
-    util.announce(url, signedTransaction);
+    const signedTx = initiater.sign(supplyTx);
+    util.announce(url, signedTx);
   }
 });

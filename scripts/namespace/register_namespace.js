@@ -43,7 +43,7 @@ if (child) {
 
 util.listener(url, initiater.address, {
   onOpen: () => {
-    const signedTransaction = initiater.sign(registerTx);
-    util.announce(url, signedTransaction);
+    const signedTx = initiater.sign(registerTx);
+    util.announce(url, signedTx);
   }
 });

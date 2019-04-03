@@ -106,7 +106,7 @@ const aggregateTx = nem.AggregateTransaction.createComplete(
 
 util.listener(url, initiater.address, {
   onOpen: () => {
-    const signedTransaction = initiater.sign(aggregateTx);
-    util.announce(url, signedTransaction);
+    const signedTx = initiater.sign(aggregateTx);
+    util.announce(url, signedTx);
   }
 });

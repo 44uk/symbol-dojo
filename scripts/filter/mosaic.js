@@ -45,7 +45,7 @@ const propModTx = nem.AccountPropertyTransaction.createMosaicPropertyModificatio
 
 util.listener(url, initiater.address, {
   onOpen: () => {
-    const signedTransaction = initiater.sign(propModTx);
-    util.announce(url, signedTransaction);
+    const signedTx = initiater.sign(propModTx);
+    util.announce(url, signedTx);
   }
 });

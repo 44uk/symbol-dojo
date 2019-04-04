@@ -131,7 +131,7 @@ nsHttp.getLinkedMosaicId(nsId).subscribe(
 
 ネームスペースをモザイクへリンクすることで、ネームスペース名によってモザイクを認識することができるようになります。
 
-リンクする前にネームスペース名でモザイクを取得するコードを実行してみましょう。
+リンクする前にネームスペース名でモザイクを取得したり、ネームスペース名を宛先とするコードを実行してみましょう。
 
 以下はモザイクへリンクする場合とほぼ同様のコードのため、結果やコード解説を省きます。
 
@@ -155,6 +155,9 @@ Endpoint:  http://localhost:3000/namespace/9cf66fb0cfeed2e0
 
 Namespace: alice
 Address:   SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
+
+# ネームスペース名でモザイクを送信できることを確認
+$ node scripts/transfer/create_mosaic_transfer_by_namespace.js alice 10
 ```
 
 

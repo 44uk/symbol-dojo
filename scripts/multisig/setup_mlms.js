@@ -85,7 +85,8 @@ util.listener(url, toBeLeftMultisig.address, {
 // -----------------------------------------------------------------------------
 
 // Rightをマルチシグにする
-const rightCosignatoryModifications = rightCosigners.map(publicAccount => {
+const rightCosignatoryModifications = rightCosigners.map((publicAccount, idx) => {
+  showAccountInfo(publicAccount, `Right Cosigner Account${idx+1}:`)
   return new nem.MultisigCosignatoryModification(
     nem.MultisigCosignatoryModificationType.Add,
     publicAccount

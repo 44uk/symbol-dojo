@@ -18,10 +18,7 @@ exports.listener = (url, address, hooks = {}) => {
       .subscribe(nextObserver('STATUS', hooks.onStatus), errorObserver);
     listener
       .unconfirmedAdded(address)
-      .subscribe(
-        nextObserver('UNCONFIRMED', hooks.onUnconfirmed),
-        errorObserver
-      );
+      .subscribe(nextObserver('UNCONFIRMED', hooks.onUnconfirmed), errorObserver);
     listener
       .confirmed(address)
       .subscribe(nextObserver('CONFIRMED', hooks.onConfirmed), errorObserver);

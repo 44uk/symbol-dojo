@@ -11,7 +11,7 @@ const initiater = nem.Account.createFromPrivateKey(
 );
 
 const namespace = process.argv[2];
-const blocks = process.argv[3] || 10000; //
+const blocks = process.argv[3] || 100; // NOTE: 現時点の仕様だと1blockにつき1cat.currencyかかる
 const parts = namespace.split('.');
 
 console.log('Initiater: %s', initiater.address.pretty());

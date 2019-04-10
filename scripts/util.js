@@ -42,13 +42,13 @@ exports.announce = (url, tx, ...subscriber) => {
 exports.announceAggregateBonded = (url, tx, ...subscriber) => {
   const transactionHttp = new nem.TransactionHttp(url)
   const subscription = transactionHttp.announceAggregateBonded(tx)
-  announceUtil(subscription, url, tx, subscriber)
+  announceUtil(subscription, url, tx, ...subscriber)
 }
 
 exports.announceAggregateBondedCosignature = (url, tx, ...subscriber) => {
   const transactionHttp = new nem.TransactionHttp(url)
   const subscription = transactionHttp.announceAggregateBondedCosignature(tx)
-  announceUtil(subscription, url, tx, subscriber)
+  announceUtil(subscription, url, tx, ...subscriber)
 }
 
 // 発信用の便利関数

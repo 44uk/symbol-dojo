@@ -61,6 +61,8 @@ util.listener(url, initiater.address, {
 });
 
 ;(async () => {
+  // `cat.currency`のモザイクIDがわかるなら直接でも可能
+  // const mosId = new nem.MosaicId('7d09bf306c0b2e38');
   const mosId = await new nem.NamespaceHttp(url)
     .getLinkedMosaicId(new nem.NamespaceId('cat.currency'))
     .toPromise();

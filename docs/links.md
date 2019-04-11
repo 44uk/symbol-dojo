@@ -53,5 +53,8 @@
 ## 参考プロジェクト
 
 - [aleixmorgadas/nem2\-wallet\-browserextension: nem2 browser wallet\. Experimental, use in your own risk\.](https://github.com/aleixmorgadas/nem2-wallet-browserextension)
+- [NemTechCN/Nem2\-Dapp\-Plugin](https://github.com/NemTechCN/Nem2-Dapp-Plugin)
 - [sleepyOwl14/NEM2\-GraphQL: GraphQL for NEM2 MongoDB](https://github.com/sleepyOwl14/NEM2-GraphQL)
 - [nemtech/nem2\-camel: A component to turn the asynchronous transaction announcement into synchronous\.](https://github.com/nemtech/nem2-camel)
+- [evias/nem2\-hd\-wallets: Experimental library to handle hyper deterministic wallets for Catapult](https://github.com/evias/nem2-hd-wallets)
+

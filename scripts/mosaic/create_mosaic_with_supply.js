@@ -1,5 +1,5 @@
 /**
- * $ node scripts/mosaic/create_mosaic_with_supply.js
+ * $ node scripts/mosaic/create_mosaic_with_supply.js 1000000
  */
 const nem = require('nem2-sdk');
 const util = require('../util');
@@ -10,7 +10,7 @@ const initiater = nem.Account.createFromPrivateKey(
   nem.NetworkType.MIJIN_TEST
 );
 
-const absSupply = process.argv[2];
+const absSupply = process.argv[2] || 1000000;
 const blocks = process.argv[3] || 10000; //
 const nonce = nem.MosaicNonce.createRandom();
 const mosId = nem.MosaicId.createFromNonce(nonce, initiater.publicAccount);

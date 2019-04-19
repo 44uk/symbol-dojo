@@ -8,7 +8,7 @@
 
 モザイクには作成時に設定できる定義があります。
 
-- 有効期間(ブロック数)
+- 有効期間(ブロック数)(未定義の場合は無期限)
 - 可分性(少数の最小値)
 - 転送許可
 - 供給量変更許可
@@ -167,6 +167,8 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
 モザイク定義は`MosaicDefinitionTransaction`オブジェクトを作成します。
 
 `MosaicProperties.create`によってモザイクの性質プロパティを設定しています。
+
+`duration`を設定しないまたは`undefined`を渡すと、無期限のモザイクとして設定することができます。
 
 これに署名をして発信します。
 

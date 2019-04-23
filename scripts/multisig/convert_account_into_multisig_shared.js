@@ -1,5 +1,5 @@
 /**
- * $ node scripts/multisig/convert_multisig.js
+ * $ node scripts/multisig/convert_account_into_multisig_shared.js
  */
 const nem = require('nem2-sdk');
 const util = require('../util');
@@ -10,8 +10,8 @@ const initiater = nem.Account.createFromPrivateKey(
   nem.NetworkType.MIJIN_TEST
 );
 
-const minApprovalDelta = 2;
-const minRemovalDelta = 2;
+const minApprovalDelta = 1; // 1人の承認でよい
+const minRemovalDelta = 2; // 連署者を外すには2人に承認が必要
 
 console.log('Initiater: %s', initiater.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
@@ -28,11 +28,11 @@ const showAccountInfo = (account, label = null) => {
 }
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
-const accounts = [...Array(3)].map((_, idx) => {
+const accounts = [...Array(2)].map((_, idx) => {
   return nem.Account.generateNewAccount(nem.NetworkType.MIJIN_TEST);
 });
 
-// 1つ目のアカウントをマルチシグ候補にする
+// 1つ目のアカウントをマルチシグ化候補にする
 const toBeMultisig = accounts[0]
 // それ以降は連署者候補とする
 const cosigners = accounts.slice(1)

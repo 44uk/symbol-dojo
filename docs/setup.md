@@ -11,7 +11,7 @@
 - nem2-cli
     - 0.11.0
 - nem2-sdk
-    - 0.11.1
+    - 0.11.5
 - docker(ローカルネットワークを構築する場合)
     - Docker version 18.09.2, build 6247962
 - docker-compose(ローカルネットワークを構築する場合)

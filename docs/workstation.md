@@ -22,21 +22,13 @@ NEM財団と有志によるネットワークが稼働しています。
 
 ### NEM Foundation's Catapult Testnet Web Wallet
 
-- [NEM NETWORK EXPLORER](http://3.17.139.170:8080/)
-- [Endpoint 13.114.200.132](http://13.114.200.132:3000)
-- [Endpoint 40.90.163.184](http://40.90.163.184:3000)
-- [Endpoint 52.194.207.217](http://52.194.207.217:3000)
-- [Endpoint 47.107.245.217](http://47.107.245.217:3000)
+- [エンドポイント 13.114.200.132](http://13.114.200.132:3000)
+- [エンドポイント 40.90.163.184](http://40.90.163.184:3000)
+- [エンドポイント 52.194.207.217](http://52.194.207.217:3000)
+- [エンドポイント 47.107.245.217](http://47.107.245.217:3000)
 - [エクスプローラ](http://40.90.163.184:8000/#/blocks/0)
 - [フォーセット](http://nf-catapult-testnet.herokuapp.com/)
 - [ウォレット](http://nfwallet.z31.web.core.windows.net/)
-
-
-### catapult-test.44uk.net
-
-- [APIエンドポイント](http://catapult-test.44uk.net:3000)
-- [エクスプローラ](http://catapult-test.44uk.net:8000)
-- [フォーセット](http://catapult-test.44uk.net:4000)
 
 
 ### catapult48gh23s.xyz

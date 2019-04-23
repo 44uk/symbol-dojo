@@ -19,14 +19,14 @@
 
 ## マルチシグアカウントへの変換
 
-`scripts/multisig/convert_multisig.js`を実行してください。
+`scripts/multisig/convert_account_into_multisig.js`を実行してください。
 
 このスクリプトはアカウントを3つ生成し、そのうち1つをマルチシグアカウントに、
 
-2つと環境変数に設定している秘密鍵のアカウントを連署者として設定します。
+2つと環境変数に設定している秘密鍵のアカウントの3つのアカウントを連署者として設定します。
 
 ```shell
-$ node scripts/multisig/convert_multisig.js
+$ node scripts/multisig/convert_account_into_multisig.js
 Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 
@@ -162,7 +162,7 @@ util.listener(url, toBeMultisig.address, {
 
 このスクリプトは、連署者の秘密鍵、マルチシグアカウントの公開鍵、受信者アドレス、モザイク量を渡します。
 
-ここでは、前の項で作った、連署者として`Cosigner Account1`の秘密鍵を、受信者には`Cosigner Account2`のアドレスを指定しました。
+ここでは前の項で作った、連署者として`Cosigner Account1`の秘密鍵を、受信者には`Cosigner Account2`のアドレスを指定しました。
 
 ```shell
 $ node scripts/multisig/initiate_from_cosigner.js 63C3B2AD116A94591483F60E320BB5A53795F8FCB88AB282BADDC86A0BE69F99 F5B9256485A4BDD4ACD713D8A95BAB38E83B22934E8B8C6A74285B060413FAD6 SBFMZE43WQ255UPU7OHRAGZ6S3SFGEK7NZ4AKCBM 1
@@ -203,9 +203,9 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 
 流れとしては、受信者のアドレスへの転送トランザクションを作り、アグリゲートトランザクションの公開アカウントとしてマルチシグアカウントを渡します。
 
-アグリゲートボンドトランザクションなので、LockFundsトランザクションを発行します。
+アグリゲートボンドトランザクションなので、`LockFunds`トランザクションを発行します。
 
-LockFundsが承認されたらアグリゲートボンドトランザクションを発行します。
+`LockFunds`が承認されたらアグリゲートボンドトランザクションを発行します。
 
 アグリゲートボンドトランザクションが承認されたら、連署者がそれに署名をすることで2名が署名したことになるので、転送トランザクションが承認されます。
 
@@ -242,6 +242,17 @@ util.listener(url, initiater.address, {
 ここでは便宜上、アグリゲートトランザクションが承認されたタイミングで連署者に署名をさせています。
 
 以降はアグリゲートボンドトランザクションのためのLockFundsトランザクションの処理を行っています。
+
+
+## 1-of-m 構成の場合
+
+1-of-m 構成(最小承認数が1)である場合、トランザクションを送ろうとする連署者だけの署名で十分なので、アグリゲートコンプリートトランザクションとして発行できます。
+
+`scripts/multisig/convert_account_into_multisig_shared.js` は 1-of-2 のマルチシグアカウントを構築します。
+
+`scripts/multisig/initiate_from_cosigner_without_cosigner.js` はアグリゲートコンプリートで転送するスクリプトです。
+
+この２つを使って動作を確認してみてください。
 
 
 ## マルチレベルマルチシグの構築
@@ -357,3 +368,5 @@ Signer:   03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55
 同様に必要があればリダイレクトや`tee`コマンドで秘密鍵を保存してください。
 
 マルチシグレベルマルチシグの階層構造は`/account/{address}/multisig/graph`のAPIにアクセスすることで取得できます。
+
+

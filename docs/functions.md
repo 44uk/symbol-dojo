@@ -120,11 +120,11 @@ const secretLockTx = nem.SecretLockTransaction.create(
 ```javascript
 if(info.type === nem.TransactionType.SECRET_LOCK) {
   const secretProofTx = nem.SecretProofTransaction.create(
-  nem.Deadline.create(),
-  nem.HashType.Op_Sha3_256,
-  info.secret, // トランザクションから得られるsecret
-  proof, // 本来は受信者が認知して使用するproof
-  nem.NetworkType.MIJIN_TEST
+    nem.Deadline.create(),
+    nem.HashType.Op_Sha3_256,
+    info.secret, // トランザクションから得られるsecret
+    proof, // 本来は受信者が認知して使用するproof
+    nem.NetworkType.MIJIN_TEST
   );
   const signedTx = initiater.sign(secretProofTx);
   util.announce(url, signedTx);

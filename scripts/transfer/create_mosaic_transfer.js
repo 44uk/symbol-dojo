@@ -1,5 +1,5 @@
 /**
- * $ node scripts/transfer/create_mosaic_transfer.js RECI{IENT_ADDRESS 10
+ * $ node scripts/transfer/create_mosaic_transfer.js RECIPIENT_ADDRESS 10
  */
 const nem = require('nem2-sdk');
 const util = require('../util');

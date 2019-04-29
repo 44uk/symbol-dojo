@@ -86,7 +86,7 @@
     - 受信トランザクションブロックフィルタを設定する
 - [その他の機能](docs/functions.md)
     - クロスチェーンスワップ
-- [nem1からnem2で変わった仕様](docs/nem1-nem2.md)
+- [nem1からnem2で変わった仕様](docs/migrations.md)
     - ネームスペースとモザイク
     - 特別な存在としてのXEMの廃止
     - APIのレスポンス

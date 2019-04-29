@@ -36,10 +36,12 @@
 
 `scripts/create_mosaic.js`を実行してください。
 
-このコードはモザイク有効期間を引数にとりますが、ない場合は`10000`を指定します。
+このコードはモザイク有効期間を引数にとります。
+
+指定しない場合は`duration: undefined`となり、無期限のモザイクとなります。
 
 ```javascript
-$ node scripts/mosaic/create_mosaic.js
+$ node scripts/mosaic/create_mosaic.js 10000
 Initiater:    SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:     http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Mosaic Nonce: 114,2,14,52
@@ -60,6 +62,7 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 ```
 
 承認されたらURLで確認してみましょう。
+
 APIのレスポンスだとすこし見にくいと思うので`nem2-cli`でも確認してみましょう。
 
 ```shell

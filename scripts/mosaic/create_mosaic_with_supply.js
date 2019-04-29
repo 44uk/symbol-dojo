@@ -11,17 +11,17 @@ const initiater = nem.Account.createFromPrivateKey(
 );
 
 const absSupply = process.argv[2] || 1000000;
-const blocks = process.argv[3] || 10000; //
+const blocks = process.argv[3];
 const nonce = nem.MosaicNonce.createRandom();
 const mosId = nem.MosaicId.createFromNonce(nonce, initiater.publicAccount);
 
-console.log('Initiater:    %s', initiater.address.pretty());
-console.log('Endpoint:     %s/account/%s', url, initiater.address.plain());
-console.log('Mosaic Nonce: %s', nonce.toDTO());
-console.log('Mosaic Hex:   %s', mosId.toHex());
-console.log('Blocks:       %s', blocks);
-console.log('Supply:       %s', absSupply);
-console.log('Endpoint:     %s/mosaic/%s', url, mosId.toHex());
+console.log('Initiater: %s', initiater.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('Nonce:     %s', nonce.toDTO());
+console.log('MosaicHex: %s', mosId.toHex());
+console.log('Blocks:    %s', blocks);
+console.log('Supply:    %s', absSupply);
+console.log('Endpoint:  %s/mosaic/%s', url, mosId.toHex());
 console.log('');
 
 const definitionTx = nem.MosaicDefinitionTransaction.create(
@@ -29,7 +29,7 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
   nonce,
   mosId,
   nem.MosaicProperties.create({
-    duration: nem.UInt64.fromUint(blocks),
+    duration: blocks ? nem.UInt64.fromUint(blocks) : undefined,
     divisibility: 0,
     supplyMutable: true,
     transferable: true,

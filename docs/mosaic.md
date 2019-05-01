@@ -8,7 +8,7 @@
 
 モザイクには作成時に設定できる定義があります。
 
-- 有効期間(ブロック数)(未定義の場合は無期限)
+- 有効ブロック数(未定義の場合は無期限)
 - 可分性(少数の最小値)
 - 転送許可
 - 供給量変更許可
@@ -18,11 +18,9 @@
 
 モザイクは`75caa6b686e7e7ba`というようなネットワーク上で一意なIDを持ちます。
 
-先のネームスペースをこのモザイクIDと紐づくことで`test123`という名称のモザイクとして認識されるようになります。
+先のネームスペースがこのモザイクIDと紐づくことで`test123`という名称のモザイクとして認識されるようになります。
 
-モザイクについて`nem1`の仕様を知っている方は「おや？」と感じたかと思います。
-
-これについては後の仕様変更にて触れます。
+モザイクについて`nem1`の仕様を知っている方は「おや？」と感じたかと思いますが、これについては後の仕様変更にて触れます。
 
 
 ## モザイクの用途
@@ -36,9 +34,9 @@
 
 `scripts/create_mosaic.js`を実行してください。
 
-このコードはモザイク有効期間を引数にとります。
+このコードはモザイクが有効であるブロック数を引数にとります。
 
-指定しない場合は`duration: undefined`となり、無期限のモザイクとなります。
+指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
 ```javascript
 $ node scripts/mosaic/create_mosaic.js 10000
@@ -79,7 +77,9 @@ owner:          SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 supply:         0
 ```
 
-この時点ではまだ供給量を設定していないので、定義だけが存在していてモザイクは発行されていない状態なので`supply 0`と表示されています。
+この時点ではまだ供給量が設定されていません。
+
+定義だけが存在していてモザイクは発行されていない状態なので`supply 0`と表示されています。
 
 次に`scripts/mutate_mosaic_supply.js`を実行してください。
 
@@ -109,7 +109,7 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 {"type":16973,"networkType":144,"version":2,"deadline":{"value":"2019-03-23T16:30:59.813"},"fee":{"lower":0,"higher":0},"signature":"2523C329452B031AA2DB767D6FB66D6BF33536789E133ACCCC413FD3BA737502118F7D368F016B6085BF585A8E5FAD6E17155D6DC14FE4F5497FE21361A64E00","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":4894,"higher":0},"hash":"5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7","merkleComponentHash":"5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7"},"mosaicId":{"id":{"lower":2263345082,"higher":1976215222}},"direction":1,"delta":{"lower":10000,"higher":0}}
 ```
 
-承認されたらもう一度モザイクのリソースURLを確認するか、`nem2-cli`で確認してみましょう。
+承認されたらもう一度モザイクのリソースURLを確認するか`nem2-cli`で確認してみましょう。
 
 ```shell
 $ nem2-cli mosaic info -h 75caa6b686e7e7ba --profile alice
@@ -125,7 +125,7 @@ owner:          SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 supply:         10000
 ```
 
-今度は`supply`に指定した量が表示されています。さらに`alice`の持っているモザイクにも現れました。
+今度は`supply`に指定した量が表示され、`alice`が持っているモザイクとしても現れました。
 
 ```shell
 $ nem2-cli account info --profile alice
@@ -157,7 +157,7 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
   nonce,
   mosId,
   nem.MosaicProperties.create({
-    duration: nem.UInt64.fromUint(blocks),
+    duration: blocks ? nem.UInt64.fromUint(blocks) : undefined,
     divisibility: 0,
     transferable: true,
     supplyMutable: true,
@@ -171,9 +171,7 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
 
 `MosaicProperties.create`によってモザイクの性質プロパティを設定しています。
 
-`duration`を設定しないまたは`undefined`を渡すと、無期限のモザイクとして設定することができます。
-
-これに署名をして発信します。
+`duration`を設定しない、または`undefined`を渡すと、無期限のモザイクとして設定することができます。
 
 続いて、供給量の指定のコードです。
 
@@ -193,8 +191,6 @@ const supplyTx = nem.MosaicSupplyChangeTransaction.create(
 
 モザイクID、追加または削除の固定値、供給量を指定して`MosaicSupplyChangeTransaction`オブジェクトを作成します。
 
-これに署名をして発信します。
-
 
 ## モザイク定義と供給量をアトミックに定義する
 
@@ -204,7 +200,7 @@ const supplyTx = nem.MosaicSupplyChangeTransaction.create(
 
 このコードは第一引数に供給量を絶対値で指定してください。
 
-第二引数にはモザイク有効期間を引数にとりますが、ない場合は`10000`を指定します。
+第二引数にはモザイク有効期間を引数にとりますが、指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
 ```shell
 $ node mosaic/create_mosaic_with_supply.js 999

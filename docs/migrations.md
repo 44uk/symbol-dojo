@@ -1,6 +1,6 @@
-# nem1からnem2で変わった仕様
+# 仕様変更について
 
-主な仕様の変更点を紹介します。
+nem1からnem2で変わった、主な仕様の変更点を紹介します。
 
 
 ## ネームスペースとモザイク
@@ -50,7 +50,7 @@ IPアドレスに対してドメイン名を割り当てるようなイメージ
 - [nemtech/nem2\-camel: A component to turn the asynchronous transaction announcement into synchronous\.](https://github.com/nemtech/nem2-camel)
 
 
-## マルチシグに最小削除承認者数が追加
+## マルチシグの最小削除承認者数
 
 マルチシグ変換トランザクションには`minRemovableDelta`という値の指定があります。
 

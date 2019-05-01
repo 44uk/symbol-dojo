@@ -1,5 +1,5 @@
 /**
- * $ node scripts/mosaic/create_mosaic.js
+ * $ node scripts/mosaic/create_mosaic.js 10000
  */
 const nem = require('nem2-sdk');
 const util = require('../util');
@@ -10,7 +10,7 @@ const initiater = nem.Account.createFromPrivateKey(
   nem.NetworkType.MIJIN_TEST
 );
 
-const blocks = process.argv[3] || 10000; //
+const blocks = process.argv[3]
 const nonce = nem.MosaicNonce.createRandom();
 const mosId = nem.MosaicId.createFromNonce(nonce, initiater.publicAccount);
 
@@ -27,7 +27,7 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
   nonce,
   mosId,
   nem.MosaicProperties.create({
-    duration: nem.UInt64.fromUint(blocks),
+    duration: blocks ? nem.UInt64.fromUint(blocks) : undefined,
     divisibility: 0,
     transferable: true,
     supplyMutable: true,

@@ -131,6 +131,6 @@ if(info.type === nem.TransactionType.SECRET_LOCK) {
 }
 ```
 
-承認された`SecretLockTransaction`から`secret`がわかります。
+承認された`SecretLockTransaction`から`secret`を手に入れることが出来ます。
 
 クロスチェーンスワップであれば受信者がこの値を使って、別のチェーンで`SecretLockTransaction`を発行します。

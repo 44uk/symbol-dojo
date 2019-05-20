@@ -96,7 +96,7 @@ const util = require('../util');
 
 `nem2-sdk`を`nem`という名前でインポートしています。
 
-`util`は共通する発信処理やモニタリング処理をまとめたものです。
+`util`は共通する発信処理やモニタリング処理をまとめたもので、詳細は後述しています。
 
 ```javascript
 const url = process.env.API_URL || 'http://localhost:3000';

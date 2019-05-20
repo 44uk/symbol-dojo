@@ -19,7 +19,7 @@ console.log('Initiater: %s', initiater.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
 console.log('Nonce:     %s', nonce.toDTO());
 console.log('MosaicHex: %s', mosId.toHex());
-console.log('Blocks:    %s', blocks);
+console.log('Blocks:    %s', blocks ? blocks : 'Infinity');
 console.log('Supply:    %s', absSupply);
 console.log('Endpoint:  %s/mosaic/%s', url, mosId.toHex());
 console.log('');

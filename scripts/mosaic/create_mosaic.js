@@ -10,7 +10,7 @@ const initiater = nem.Account.createFromPrivateKey(
   nem.NetworkType.MIJIN_TEST
 );
 
-const blocks = process.argv[3]
+const blocks = process.argv[2];
 const nonce = nem.MosaicNonce.createRandom();
 const mosId = nem.MosaicId.createFromNonce(nonce, initiater.publicAccount);
 
@@ -18,7 +18,7 @@ console.log('Initiater:    %s', initiater.address.pretty());
 console.log('Endpoint:     %s/account/%s', url, initiater.address.plain());
 console.log('Mosaic Nonce: %s', nonce.toDTO());
 console.log('Mosaic Hex:   %s', mosId.toHex());
-console.log('Blocks:       %s', blocks);
+console.log('Blocks:       %s', blocks ? blocks : 'Infinity');
 console.log('Endpoint:     %s/mosaic/%s', url, mosId.toHex());
 console.log('');
 

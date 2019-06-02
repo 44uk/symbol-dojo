@@ -38,6 +38,8 @@
 
 指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
+なお、モザイクの定義にはその定義内容にかかわらず`cat:currency`が`500.000000`必要です。
+
 ```javascript
 $ node scripts/mosaic/create_mosaic.js 10000
 Initiater:    SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5

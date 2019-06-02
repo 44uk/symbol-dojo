@@ -43,11 +43,11 @@ NEM財団と有志によるネットワークが稼働しています。
 
 任意の場所にアーカイブを展開してください。(`git`が利用できる場合はクローンしてもよいです)
 
-- https://github.com/tech-bureau/catapult-service-bootstrap/archive/master.zip
+- https://github.com/tech-bureau/catapult-service-bootstrap/archive/v0.3.0.zip
 - [tech\-bureau/catapult\-service\-bootstrap: Starter project to get developers up and running with a running Catapult Service](https://github.com/tech-bureau/catapult-service-bootstrap)
 
 ```shell
-$ git clone https://github.com/tech-bureau/catapult-service-bootstrap.git
+$ git clone https://github.com/tech-bureau/catapult-service-bootstrap.git -b v0.3.0
 ```
 
 展開したディレクトリに移動して、`docker-compose`コマンドの実行でコンテナクラスタを立ち上げます。

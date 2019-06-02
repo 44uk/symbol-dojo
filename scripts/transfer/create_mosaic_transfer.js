@@ -26,7 +26,7 @@ console.log('');
 // ここでは`nem.NetworkCurrencyMosaic`すなわち`cat.currency`モザイクオブジェクトを準備
 // モザイクIDで作る場合は以下のようにする。
 // 可分性がわからないので送信量は絶対値で指定する必要がある。
-// new nem.Mosaic(new nem.MosaicId('7d09bf306c0b2e38'), nem.UInt64.fromUint(absoluteAmount)
+// const mosaics = [new nem.Mosaic(new nem.MosaicId('__MOSAIC_ID__'), nem.UInt64.fromUint(absoluteAmount))];
 const mosaics = [nem.NetworkCurrencyMosaic.createRelative(amount)];
 
 // メッセージオブジェクトを作成

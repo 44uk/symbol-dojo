@@ -9,46 +9,40 @@
 
 ## エイリアスリンクの用途
 
-アドレスに紐づけた場合は、ネームスペース名からアドレスを識別することができます。
-
-モザイクに紐づけた場合は、ネームスペース名からモザイクを識別することができます。
+- アドレスに紐づけた場合は、ネームスペース名からアドレスを識別することができます。
+- モザイクに紐づけた場合は、ネームスペース名からモザイクを識別することができます。
 
 
 ## ネームスペースをモザイクにリンクする
 
 リンクする前にネームスペース名でモザイクを取得するコードを実行してみましょう。
 
-`scripts/mosaic/fetch_mosaic_by_alias.js test123`
+`scripts/namespace/fetch_mosaic_by_alias.js test123`
 
 ```shell
-$ node scripts/mosaic/fetch_mosaic_by_alias.js test123
+$ node scripts/namespace/fetch_mosaic_by_alias.js test123
 Namespace: test123 (ff87cc82daab0bbf)
 Endpoint:  http://localhost:3000/namespace/ff87cc82daab0bbf
 
-Error:  Error: No mosaicId is linked to namespace 'undefined'
-    at MapSubscriber.rxjs_1.from.pipe.operators_1.map [as project] (/Users/yukku/projects/nem2-bootcamp/node_modules/nem2-sdk/dist/src/infrastructure/NamespaceHttp.js:117:23)
-    at MapSubscriber._next (/Users/yukku/projects/nem2-bootcamp/node_modules/rxjs/internal/operators/map.js:49:35)
-    at MapSubscriber.Subscriber.next (/Users/yukku/projects/nem2-bootcamp/node_modules/rxjs/internal/Subscriber.js:66:18)
-    at /Users/yukku/projects/nem2-bootcamp/node_modules/rxjs/internal/util/subscribeToPromise.js:7:24
-    at process._tickCallback (internal/process/next_tick.js:68:7)
+Error:  Error: No mosaicId is linked to namespace '3668642751,4287089794'
 ```
 
 紐付ける前なのでエラーになってしまいました。
 
-`Error:  Error: No mosaicId is linked to namespace 'undefined'`というメッセージから、`test123`という名前で紐付いたモザイクが取得できなかったことがわかります。
+`Error:  Error: No mosaicId is linked to namespace '3668642751,4287089794'`というメッセージから、`test123`というネームスペースに紐付いたモザイクが無いことがわかります。
 
 それではネームスペースとモザイクをリンクさせてみましょう。
 
-`scripts/aliaslink/link_mosaic.js test123 75caa6b686e7e7ba`
+`scripts/aliaslink/alias_mosaic.js test123 75caa6b686e7e7ba`
 
 ```shell
-$ node scripts/aliaslink/link_mosaic.js test123 75caa6b686e7e7ba
-Initiater:      SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:   http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
-Namespace:      test123
-Endpoint:       http://localhost:3000/namespace/ff87cc82daab0bbf
-Mosaic Hex:     75caa6b686e7e7ba
-Endpoint:       http://localhost:3000/mosaic/75caa6b686e7e7ba
+$ node scripts/aliaslink/alias_mosaic.js test123 75caa6b686e7e7ba
+Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
+Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
+Namespace: test123
+Endpoint:  http://localhost:3000/namespace/ff87cc82daab0bbf
+MosaicHex: 75caa6b686e7e7ba
+Endpoint:  http://localhost:3000/mosaic/75caa6b686e7e7ba
 
 connection open
 [Transaction announced]
@@ -66,12 +60,12 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 承認されたら、再度`scripts/namespace/fetch_mosaic_by_alias.js`を実行してみましょう。
 
 ```shell
-$ node scripts/mosaic/fetch_mosaic_by_alias.js test123
+$ node scripts/namespace/fetch_mosaic_by_alias.js test123
 Namespace: test123 (ff87cc82daab0bbf)
 Endpoint:  http://localhost:3000/namespace/ff87cc82daab0bbf
 
-Namespace:      test123
-MosaicId: 75caa6b686e7e7ba [2263345082, 1976215222]
+Namespace: test123
+MosaicId:  75caa6b686e7e7ba [2263345082, 1976215222]
 ```
 
 今度は結果を取得できました。
@@ -92,9 +86,7 @@ const aliasTx = nem.MosaicAliasTransaction.create(
 );
 ```
 
-ネームスペースIDをネームスペース名から作り、モザイクIDを渡して、`MosaicAliasTransaction`オブジェクトを作ります。
-
-これに署名をして発信します。
+ネームスペースID、モザイクIDを渡して、`MosaicAliasTransaction`オブジェクトを作り、これに署名をして発信します。
 
 続いて、ネームスペース名からモザイクIDを取得するコードです。
 
@@ -146,7 +138,7 @@ $ node scripts/namespace/register_namespace.js alice
 $ node scripts/namespace/fetch_account_by_alias.js alice
 
 # ネームスペースをアカウントへリンク
-$ node scripts/aliaslink/link_account.js alice SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
+$ node scripts/aliaslink/alias_account.js alice SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 
 # 取得できることを確認
 $ node scripts/namespace/fetch_account_by_alias.js alice
@@ -188,4 +180,3 @@ $ node scripts/namespace/fetch_mosaic_by_alias.js qwe.rty.uio
 ```shell
 $ nem2-cli account info --profile alice
 ```
-

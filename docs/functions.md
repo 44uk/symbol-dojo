@@ -27,7 +27,7 @@
 
 これまで使用していたネットワークだけで動作確認をします。
 
-クロスチェーンスワップを実現できていませんが、この挙動は前述の理屈のとおり、クロスチェーンスワップに応用することができます。
+異なるチェーン間のスワップにはなりませんが、この挙動は前述の理屈のとおり、クロスチェーンスワップに応用することができます。
 
 ここではシークレットロック/スワップトランザクションの機能についての実演です。
 
@@ -38,7 +38,7 @@
 半角文字で10文字程度入力してください。渡さなかった場合はランダムな値が使用されます。
 
 ```shell
-$ node secretlock/lock_and_proof.js SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4 ALL_YOUR_BASE_ARE_BELONG_TO_US
+$ node scripts/secretlock/lock_and_proof.js SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4 ALL_YOUR_BASE_ARE_BELONG_TO_US
 Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Recipient: SC3AWB-HBY2AB-QHQY3Q-AJLO4H-XSJ6IZ-VAYLN5-2HO4
@@ -104,7 +104,7 @@ const secret = sha3_256(input).toUpperCase()
 const secretLockTx = nem.SecretLockTransaction.create(
   nem.Deadline.create(),
   nem.NetworkCurrencyMosaic.createRelative(2),
-  nem.UInt64.fromUint(2),
+  nem.UInt64.fromUint(96 * 360 / 15),
   nem.HashType.Op_Sha3_256,
   secret,
   recipient,
@@ -123,14 +123,17 @@ if(info.type === nem.TransactionType.SECRET_LOCK) {
     nem.Deadline.create(),
     nem.HashType.Op_Sha3_256,
     info.secret, // トランザクションから得られるsecret
+    recipient,
     proof, // 本来は受信者が認知して使用するproof
     nem.NetworkType.MIJIN_TEST
   );
-  const signedTx = initiater.sign(secretProofTx);
+  const signedTx = initiater.sign(secretProofTx, process.env.GENERATION_HASH);
   util.announce(url, signedTx);
 }
 ```
 
 承認された`SecretLockTransaction`から`secret`を手に入れることが出来ます。
 
-クロスチェーンスワップであれば受信者がこの値を使って、別のチェーンで`SecretLockTransaction`を発行します。
+今回は自分でロックして、自分でアンロックする形になっています。
+
+異なるチェーン間でスワップするのあれば、受信者がこの値を使って別のチェーンで`SecretLockTransaction`を発行します。

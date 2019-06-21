@@ -5,7 +5,7 @@ const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
@@ -14,8 +14,8 @@ const namespace = process.argv[2];
 const blocks = process.argv[3] || 100; // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
 const nsId = new nem.NamespaceId(namespace);
 
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('Namespace: %s (%s)', nsId.fullName, nsId.toHex());
 console.log('Blocks:    %s', blocks);
 console.log('Endpoint:  %s/namespace/%s', url, nsId.toHex());
@@ -41,9 +41,10 @@ if (child) {
   )
 }
 
-util.listener(url, initiater.address, {
+util.listener(url, initiator.address, {
   onOpen: () => {
-    const signedTx = initiater.sign(registerTx);
+    const signedTx = initiator.sign(registerTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
-  }
+  },
+  onConfirmed: (_, listener) => listener.close()
 });

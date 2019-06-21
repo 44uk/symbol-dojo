@@ -46,8 +46,8 @@
 - [planethouki/nem2\-helper\-web: NEM2 サクサク データ変換Web](https://github.com/planethouki/nem2-helper-web)
 - [planethouki/nem2\-unsafe\-wallet\-nuxt: NEM2 テスト用ウォレット](https://github.com/planethouki/nem2-unsafe-wallet-nuxt)
 - [Matsushin/nem2\-sdk\-wallet\-vue\-sample](https://github.com/Matsushin/nem2-sdk-wallet-vue-sample)
-- [44uk/nem2\-dev\-ui: nem2\(catapult\) development Utility Interface](https://github.com/44uk/nem2-dev-ui)
 - [44uk/nem2\-faucet: Faucet application for nem2 \(catapult\)](https://github.com/44uk/nem2-faucet)
+- [44uk/nem2\-dev\-ui: nem2\(catapult\) development Utility Interface](https://github.com/44uk/nem2-dev-ui)
 
 
 ## 参考プロジェクト

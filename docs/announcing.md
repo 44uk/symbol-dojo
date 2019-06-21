@@ -16,11 +16,11 @@
 
 ### コード実行の前に
 
-サンプルコードは`秘密鍵`と`APIのURL`を環境変数から取得するように書いてあります。
+サンプルコードでは`APIのURL`と`秘密鍵`と`GENERATION_HASH`を環境変数から取得するように書いてあります。
 
 次のように環境変数をセットしてください。
 
-(なお`API_URL`がない場合は`http://localhost:3000`がセットされるので、ローカル環境であれば不要です)
+(なお`API_URL`がない場合は`http://localhost:3000`がセットされるので、ローカル環境を使用するのであれば不要です)
 
 秘密鍵には`alice`の鍵を指定してください。鍵を確認する場合は`profile list`で表示できます。
 
@@ -34,11 +34,20 @@ alice->
 	PrivateKey:	25E7E5A21DD0C863B3CC3767C5CC6C081A7C7795BA4115231C74F491A97D6ED7
 ```
 
+`GENERATION_HASH`は`http://localhost:3000/block/1`にアクセスすることで表示される`generationHash`の値を使用してください。
+
+```shell
+# curlでGENERATION_HASHだけを取得する例
+$ curl -s http://localhost:3000/block/1 | grep -oE '"generationHash":"[0-9A-Z]{64}"' | sed 's/"//g' | sed 's/generationHash://'
+5ABBD9F7894EE7E5D4C3CDA934245396AEFCD1CB0426F265AC81F4F3450AB6DD
+```
+
 ターミナルで以下のように環境変数をセットしてください。
 
 ```shell
 export API_URL=http://localhost:3000
 export PRIVATE_KEY=25E7E5A21DD0C863B3CC3767C5CC6C081A7C7795BA4115231C74F491A97D6ED7
+export GENERATION_HASH=5ABBD9F7894EE7E5D4C3CDA934245396AEFCD1CB0426F265AC81F4F3450AB6DD
 ```
 
 以降、サンプルコードでは`alice`の秘密鍵がトランザクションの発信に使用されます。
@@ -82,6 +91,20 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 
 ```shell
 $ nem2-cli account info --profile bob
+Account:        SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT
+-------------------------------------------------------
+
+Address:        SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT
+at height:      99118
+
+PublicKey:      0000000000000000000000000000000000000000000000000000000000000000
+at height:      0
+
+Importance:     0
+at height:      0
+
+Mosaics
+7d09bf306c0b2e38:       10
 ```
 
 
@@ -173,7 +196,7 @@ const message = nem.PlainMessage.create('Ticket fee');
 
 実装上問題がなければオブジェクトを使い分けずに、空文字を渡しても結果は同じです。
 
-- [nem2\-sdk\-typescript\-javascript/PlainMessage\.ts at v0\.11\.1 · nemtech/nem2\-sdk\-typescript\-javascript](https://github.com/nemtech/nem2-sdk-typescript-javascript/blob/v0.11.1/src/model/transaction/PlainMessage.ts#L52)
+- [nem2\-sdk\-typescript\-javascript/PlainMessage\.ts at v0\.12\.1 · nemtech/nem2\-sdk\-typescript\-javascript](https://github.com/nemtech/nem2-sdk-typescript-javascript/blob/v0.12.1/src/model/transaction/PlainMessage.ts#L53)
 
 ```javascript
 // トランザクションオブジェクトを作成
@@ -194,9 +217,9 @@ const transferTx = nem.TransferTransaction.create(
 
 設定可能な範囲は24時間未満の未来までで、引数が無い場合はデフォルトで**2時間**がセットされます。
 
-- [nem2\-sdk\-typescript\-javascript/Deadline\.ts at v0\.11\.1 · nemtech/nem2\-sdk\-typescript\-javascript](https://github.com/nemtech/nem2-sdk-typescript-javascript/blob/v0.11.1/src/model/transaction/Deadline.ts#L42)
+- [nem2\-sdk\-typescript\-javascript/Deadline\.ts at v0\.12\.1 · nemtech/nem2\-sdk\-typescript\-javascript](https://github.com/nemtech/nem2-sdk-typescript-javascript/blob/v0.12.1/src/model/transaction/Deadline.ts#L42)
 
-`js-joda`の時間単位を一緒に渡すことで、より細かい単位の時間を設定できます。
+また、`js-joda`の時間単位を一緒に渡すことで、より細かい単位の時間を設定できます。
 
 
 ```javascript
@@ -204,15 +227,18 @@ const transferTx = nem.TransferTransaction.create(
 util.listener(url, initiater.address, {
   onOpen: () => {
     // 署名して発信
-    const signedTx = initiater.sign(transferTx);
+    const signedTx = initiater.sign(transferTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
-  }
+  },
+  onConfirmed: (_, listener) => listener.close()
 });
 ```
 
-モニタリングを開始して、接続が完了し待機状態になったらトランザクションに署名をして、発信しています。
+モニタリングを開始し、接続が完了して待機状態になったらトランザクションに署名をして、発信しています。
 
-トランザクションの未承認・承認のタイミングで通知が表示されます。
+トランザクション署名時に発信したいネットワークのネメシスブロックの`generationHash`の値を渡す必要があります。
+
+トランザクションの未承認・承認のタイミングで通知が表示され、承認されたら終了します。
 
 
 ### util.jsの解説
@@ -225,7 +251,7 @@ util.listener(url, initiater.address, {
 const nem = require('nem2-sdk');
 
 exports.listener = (url, address, hooks = {}) => {
-  const excerptAddress = address.plain().slice(0,6)
+  const excerptAddress = address.plain().slice(0,6);
   const nextObserver = (label, hook) => info => {
     console.log('[%s] %s...\n%s\n', label, excerptAddress, JSON.stringify(info));
     typeof hook === 'function' && hook(info);
@@ -353,6 +379,8 @@ const announceUtil = (subscription, url, tx, ...subscriber) => {
 
 束ねたトランザクションすべてが承認されるか、すべて承認されないかという原始性を実現します。
 
+内包するトランザクションに一つでもエラーが含まれる場合はいずれのトランザクションも承認されずに破棄されます。
+
 DBMSにおける「トランザクション」と同じような概念です。
 
 内包されたトランザクションの署名が揃っているかどうかで、アグリゲートトランザクションは2種類に分類されます。
@@ -390,7 +418,7 @@ DBMSにおける「トランザクション」と同じような概念です。
 
 この`10 cat.currency`は署名が完了し、アグリゲートトランザクションが受理された場合に、発行したアカウントへ戻ってきます。
 
-トランザクションの期限が切れると`10 cat.currency`は、期限が切れる時のブロックをハーベストしたアカウントへのハーベスト報酬となり、戻ってきません。
+トランザクションの期限が切れると`10 cat.currency`は、期限が切れる時のブロックをハーベストしたアカウントへのハーベスト報酬となり戻ってきません。
 
 こちらは、
 
@@ -404,7 +432,7 @@ DBMSにおける「トランザクション」と同じような概念です。
 
 ### LockFundTransactionについて
 
-これは他のアカウントへやらたに署名の要求を送らないための、ネットワークに対しての保証モザイクのようなものです。
+これは他のアカウントへむやみに署名の要求を送らないための、ネットワークに対しての保証モザイクのようなものです。
 
 - [アグリゲートトランザクション — NEM Developer Center](https://nemtech.github.io/ja/concepts/aggregate-transaction.html#hash-lock-transaction)
 
@@ -425,8 +453,8 @@ DBMSにおける「トランザクション」と同じような概念です。
 
 ```shell
 $ node scripts/transfer/create_transfers_atomically.js 1
-Initiater:      SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:       http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
+Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
+Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 
 - account1 ----------------------------------------------------------------
 Private:  39632EB06B004A006FDD8B51E1657A4E4AFAB949E1D86F94A8313D93B39380F5
@@ -459,7 +487,7 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 
 承認されたら生成されたアカウントの残高を確認してみましょう。
 
-表示されたアカウントのURLを開くか、`nem2-cli`で確認できます。
+表示されたアカウントのURLを開くか、`nem2-cli`の`-a`オプションにアドレスを渡すことで確認できます。
 
 ```shell
 $ nem2-cli account info -a SARX6U-JDNFZX-MTJZB2-YHZ6VX-44QLEI-UZRTRY-7EPR
@@ -479,11 +507,11 @@ Mosaics
 7d09bf306c0b2e38:       1
 ```
 
-結果だけ確認すると、3人それぞれに一回づつ送ったのか、集約されていたのかわかりません。
+モザイクは届いているようですが、結果だけ確認すると3人それぞれに一回づつ送ったのか、集約されていたのかわかりません。
 
 トランザクションハッシュを指定して、承認されたトランザクションを確認してみましょう。
 
-コンソールに表示されたURLにアクセスするか、`nem2-cli`で確認してみましょう。
+コンソールに表示されたURLにアクセスするか、`nem2-cli`の`-h`オプションで確認してみましょう。
 
 ```shell
 $ nem2-cli transaction info -h C2470442A59B9AB68B6677DC202F819E4BFED67F8EF8D82AFB413C80809E7871
@@ -514,7 +542,7 @@ AggregateTransaction:
 
 `InnerTransactions`に3つの宛先への転送トランザクションが入っていました。
 
-このコードでは同じ量と同じメッセージを送りますが、もちろん個別に変えることもできます。
+このコードでは同じ量と同じメッセージを送っていますが、もちろん個別に変えることもできます。
 
 
 ### コード解説
@@ -551,18 +579,18 @@ const aggregateTx = nem.AggregateTransaction.createComplete(
 
 `scripts/transfer/create_pullfunds.js`を実行してください。
 
-このコードは`bob`が`10 cat.currency`を`alice`に送るよう、支払いの請求を行います。
+このコードは`alice`が`10 cat.currency`の支払いの請求を行い、請求を受取った`bob`はそれを支払うシーンです。
 
-メッセージの内容を確認した`bob`が署名をすることで、アグリゲートトランザクションが承認されます。
+メッセージの内容を確認した`alice`が署名をすることで、アグリゲートトランザクションが承認されます。
 
-このコードでは`bob`も署名する必要があるので秘密鍵を渡します。
+このコードでは`bob`も署名する必要があるので、引数に`bob`の秘密鍵を渡します。
 
-アグリゲートボンドの作成から署名し承認されるまでの流れをひとつのスクリプト内で行います。
+アグリゲートボンドの作成から署名し承認されるまでの流れをひとつのスクリプト内で行っており、
 
-現実的な仕組みのコードではないですが、流れを掴んでもらうにはわかりやすいと思います。
+現実的な仕組みのコードではないですが、トランザクションや署名タイミングの流れを掴んでください。
 
 ```shell
-$ node transfer/create_pullfunds.js 2F80B79E9D1A2BD08C9A045B4144FCDFFFC126F035B97C2E30831B63D7626A50
+$ node scripts/transfer/create_pullfunds.js 2F80B79E9D1A2BD08C9A045B4144FCDFFFC126F035B97C2E30831B63D7626A50
 Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Debtor:    SC3AWB-HBY2AB-QHQY3Q-AJLO4H-XSJ6IZ-VAYLN5-2HO4
@@ -609,13 +637,17 @@ Amount: Mosaic {
 {"type":16961,"networkType":144,"version":2,"deadline":{"value":"2019-03-25T12:28:24.036"},"fee":{"lower":0,"higher":0},"signature":"F75EA35C1191BB6DC6B7BDB7BBE37D74DC833C943A9D136220F8DE55886B3EFA43CAEE703C19E9B6805CD493215A58048DF704D3D403EB6E11BA253D3E51C90E","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"6E00E13430F01082B06A9E20918314F6C435D80A7721A48FCEEE20F2D22E1A9B","merkleComponentHash":"1B9DD0EBC7D4E3810363338F5EF9A313402BBADA27F872258B6E45B92311DCD3"},"innerTransactions":[{"type":16724,"networkType":144,"version":3,"deadline":{"value":"2019-03-25T12:28:24.036"},"fee":{"lower":0,"higher":0},"signature":"F75EA35C1191BB6DC6B7BDB7BBE37D74DC833C943A9D136220F8DE55886B3EFA43CAEE703C19E9B6805CD493215A58048DF704D3D403EB6E11BA253D3E51C90E","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"recipient":{"address":"SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4","networkType":144},"mosaics":[],"message":{"type":0,"payload":"Request for a refund 10 cat.currency"}},{"type":16724,"networkType":144,"version":3,"deadline":{"value":"2019-03-25T12:28:24.036"},"fee":{"lower":0,"higher":0},"signature":"F75EA35C1191BB6DC6B7BDB7BBE37D74DC833C943A9D136220F8DE55886B3EFA43CAEE703C19E9B6805CD493215A58048DF704D3D403EB6E11BA253D3E51C90E","signer":{"publicKey":"0CE0BDD69DC579491FDB7AEA57FAF6E37BDB79D1E5C54DA40665D8B2F362F1DF","address":{"address":"SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4","networkType":144}},"recipient":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144},"mosaics":[{"id":{"id":{"lower":3294802500,"higher":2243684972}},"amount":{"lower":10000000,"higher":0}}],"message":{"type":0,"payload":""}}],"cosignatures":[{"signature":"795282A3E9781F2934C3224AED48F265BF27D4089A615A2F1D75A36210A4AC217B0DD1DA0577DD355A0746BAE494B0CEF570AE90B6ED3BD983B4EE8574577900","signer":{"publicKey":"0CE0BDD69DC579491FDB7AEA57FAF6E37BDB79D1E5C54DA40665D8B2F362F1DF","address":{"address":"SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4","networkType":144}}}]}
 ```
 
-`alice`から`bob`へ`10 cat.currency`が届いていることを確認してみてください。
+`bob`が`alice`へ`10 cat.currency`を送信していることを確認してみてください。
+
+```shell
+$ nem2-cli account info --profile bob
+```
 
 なお、この動作は`nem2-cli transfer pullfunds`として実装されているので、こちらも試してみてください。
 
 - [プルトランザクションの送信 | トランザクション - クライアント — NEM Developer Center](https://nemtech.github.io/ja/cli.html#transaction)
 
-今回は`alice`からはメッセージだけを送りましたが、相手方とモザイクを交換したい場合にも同じ操作をすることで、安全に交換することができます。
+今回は`alice`からメッセージだけを送りましたが、相手方とモザイクの交換をしたい場合にも同じ操作をすることで、安全に交換することができます。
 
 - [アグリゲートボンドトランザクションを使ったエスクローの作成 — NEM Developer Center](https://nemtech.github.io/ja/guides/transaction/creating-an-escrow-with-aggregate-bonded-transaction.html)
 
@@ -647,14 +679,14 @@ const aggregateTx = nem.AggregateTransaction.createBonded(
   ],
   nem.NetworkType.MIJIN_TEST
 );
-const signedTx = initiater.sign(aggregateTx);
+const signedTx = initiater.sign(aggregateTx, process.env.GENERATION_HASH);
 ```
 
 `alice`からは`"Request for a refund 10 cat.currency"`というメッセージを送るトランザクションを作ります。
 
-そして`bob`が`10 cat.currency`送るモザイク転送トランザクションを作ります。
+そして`bob`が`10 cat.currency`を送るモザイク転送トランザクションを作ります。
 
-`bob`が`alice`のメッセージを確認しモザイクを送るという順序でアグリゲートしています。
+トランザクション配列はその順序通りに処理されるので、`bob`が`alice`からのメッセージを確認し、モザイクを送るという順序でアグリゲートしています。
 
 
 ```javascript

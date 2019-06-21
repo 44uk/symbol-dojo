@@ -6,7 +6,7 @@ const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
 // 秘密鍵からアカウントオブジェクトを作る
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
@@ -16,8 +16,8 @@ const recipient = nem.Address.createFromRawAddress(process.argv[2]);
 const amount = parseInt(process.argv[3]);
 
 // 確認用の情報を出力
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('Recipient: %s', recipient.pretty());
 console.log('Endpoint:  %s/account/%s', url, recipient.plain());
 console.log('');
@@ -45,10 +45,11 @@ const transferTx = nem.TransferTransaction.create(
 );
 
 // トランザクション成功/失敗,未承認,承認のモニタリング接続
-util.listener(url, initiater.address, {
+util.listener(url, initiator.address, {
   onOpen: () => {
     // 署名して発信
-    const signedTx = initiater.sign(transferTx);
+    const signedTx = initiator.sign(transferTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
-  }
+  },
+  onConfirmed: (_, listener) => listener.close()
 });

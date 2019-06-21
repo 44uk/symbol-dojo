@@ -1,21 +1,21 @@
 /**
- * $ node scripts/mosaic/create_named_mosaic.js aaa.bbb.ccc 10000
+ * $ node scripts/mosaic/create_named_mosaic.js aaa.bbb.ccc 100
  */
 const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
 
 const namespace = process.argv[2];
-const blocks = process.argv[4] || 10000; //
+const blocks = process.argv[4] || 100;
 const parts = namespace.split('.');
 
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('Blocks:    %s', blocks);
 parts.reduce((accum, part) => {
   accum.push(part);
@@ -51,7 +51,7 @@ const txes = parts.reduce((accum, part, idx, array) => {
 
 // create mosaic
 const nonce = nem.MosaicNonce.createRandom();
-const mosId = nem.MosaicId.createFromNonce(nonce, initiater.publicAccount);
+const mosId = nem.MosaicId.createFromNonce(nonce, initiator.publicAccount);
 const absSupply = process.argv[3];
 
 console.log('Mosaic Nonce: %s', nonce.toDTO());
@@ -99,14 +99,15 @@ console.log('Txes Len: ', txes.length);
 console.log('');
 const aggregateTx = nem.AggregateTransaction.createComplete(
   nem.Deadline.create(),
-  txes.map(tx => tx.toAggregate(initiater.publicAccount)),
+  txes.map(tx => tx.toAggregate(initiator.publicAccount)),
   nem.NetworkType.MIJIN_TEST,
   []
 );
 
-util.listener(url, initiater.address, {
+util.listener(url, initiator.address, {
   onOpen: () => {
-    const signedTx = initiater.sign(aggregateTx);
+    const signedTx = initiator.sign(aggregateTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
-  }
+  },
+  onConfirmed: (_, listener) => listener.close()
 });

@@ -38,7 +38,7 @@
 
 指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
-なお、モザイクの定義にはその定義内容にかかわらず`cat:currency`が`500.000000`必要です。
+なお、モザイクの定義にはその定義内容にかかわらず`500 cat:currency`が必要です。
 
 ```javascript
 $ node scripts/mosaic/create_mosaic.js 10000
@@ -205,7 +205,7 @@ const supplyTx = nem.MosaicSupplyChangeTransaction.create(
 第二引数にはモザイク有効期間を引数にとりますが、指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
 ```shell
-$ node mosaic/create_mosaic_with_supply.js 999
+$ node scripts/mosaic/create_mosaic_with_supply.js 999
 Initiater:    SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:     http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Mosaic Nonce: 3,69,180,223

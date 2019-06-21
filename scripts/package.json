@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "scripts",
+  "name": "examples",
   "version": "0.0.1",
   "description": "nem2-dojo example scripts",
   "keywords": [
@@ -14,7 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "js-sha3": "^0.8.0",
-    "nem2-sdk": "0.11.6",
-    "rxjs": "^6.4.0"
+    "nem2-sdk": "0.12.3",
+    "ripemd160": "^2.0.2",
+    "rxjs": "^6.5.2"
   }
 }

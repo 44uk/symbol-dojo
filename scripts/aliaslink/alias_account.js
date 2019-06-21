@@ -5,7 +5,7 @@ const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
@@ -16,8 +16,8 @@ const rawAddress = process.argv[3];
 const nsId = new nem.NamespaceId(namespace);
 const address = nem.Address.createFromRawAddress(rawAddress);
 
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('Namespace: %s', nsId.fullName);
 console.log('Endpoint:  %s/namespace/%s', url, nsId.toHex());
 console.log('Address:   %s', address.pretty());
@@ -32,9 +32,10 @@ const aliasTx = nem.AddressAliasTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
-util.listener(url, initiater.address, {
+util.listener(url, initiator.address, {
   onOpen: () => {
-    const signedTx = initiater.sign(aliasTx);
+    const signedTx = initiator.sign(aliasTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
-  }
+  },
+  onConfirmed: (_, listener) => listener.close()
 });

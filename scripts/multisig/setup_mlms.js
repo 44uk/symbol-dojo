@@ -5,7 +5,7 @@ const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
@@ -14,8 +14,8 @@ const cosignerPublicAccount = nem.PublicAccount.createFromPublicKey(
   nem.NetworkType.MIJIN_TEST
 )
 
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('');
 
 const showAccountInfo = (account, label = null) => {
@@ -30,29 +30,24 @@ const showAccountInfo = (account, label = null) => {
 }
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
-const accounts = [...Array(5)].map((_, idx) => {
+const accounts = [...Array(7)].map((_, idx) => {
   return nem.Account.generateNewAccount(nem.NetworkType.MIJIN_TEST);
 });
 
 // 1つ目のアカウントを最上位のマルチシグ候補にする
-const toBeMultisig = accounts[0]
-
+const toBeMultisig = accounts[0];
 // 2,3つ目のアカウントをMLMS候補にする
-const toBeLeftMultisig = accounts[1]
-const toBeRightMultisig = accounts[2]
-
-// それ以降は左辺の連署者候補とする
-const leftCosigners = accounts.slice(3)
-// 右辺の連署者は`alice`と引数の公開鍵アカウントとする
-const rightCosigners = [
-  initiater.publicAccount,
-  cosignerPublicAccount
-]
+const toBeLeftMultisig = accounts[1];
+const toBeRightMultisig = accounts[2];
+// 左辺の連署者候補
+const leftCosigners = accounts.slice(3, 5);
+// 右辺の連署者候補
+const rightCosigners = accounts.slice(5, 7);
 
 // マルチシグアカウントとするアカウント情報を表示
-showAccountInfo(toBeMultisig, 'Root Multisig Account')
-showAccountInfo(toBeLeftMultisig, 'Left Multisig Account')
-showAccountInfo(toBeRightMultisig, 'Right Multisig Account')
+showAccountInfo(toBeMultisig, 'Root Multisig Account');
+showAccountInfo(toBeLeftMultisig, 'Left Multisig Account');
+showAccountInfo(toBeRightMultisig, 'Right Multisig Account');
 
 // -----------------------------------------------------------------------------
 
@@ -74,22 +69,14 @@ const convertLeftIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
-util.listener(url, toBeLeftMultisig.address, {
-  onOpen: () => {
-    const signedTx = toBeLeftMultisig.sign(convertLeftIntoMultisigTx);
-    util.announce(url, signedTx);
-  },
-  onConfirmed: (_, listener) => listener.close()
-});
-
 // -----------------------------------------------------------------------------
 
 // Rightをマルチシグにする
-const rightCosignatoryModifications = rightCosigners.map((publicAccount, idx) => {
-  showAccountInfo(publicAccount, `Right Cosigner Account${idx+1}:`)
+const rightCosignatoryModifications = rightCosigners.map((account, idx) => {
+  showAccountInfo(account, `Right Cosigner Account${idx+1}:`)
   return new nem.MultisigCosignatoryModification(
     nem.MultisigCosignatoryModificationType.Add,
-    publicAccount
+    account.publicAccount
   );
 });
 
@@ -101,13 +88,6 @@ const convertRightIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
   rightCosignatoryModifications,
   nem.NetworkType.MIJIN_TEST
 );
-util.listener(url, toBeRightMultisig.address, {
-  onOpen: () => {
-    const signedTx = toBeRightMultisig.sign(convertRightIntoMultisigTx);
-    util.announce(url, signedTx);
-  },
-  onConfirmed: (_, listener) => listener.close()
-});
 
 // -----------------------------------------------------------------------------
 
@@ -132,9 +112,24 @@ const convertIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
+const aggregateTx = nem.AggregateTransaction.createComplete(
+  nem.Deadline.create(),
+  [
+    convertLeftIntoMultisigTx.toAggregate(toBeLeftMultisig.publicAccount),
+    convertRightIntoMultisigTx.toAggregate(toBeRightMultisig.publicAccount),
+    convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount)
+  ],
+  nem.NetworkType.MIJIN_TEST
+);
+
 util.listener(url, toBeMultisig.address, {
   onOpen: () => {
-    const signedTx = toBeMultisig.sign(convertIntoMultisigTx);
+    const signedTx = toBeMultisig.signTransactionWithCosignatories(
+      aggregateTx,
+      [ toBeLeftMultisig, ...leftCosigners,
+        toBeRightMultisig, ...rightCosigners ],
+      process.env.GENERATION_HASH
+    );
     util.announce(url, signedTx);
   },
   onConfirmed: (_, listener) => listener.close()

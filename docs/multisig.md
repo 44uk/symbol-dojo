@@ -7,9 +7,9 @@
 
 ## マルチシグアカウントの用途
 
-マルチシグアカウントとなったアカウントはそれ自信からトランザクションを発行することができなくなり、トランザクションの発信は連署者より行うことになります。
+マルチシグアカウントとなったアカウントはそれ自信からトランザクションを発行することができなくなり、トランザクション発信は連署者より行うことになります。
 
-マルチシグアカウントに関連する連署者は後から追加・削減することができます。
+マルチシグアカウントの連署者は後から追加・削減することができます。
 
 - 共有アカウントからのモザイク送信の承認・否認ロジック
 - アカウントの譲渡
@@ -25,8 +25,17 @@
 
 2つと環境変数に設定している秘密鍵のアカウントの3つのアカウントを連署者として設定します。
 
+ここで設定されたマルチシグアカウントは後で利用するので、
+
+ターミナルの出力を保存したり、`tee`コマンドなどを利用して生成されたアカウントをメモしておいてください。
+
+マルチシグアカウントの連署者に指定されたアカウントはその要求に署名する必要があります。
+
+このスクリプトでは便宜上アカウントを生成していて秘密鍵がわかっているため、アグリゲートコンプリートで処理します。
+
+
 ```shell
-$ node scripts/multisig/convert_account_into_multisig.js
+$ node scripts/multisig/convert_account_into_multisig.js | tee multisig.txt
 Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 
@@ -95,13 +104,16 @@ Signer:   F5B9256485A4BDD4ACD713D8A95BAB38E83B22934E8B8C6A74285B060413FAD6
 
 ### コード解説
 
-複数のアカウントをポチポチと`nem2-cli`で作成するのは時間がかかるので、便宜上コード中でアカウントを生成しています。
-
-現実のコードにおいては、連署者として追加するための公開鍵だけがあればよいです。
+複数のアカウントを`nem2-cli`で準備するのは時間がかかるので、便宜上コード中でアカウントを生成しています。
 
 アカウントを3つ作って、1つ目をマルチシグアカウントへ、後の2つと`alice`を連署者として設定します。
 
 生成したアカウントの秘密鍵はコンソールに表示しているだけなので、適宜リダイレクトや`tee`コマンドでテキストに保存してください。
+
+なお、現実のコードにおいては、連署者として追加するための公開鍵が必要です。
+
+さらに、アグリゲートボンドトランザクションによって連署者となるための署名が必要になります。
+
 
 ```javascript
 // 連署者とするアカウントの公開アカウントの集合を作る
@@ -126,9 +138,22 @@ const convertIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
+// 実際はAggregateTransaction.createBondedメソッドを使い連署アカウントに署名を求める。
+// 今回は連署アカウントの秘密鍵がわかっているのでそれらを利用して署名してしまう。
+const aggregateTx = nem.AggregateTransaction.createComplete(
+  nem.Deadline.create(),
+  [ convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount) ],
+  nem.NetworkType.MIJIN_TEST
+);
+
 util.listener(url, toBeMultisig.address, {
   onOpen: () => {
-    const signedTx = toBeMultisig.sign(convertIntoMultisigTx);
+    // signTransactionWithCosignatoriesを使う
+    const signedTx = toBeMultisig.signTransactionWithCosignatories(
+      aggregateTx,
+      cosigners,
+      process.env.GENERATION_HASH
+    );
     util.announce(url, signedTx);
   },
   onConfirmed: (_, listener) => listener.close()
@@ -147,25 +172,37 @@ util.listener(url, toBeMultisig.address, {
 
 今回は初回の設定なので、設定したい目標数をそのまま指定します。
 
-最後に**マルチシグアカウントに変換したいアカウントの秘密鍵**で署名をして発信します。
+署名済みトランザクションを**マルチシグアカウントに変換したいアカウントの秘密鍵**で作ります。
+
+次に、このトランザクションをアグリゲートトランザクションでラップします。
+
+現実には連署者の秘密鍵がわかることは無いでしょうから、通常は`AggregateTransaction.createBonded`で連署者に署名を求める必要があります。
+
+`createdBonded`を用いたサンプルは`convert_account_into_multisig.bonded.js`として用意してあるので、コードの違いを確認してみてください。
+
+こちらのコードも便宜上同じコードの中で各連署アカウントが署名をしていますが、実際にはそれぞれのアカウントが署名をするはずなので、処理の流れの参考にしてみてください。
+
+このコードは引数にマルチシグアカウントに変換するアカウントの秘密鍵を渡します。
+
+アカウントがアグリゲートボンドトランザクションを発信する必要があるため、`10 cat.currency`以上を保有させておく必要があります。
+
+`node scripts/multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__`として実行してみてください。
 
 
 ## マルチシグアカウントからの送信
 
 マルチシグ化したアカウントはそのアカウントの秘密鍵ではトランザクションを発信することができなくなります。
 
-マルチシグアカウントからトランザクションを発信する場合は連署者となったアカウントからアグリゲートトランザクションを発行します。
-
-スクリプトを実行する前に、マルチシグアカウント化したアカウントへ`10 cat.currency`ほど転送しておいてください。
+マルチシグアカウントからトランザクションを発信する場合は連署アカウントからアグリゲートトランザクションを発信します。
 
 転送して残高に反映されたら`scripts/multisig/initiate_from_cosigner.js`を実行してください。
 
-このスクリプトは、連署者の秘密鍵、マルチシグアカウントの公開鍵、受信者アドレス、モザイク量を渡します。
+このスクリプトは連署者の秘密鍵、マルチシグアカウントの公開鍵、受信者アドレスを渡します。
 
-ここでは前の項で作った、連署者として`Cosigner Account1`の秘密鍵を、受信者には`Cosigner Account2`のアドレスを指定しました。
+ここでは前の項で作った、連署者として`Cosigner Account1`の秘密鍵を、マルチシグアカウントの公開鍵を、受信者には`Cosigner Account2`のアドレスを指定しました。
 
 ```shell
-$ node scripts/multisig/initiate_from_cosigner.js 63C3B2AD116A94591483F60E320BB5A53795F8FCB88AB282BADDC86A0BE69F99 F5B9256485A4BDD4ACD713D8A95BAB38E83B22934E8B8C6A74285B060413FAD6 SBFMZE43WQ255UPU7OHRAGZ6S3SFGEK7NZ4AKCBM 1
+$ node scripts/multisig/initiate_from_cosigner.js 63C3B2AD116A94591483F60E320BB5A53795F8FCB88AB282BADDC86A0BE69F99 F5B9256485A4BDD4ACD713D8A95BAB38E83B22934E8B8C6A74285B060413FAD6 SBFMZE43WQ255UPU7OHRAGZ6S3SFGEK7NZ4AKCBM
 Initiater:  SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:   http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Cosignator: SBV46L-BDJZGK-ETWYS5-6ZT2VV-4RCOMH-KA3NTN-UQSG
@@ -201,13 +238,13 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 {"type":16961,"networkType":144,"version":2,"deadline":{"value":"2019-03-25T00:22:41.288"},"fee":{"lower":0,"higher":0},"signature":"6B7EFA559701E4C63367C80F5447DFD2978D5838055EF44C2BD3EAB31AE5EEEEFF23FF494FA2464FDA614F8A312F225DB59EC10422F24DA61D225AB91FA5EB08","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":8713,"higher":0},"hash":"EBDCD709A41BF5100E20A63EA73A536C3704C9B74C9F6D2248509BD7783A829D","merkleComponentHash":"889917138407628DF386D5E6434414A460E6EAA8DD07F7E22FE2B9B653243DAE"},"innerTransactions":[{"type":16724,"networkType":144,"version":3,"deadline":{"value":"2019-03-25T00:22:41.288"},"fee":{"lower":0,"higher":0},"signature":"6B7EFA559701E4C63367C80F5447DFD2978D5838055EF44C2BD3EAB31AE5EEEEFF23FF494FA2464FDA614F8A312F225DB59EC10422F24DA61D225AB91FA5EB08","signer":{"publicKey":"F5B9256485A4BDD4ACD713D8A95BAB38E83B22934E8B8C6A74285B060413FAD6","address":{"address":"SDGQ6RTCBE7S3LTTXG7YVMABXHJTZDCF3JWE5R7A","networkType":144}},"recipient":{"address":"SBFMZE43WQ255UPU7OHRAGZ6S3SFGEK7NZ4AKCBM","networkType":144},"mosaics":[{"id":{"id":{"lower":3294802500,"higher":2243684972}},"amount":{"lower":1000000,"higher":0}}],"message":{"type":0,"payload":""}}],"cosignatures":[{"signature":"311534CF2BC6B1C24E3A6B999C38DE3291B726210E19796D6B5F580E5A23AA99E5978913D727B070EB7709081EDC4B9BF36A86D53AA300956BB343716316D20E","signer":{"publicKey":"7CDFDE511E145E4B17292AC268B2AD493B30C3AB060EBC53F753661C4BC06AC8","address":{"address":"SBV46LBDJZGKETWYS56ZT2VV4RCOMHKA3NTNUQSG","networkType":144}}}]}
 ```
 
-流れとしては、受信者のアドレスへの転送トランザクションを作り、アグリゲートトランザクションの公開アカウントとしてマルチシグアカウントを渡します。
+受信者のアドレスへの転送トランザクションを作り、アグリゲートトランザクションの公開アカウントとしてマルチシグアカウントを渡します。
 
-アグリゲートボンドトランザクションなので、`LockFunds`トランザクションを発行します。
+アグリゲートボンドトランザクションなので`LockFunds`トランザクションを発行します。
 
 `LockFunds`が承認されたらアグリゲートボンドトランザクションを発行します。
 
-アグリゲートボンドトランザクションが承認されたら、連署者がそれに署名をすることで2名が署名したことになるので、転送トランザクションが承認されます。
+アグリゲートボンドトランザクションが承認されたら、別の連署者がそれに署名をすることで2名の署名が揃い、転送トランザクションが承認されます。
 
 
 ### コード解説
@@ -216,20 +253,33 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 // マルチシグトランザクションはアグリゲートボンドトランザクションとして行う
 const multisigTx = nem.AggregateTransaction.createBonded(
   nem.Deadline.create(),
-  [transferTx.toAggregate(multisig)],
+  [ transferTx.toAggregate(multisig) ],
   nem.NetworkType.MIJIN_TEST
 );
-const signedMultisigTx = initiater.sign(multisigTx);
+const signedMultisigTx = initiater.sign(multisigTx, process.env.GENERATION_HASH);
 ```
 
 マルチシグトランザクションを発行するにはアグリゲートボンドトランザクションを使います。
 
 ```javascript
 util.listener(url, initiater.address, {
+  onOpen: () => {
+    const lockFundsTx = nem.LockFundsTransaction.create(
+      nem.Deadline.create(),
+      nem.NetworkCurrencyMosaic.createRelative(10),
+      nem.UInt64.fromUint(480),
+      signedMultisigTx,
+      nem.NetworkType.MIJIN_TEST
+    );
+    const signedLockFundsTx = initiater.sign(lockFundsTx, process.env.GENERATION_HASH);
+    util.announce(url, signedLockFundsTx)
+  },
   onConfirmed: () => {
+    // LockFundが承認されたらアグリゲートトランザクションを発信
     util.announceAggregateBonded(url, signedMultisigTx);
   },
   onAggregateBondedAdded: (aggregateTx) => {
+    // 連署者が署名することでマルチシグアカウントからのモザイク送信を承認する
     const cosignatureTx = nem.CosignatureTransaction.create(aggregateTx)
     const signedCosignatureTx = cosignator.signCosignatureTransaction(cosignatureTx)
     util.announceAggregateBondedCosignature(url, signedCosignatureTx)
@@ -246,13 +296,13 @@ util.listener(url, initiater.address, {
 
 ## 1-of-m 構成の場合
 
-1-of-m 構成(最小承認数が1)である場合、トランザクションを送ろうとする連署者だけの署名で十分なので、アグリゲートコンプリートトランザクションとして発行できます。
+`1-of-m`構成(最小承認数が1)である場合、トランザクションを送ろうとする連署者だけの署名で十分なので、アグリゲートコンプリートトランザクションとして発行できます。
 
-`scripts/multisig/convert_account_into_multisig_shared.js` は 1-of-2 のマルチシグアカウントを構築します。
+`scripts/multisig/convert_account_into_multisig_shared.js`は`1-of-2`のマルチシグアカウントを構築します。
 
-`scripts/multisig/initiate_from_cosigner_without_cosigner.js` はアグリゲートコンプリートで転送するスクリプトです。
+`scripts/multisig/initiate_from_cosigner_without_cosigner.js`はアグリゲートコンプリートで転送するスクリプトです。
 
-この２つを使って動作を確認してみてください。
+この2つを使ってそれぞれの動作を確認してみてください。
 
 
 ## マルチレベルマルチシグの構築
@@ -270,90 +320,94 @@ MLMSを構築する際に特別な方法は必要とせず、単にマルチシ�
 
 `scripts/multisig/setup_mlms.js`を実行してください。
 
-このスクリプトはアカウントを5つ生成し、そのうち1つをトップのマルチシグアカウントに、2つを2階層目のアカウントに、残りの2つを片方の2階層目の連署者に、
+このスクリプトはアカウントを7つ生成し、そのうち1つをトップのマルチシグアカウントに、
 
-もう片方の2階層目の連署者には、環境変数に設定された秘密鍵のアカウントと引数で渡した公開鍵のアカウントを設定します。
+2つを2階層目のアカウントに、最後に2階層目のアカウントに2つづつの連署アカウントを設定したマルチレベルマルチシグを構築します。
+
+```
+- Root
+ |- Lv2-A
+   |- Lv3-a
+   `- Lv3-b
+ |- Lv2-B
+   |- Lv3-c
+   `- Lv3-d
+```
+
+図にするとこのような状態になります。
 
 ```shell
-$ node scripts/multisig/setup_mlms.js 8F6A78A6FD538001145F56082B318C838210E9B3FC8151906E5F714AD7CEF840
-Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
+$ node scripts/multisig/setup_mlms.js
+Initiater: SCZWFE-CW5HO2-UGNM5K-7LFSVO-DVTADT-722LNL-WSBJ
+Endpoint:  http://localhost:3000/account/SCZWFECW5HO2UGNM5K7LFSVODVTADT722LNLWSBJ
 
 Root Multisig Account
-Private:  4150EE61F4E3B6DD327C43DC6B72EC3895A99CB71F618661C7ACD40DF2534817
-Public:   5FDA91C2C8988C606512B8D8FED9214DD16E288D444C06D57F5740A67389676F
-Address:  SBK4KX-ICFNFZ-BZS6NR-XVYMLS-7NOBEX-MLILBK-KIOE
-Endpoint: http://localhost:3000/account/SBK4KXICFNFZBZS6NRXVYMLS7NOBEXMLILBKKIOE
-Endpoint: http://localhost:3000/account/SBK4KXICFNFZBZS6NRXVYMLS7NOBEXMLILBKKIOE/multisig
-Endpoint: http://localhost:3000/account/SBK4KXICFNFZBZS6NRXVYMLS7NOBEXMLILBKKIOE/multisig/graph
+Private:  D75B1A1590B1200DE9EBA658DA4A156A2EF77F35A6CFAFF50089B7ED4E838305
+Public:   56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE
+Address:  SCWACH-X75QDD-CXQWDV-NBALPM-UYYSPO-JRVF66-RPX3
+Endpoint: http://localhost:3000/account/SCWACHX75QDDCXQWDVNBALPMUYYSPOJRVF66RPX3
+Endpoint: http://localhost:3000/account/SCWACHX75QDDCXQWDVNBALPMUYYSPOJRVF66RPX3/multisig
+Endpoint: http://localhost:3000/account/SCWACHX75QDDCXQWDVNBALPMUYYSPOJRVF66RPX3/multisig/graph
 
 Left Multisig Account
-Private:  09B8E081D276887597877BB9EA6825661F86687FCAD2BF1EEE85AD5C8DA55330
-Public:   9ECAB480202F371403977F465150B5D363CCB3856AC2F5723036E175379014D6
-Address:  SB2TJ2-YX24KF-NC4XPG-CNW4W7-QBQI6Z-XR2CAR-73WF
-Endpoint: http://localhost:3000/account/SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF
-Endpoint: http://localhost:3000/account/SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF/multisig
-Endpoint: http://localhost:3000/account/SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF/multisig/graph
+Private:  2F36E07E71A178D3A9417C6D95F5D880C0C793AB8839D5090B8303A0298C6EC3
+Public:   6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058
+Address:  SA5MHL-UMHRX6-FVQI2V-PWU2JW-GN2YXM-C2M4K2-ZPIV
+Endpoint: http://localhost:3000/account/SA5MHLUMHRX6FVQI2VPWU2JWGN2YXMC2M4K2ZPIV
+Endpoint: http://localhost:3000/account/SA5MHLUMHRX6FVQI2VPWU2JWGN2YXMC2M4K2ZPIV/multisig
+Endpoint: http://localhost:3000/account/SA5MHLUMHRX6FVQI2VPWU2JWGN2YXMC2M4K2ZPIV/multisig/graph
 
 Right Multisig Account
-Private:  DEC71E5DD73B3750F52025CF7B923CFE09FBF1A1D1CDB47EAB6F5C2DD97008CD
-Public:   03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55
-Address:  SD7DP6-GE7JGN-CIQRUH-PBOGJ5-T2C4SV-3ZLB3B-Z3E7
-Endpoint: http://localhost:3000/account/SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7
-Endpoint: http://localhost:3000/account/SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7/multisig
-Endpoint: http://localhost:3000/account/SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7/multisig/graph
+Private:  A582EFCC85CF2477721115F498C2F7F499C42BB6552545AA9B0C16419CDEF17F
+Public:   01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1
+Address:  SD4AKS-SJU7RU-GIC2N5-SMW6HY-O5R5PG-JCMPHG-4U6B
+Endpoint: http://localhost:3000/account/SD4AKSSJU7RUGIC2N5SMW6HYO5R5PGJCMPHG4U6B
+Endpoint: http://localhost:3000/account/SD4AKSSJU7RUGIC2N5SMW6HYO5R5PGJCMPHG4U6B/multisig
+Endpoint: http://localhost:3000/account/SD4AKSSJU7RUGIC2N5SMW6HYO5R5PGJCMPHG4U6B/multisig/graph
 
 Left Cosigner Account1:
-Private:  A080ADC06DA7927AA87DF2069807AEFE1B13515DD295088A9D0E30EF3A0F7990
-Public:   6231C3C1E26CFB11E83D8BBB782D258F1E2048D65E2A41186B59AA6CBD41A332
-Address:  SD54SD-KEOWWB-UU37J4-NKFKZT-WVCSEF-MN2XAU-NVC6
-Endpoint: http://localhost:3000/account/SD54SDKEOWWBUU37J4NKFKZTWVCSEFMN2XAUNVC6
-Endpoint: http://localhost:3000/account/SD54SDKEOWWBUU37J4NKFKZTWVCSEFMN2XAUNVC6/multisig
-Endpoint: http://localhost:3000/account/SD54SDKEOWWBUU37J4NKFKZTWVCSEFMN2XAUNVC6/multisig/graph
+Private:  8CA497B41F9B2BA779C3E83C9ACD82FCE4919112941899FA9EB5A95CEB558B10
+Public:   5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD
+Address:  SDKLY4-SGMNRY-LNNVYN-BPEK3F-QBSYN3-QQHPPU-EKRV
+Endpoint: http://localhost:3000/account/SDKLY4SGMNRYLNNVYNBPEK3FQBSYN3QQHPPUEKRV
+Endpoint: http://localhost:3000/account/SDKLY4SGMNRYLNNVYNBPEK3FQBSYN3QQHPPUEKRV/multisig
+Endpoint: http://localhost:3000/account/SDKLY4SGMNRYLNNVYNBPEK3FQBSYN3QQHPPUEKRV/multisig/graph
 
 Left Cosigner Account2:
-Private:  9626BA21B5BC280F76A3844AB13266F9FA9855CFA887B4478332EF082C0AFF0C
-Public:   9DBCBB48D9D5B7B1D49D2E8A655BC6014B6F10D42BFC3AE030FC8A31E403FD32
-Address:  SAI6D7-AELD6A-PBKV2G-MJMBQN-NZMREF-QKCEV7-LGJV
-Endpoint: http://localhost:3000/account/SAI6D7AELD6APBKV2GMJMBQNNZMREFQKCEV7LGJV
-Endpoint: http://localhost:3000/account/SAI6D7AELD6APBKV2GMJMBQNNZMREFQKCEV7LGJV/multisig
-Endpoint: http://localhost:3000/account/SAI6D7AELD6APBKV2GMJMBQNNZMREFQKCEV7LGJV/multisig/graph
+Private:  022BAAD0C642F762E836318FB194170F92487759A51AAC38E06B76A1F59B43BA
+Public:   55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097
+Address:  SDJP2Y-VVLDPL-ERW7DK-5UUKPF-R4HBS4-G5CAFI-C3F2
+Endpoint: http://localhost:3000/account/SDJP2YVVLDPLERW7DK5UUKPFR4HBS4G5CAFIC3F2
+Endpoint: http://localhost:3000/account/SDJP2YVVLDPLERW7DK5UUKPFR4HBS4G5CAFIC3F2/multisig
+Endpoint: http://localhost:3000/account/SDJP2YVVLDPLERW7DK5UUKPFR4HBS4G5CAFIC3F2/multisig/graph
+
+Right Cosigner Account1:
+Private:  64799713AC8B1AD8F2C6D5BA6D506A2F49F5AAF66757218ABE6F5555926B0D3E
+Public:   5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0
+Address:  SCNC6D-LW7FJE-TWS6UB-R5YNGI-2ZHZCL-7X6GYG-5NXR
+Endpoint: http://localhost:3000/account/SCNC6DLW7FJETWS6UBR5YNGI2ZHZCL7X6GYG5NXR
+Endpoint: http://localhost:3000/account/SCNC6DLW7FJETWS6UBR5YNGI2ZHZCL7X6GYG5NXR/multisig
+Endpoint: http://localhost:3000/account/SCNC6DLW7FJETWS6UBR5YNGI2ZHZCL7X6GYG5NXR/multisig/graph
+
+Right Cosigner Account2:
+Private:  D86821EB3B59262ADEB5F464ECEE63A9316DCCC85BBE672C791B223988D12E30
+Public:   6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80
+Address:  SA5EEM-QNHVTP-5VF5M3-WSYZJV-5JGMZ6-BMAP3C-KTDR
+Endpoint: http://localhost:3000/account/SA5EEMQNHVTP5VF5M3WSYZJV5JGMZ6BMAP3CKTDR
+Endpoint: http://localhost:3000/account/SA5EEMQNHVTP5VF5M3WSYZJV5JGMZ6BMAP3CKTDR/multisig
+Endpoint: http://localhost:3000/account/SA5EEMQNHVTP5VF5M3WSYZJV5JGMZ6BMAP3CKTDR/multisig/graph
 
 connection open
-connection open
-connection open
 [Transaction announced]
-Endpoint: http://localhost:3000/transaction/3A57AA96CD5424E8BF9D6393A01A9A6872A21062229581D5269EB8738B50A5D6
-Hash:     3A57AA96CD5424E8BF9D6393A01A9A6872A21062229581D5269EB8738B50A5D6
-Signer:   9ECAB480202F371403977F465150B5D363CCB3856AC2F5723036E175379014D6
+Endpoint: http://localhost:3000/transaction/E283EAB4658DD8F969E7D6EA2DB7876ACF8EC96B1FC5711CCFFBF6FD7FAB548C
+Hash:     E283EAB4658DD8F969E7D6EA2DB7876ACF8EC96B1FC5711CCFFBF6FD7FAB548C
+Signer:   56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE
 
-[Transaction announced]
-Endpoint: http://localhost:3000/transaction/6A9E881776374ADD4EAD0C066618FA55E358AF8478A984A880F670C2BACAFA91
-Hash:     6A9E881776374ADD4EAD0C066618FA55E358AF8478A984A880F670C2BACAFA91
-Signer:   5FDA91C2C8988C606512B8D8FED9214DD16E288D444C06D57F5740A67389676F
+[UNCONFIRMED] SCWACH...
+{"transaction":{"type":16705,"networkType":144,"version":36866,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE","transactions":[{"transaction":{"type":16725,"networkType":144,"version":36867,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058","minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD","type":0},{"cosignatoryPublicKey":"55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097","type":0}]}},{"transaction":{"type":16725,"networkType":144,"version":36867,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0","type":0},{"cosignatoryPublicKey":"6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80","type":0}]}},{"transaction":{"type":16725,"networkType":144,"version":36867,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058","type":0},{"cosignatoryPublicKey":"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1","type":0}]}}],"cosignatures":[{"signature":"A250894C6299FE3BEA74B51279E17CA1C22BD2877A2CA4A65EB5DD5735719AA3326D225B2EA613A62AAD18D4E3C5F61C33CB8463E9B15D66C8A60A93713EEC0E","signer":{"publicKey":"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058","address":{"address":"SA5MHLUMHRX6FVQI2VPWU2JWGN2YXMC2M4K2ZPIV","networkType":144}}},{"signature":"53B7B1438C7284CE66C4820F41359DC0D84142B244A4244FE703B0061E76FF61F3C435CA5F051A179B5E40776855FF028630B4AF8976693FB10D3AF63104100D","signer":{"publicKey":"5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD","address":{"address":"SDKLY4SGMNRYLNNVYNBPEK3FQBSYN3QQHPPUEKRV","networkType":144}}},{"signature":"44BFCACA9C18C8D3C17E5F7448BD31473BA46BECD3225DBB3573C3DDDEF7BB8D60403A407CDD478AD1E12EC8003AE401972F28DD1EC50C5CB67C26BDB571950C","signer":{"publicKey":"55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097","address":{"address":"SDJP2YVVLDPLERW7DK5UUKPFR4HBS4G5CAFIC3F2","networkType":144}}},{"signature":"1460746724811EF4DFEA038188EDB37357247F688C47EF78966C2E4D8633B8AA1678ECC644A446755D10B01018269E63519222508D29C46E88A22CA9C93F8B0C","signer":{"publicKey":"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1","address":{"address":"SD4AKSSJU7RUGIC2N5SMW6HYO5R5PGJCMPHG4U6B","networkType":144}}},{"signature":"08577EE4063F2744F4173A8129696AF5EDA1672AED24ABE80F51970739A95DC23EB1FA4EC02E9CB900ED0B5E211563970EA741D686C31AB81BA5FC4037A1A80D","signer":{"publicKey":"5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0","address":{"address":"SCNC6DLW7FJETWS6UBR5YNGI2ZHZCL7X6GYG5NXR","networkType":144}}},{"signature":"F991BCA7B3C0738EE04C28233D371E58128F5351249042472DF3413C5888D45CD4AB3ADD9B9B18D9217F407A2008B13AD18817B397E0ECFFE7424914B6B3D100","signer":{"publicKey":"6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80","address":{"address":"SA5EEMQNHVTP5VF5M3WSYZJV5JGMZ6BMAP3CKTDR","networkType":144}}}]}}
 
-[Transaction announced]
-Endpoint: http://localhost:3000/transaction/55AE03F16C754A6F16E2822E9B380FECF2D07F252AA3700D3108A13D3EF6A95E
-Hash:     55AE03F16C754A6F16E2822E9B380FECF2D07F252AA3700D3108A13D3EF6A95E
-Signer:   03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55
-
-[UNCONFIRMED] SD7DP6...
-{"type":16725,"networkType":144,"version":3,"deadline":{"value":"2019-03-24T00:27:25.341"},"fee":{"lower":0,"higher":0},"signature":"0BC7D42B933E6430F23200ABC20FF902B0A54086F57CF8DCD5AD42EC02540EC1D241B2FC9E0A40EDC9A5A17457CE6F6ABE13D7FA6DBFC5DAC1F5502FEE3B2604","signer":{"publicKey":"03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55","address":{"address":"SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"55AE03F16C754A6F16E2822E9B380FECF2D07F252AA3700D3108A13D3EF6A95E","merkleComponentHash":"55AE03F16C754A6F16E2822E9B380FECF2D07F252AA3700D3108A13D3EF6A95E"},"minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"type":0,"cosignatoryPublicAccount":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}}},{"type":0,"cosignatoryPublicAccount":{"publicKey":"8F6A78A6FD538001145F56082B318C838210E9B3FC8151906E5F714AD7CEF840","address":{"address":"SBVNFWUJBTQ6PS2SGRDJLYL2SGNFB4IBBKYPELOB","networkType":144}}}]}
-
-[UNCONFIRMED] SBK4KX...
-{"type":16725,"networkType":144,"version":3,"deadline":{"value":"2019-03-24T00:27:25.342"},"fee":{"lower":0,"higher":0},"signature":"5B6582E829C28DEDDBBA7135B2A232DF34F64562B9769BE998A89BF77EA6CC2172BC48C8EA0E66D56B11DC3F0AE92AF20FDAC1465BE1009E056C76B9E8793B0D","signer":{"publicKey":"5FDA91C2C8988C606512B8D8FED9214DD16E288D444C06D57F5740A67389676F","address":{"address":"SBK4KXICFNFZBZS6NRXVYMLS7NOBEXMLILBKKIOE","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"6A9E881776374ADD4EAD0C066618FA55E358AF8478A984A880F670C2BACAFA91","merkleComponentHash":"6A9E881776374ADD4EAD0C066618FA55E358AF8478A984A880F670C2BACAFA91"},"minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"type":0,"cosignatoryPublicAccount":{"publicKey":"9ECAB480202F371403977F465150B5D363CCB3856AC2F5723036E175379014D6","address":{"address":"SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF","networkType":144}}},{"type":0,"cosignatoryPublicAccount":{"publicKey":"03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55","address":{"address":"SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7","networkType":144}}}]}
-
-[UNCONFIRMED] SB2TJ2...
-{"type":16725,"networkType":144,"version":3,"deadline":{"value":"2019-03-24T00:27:25.324"},"fee":{"lower":0,"higher":0},"signature":"3653F55489DBF19AD8AF45F254173A269F89C6936881C1003122FA8DCA6949DA68B1DE7E5F6C6E62275A779AE3FB54AFB07845F752458C0E0B02A56E674CB407","signer":{"publicKey":"9ECAB480202F371403977F465150B5D363CCB3856AC2F5723036E175379014D6","address":{"address":"SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"3A57AA96CD5424E8BF9D6393A01A9A6872A21062229581D5269EB8738B50A5D6","merkleComponentHash":"3A57AA96CD5424E8BF9D6393A01A9A6872A21062229581D5269EB8738B50A5D6"},"minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"type":0,"cosignatoryPublicAccount":{"publicKey":"6231C3C1E26CFB11E83D8BBB782D258F1E2048D65E2A41186B59AA6CBD41A332","address":{"address":"SD54SDKEOWWBUU37J4NKFKZTWVCSEFMN2XAUNVC6","networkType":144}}},{"type":0,"cosignatoryPublicAccount":{"publicKey":"9DBCBB48D9D5B7B1D49D2E8A655BC6014B6F10D42BFC3AE030FC8A31E403FD32","address":{"address":"SAI6D7AELD6APBKV2GMJMBQNNZMREFQKCEV7LGJV","networkType":144}}}]}
-
-[CONFIRMED] SBK4KX...
-{"type":16725,"networkType":144,"version":3,"deadline":{"value":"2019-03-24T00:27:25.342"},"fee":{"lower":0,"higher":0},"signature":"5B6582E829C28DEDDBBA7135B2A232DF34F64562B9769BE998A89BF77EA6CC2172BC48C8EA0E66D56B11DC3F0AE92AF20FDAC1465BE1009E056C76B9E8793B0D","signer":{"publicKey":"5FDA91C2C8988C606512B8D8FED9214DD16E288D444C06D57F5740A67389676F","address":{"address":"SBK4KXICFNFZBZS6NRXVYMLS7NOBEXMLILBKKIOE","networkType":144}},"transactionInfo":{"height":{"lower":5845,"higher":0},"hash":"6A9E881776374ADD4EAD0C066618FA55E358AF8478A984A880F670C2BACAFA91","merkleComponentHash":"6A9E881776374ADD4EAD0C066618FA55E358AF8478A984A880F670C2BACAFA91"},"minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"type":0,"cosignatoryPublicAccount":{"publicKey":"9ECAB480202F371403977F465150B5D363CCB3856AC2F5723036E175379014D6","address":{"address":"SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF","networkType":144}}},{"type":0,"cosignatoryPublicAccount":{"publicKey":"03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55","address":{"address":"SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7","networkType":144}}}]}
-
-[CONFIRMED] SD7DP6...
-{"type":16725,"networkType":144,"version":3,"deadline":{"value":"2019-03-24T00:27:25.341"},"fee":{"lower":0,"higher":0},"signature":"0BC7D42B933E6430F23200ABC20FF902B0A54086F57CF8DCD5AD42EC02540EC1D241B2FC9E0A40EDC9A5A17457CE6F6ABE13D7FA6DBFC5DAC1F5502FEE3B2604","signer":{"publicKey":"03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55","address":{"address":"SD7DP6GE7JGNCIQRUHPBOGJ5T2C4SV3ZLB3BZ3E7","networkType":144}},"transactionInfo":{"height":{"lower":5845,"higher":0},"hash":"55AE03F16C754A6F16E2822E9B380FECF2D07F252AA3700D3108A13D3EF6A95E","merkleComponentHash":"55AE03F16C754A6F16E2822E9B380FECF2D07F252AA3700D3108A13D3EF6A95E"},"minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"type":0,"cosignatoryPublicAccount":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}}},{"type":0,"cosignatoryPublicAccount":{"publicKey":"8F6A78A6FD538001145F56082B318C838210E9B3FC8151906E5F714AD7CEF840","address":{"address":"SBVNFWUJBTQ6PS2SGRDJLYL2SGNFB4IBBKYPELOB","networkType":144}}}]}
-
-[CONFIRMED] SB2TJ2...
-{"type":16725,"networkType":144,"version":3,"deadline":{"value":"2019-03-24T00:27:25.324"},"fee":{"lower":0,"higher":0},"signature":"3653F55489DBF19AD8AF45F254173A269F89C6936881C1003122FA8DCA6949DA68B1DE7E5F6C6E62275A779AE3FB54AFB07845F752458C0E0B02A56E674CB407","signer":{"publicKey":"9ECAB480202F371403977F465150B5D363CCB3856AC2F5723036E175379014D6","address":{"address":"SB2TJ2YX24KFNC4XPGCNW4W7QBQI6ZXR2CAR73WF","networkType":144}},"transactionInfo":{"height":{"lower":5845,"higher":0},"hash":"3A57AA96CD5424E8BF9D6393A01A9A6872A21062229581D5269EB8738B50A5D6","merkleComponentHash":"3A57AA96CD5424E8BF9D6393A01A9A6872A21062229581D5269EB8738B50A5D6"},"minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"type":0,"cosignatoryPublicAccount":{"publicKey":"6231C3C1E26CFB11E83D8BBB782D258F1E2048D65E2A41186B59AA6CBD41A332","address":{"address":"SD54SDKEOWWBUU37J4NKFKZTWVCSEFMN2XAUNVC6","networkType":144}}},{"type":0,"cosignatoryPublicAccount":{"publicKey":"9DBCBB48D9D5B7B1D49D2E8A655BC6014B6F10D42BFC3AE030FC8A31E403FD32","address":{"address":"SAI6D7AELD6APBKV2GMJMBQNNZMREFQKCEV7LGJV","networkType":144}}}]}
+[CONFIRMED] SCWACH...
+{"transaction":{"type":16705,"networkType":144,"version":36866,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE","transactions":[{"transaction":{"type":16725,"networkType":144,"version":36867,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058","minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD","type":0},{"cosignatoryPublicKey":"55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097","type":0}]}},{"transaction":{"type":16725,"networkType":144,"version":36867,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0","type":0},{"cosignatoryPublicKey":"6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80","type":0}]}},{"transaction":{"type":16725,"networkType":144,"version":36867,"maxFee":[0,0],"deadline":[2876515307,23],"signature":"05920ED4C2B6F53896E9D23D72D515F92F00B4E7C81E3D20FDC84EDC328BF197D1E639EB2E67131527EE3E52DC5DED6DAC4806743B3DE69A7D882CB53C8CEE0D","signer":"56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058","type":0},{"cosignatoryPublicKey":"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1","type":0}]}}],"cosignatures":[{"signature":"A250894C6299FE3BEA74B51279E17CA1C22BD2877A2CA4A65EB5DD5735719AA3326D225B2EA613A62AAD18D4E3C5F61C33CB8463E9B15D66C8A60A93713EEC0E","signer":{"publicKey":"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058","address":{"address":"SA5MHLUMHRX6FVQI2VPWU2JWGN2YXMC2M4K2ZPIV","networkType":144}}},{"signature":"53B7B1438C7284CE66C4820F41359DC0D84142B244A4244FE703B0061E76FF61F3C435CA5F051A179B5E40776855FF028630B4AF8976693FB10D3AF63104100D","signer":{"publicKey":"5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD","address":{"address":"SDKLY4SGMNRYLNNVYNBPEK3FQBSYN3QQHPPUEKRV","networkType":144}}},{"signature":"44BFCACA9C18C8D3C17E5F7448BD31473BA46BECD3225DBB3573C3DDDEF7BB8D60403A407CDD478AD1E12EC8003AE401972F28DD1EC50C5CB67C26BDB571950C","signer":{"publicKey":"55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097","address":{"address":"SDJP2YVVLDPLERW7DK5UUKPFR4HBS4G5CAFIC3F2","networkType":144}}},{"signature":"1460746724811EF4DFEA038188EDB37357247F688C47EF78966C2E4D8633B8AA1678ECC644A446755D10B01018269E63519222508D29C46E88A22CA9C93F8B0C","signer":{"publicKey":"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1","address":{"address":"SD4AKSSJU7RUGIC2N5SMW6HYO5R5PGJCMPHG4U6B","networkType":144}}},{"signature":"08577EE4063F2744F4173A8129696AF5EDA1672AED24ABE80F51970739A95DC23EB1FA4EC02E9CB900ED0B5E211563970EA741D686C31AB81BA5FC4037A1A80D","signer":{"publicKey":"5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0","address":{"address":"SCNC6DLW7FJETWS6UBR5YNGI2ZHZCL7X6GYG5NXR","networkType":144}}},{"signature":"F991BCA7B3C0738EE04C28233D371E58128F5351249042472DF3413C5888D45CD4AB3ADD9B9B18D9217F407A2008B13AD18817B397E0ECFFE7424914B6B3D100","signer":{"publicKey":"6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80","address":{"address":"SA5EEMQNHVTP5VF5M3WSYZJV5JGMZ6BMAP3CKTDR","networkType":144}}}]}}
 ```
 
 トランザクションが承認されたらURLにアクセスしてみましょう。
@@ -361,12 +415,130 @@ Signer:   03C7223F64B39D2713A568B92B8041FB23F9B5FAB8E91BAB873E12C79F097A55
 
 #### コード解説
 
-マルチシグアカウントに別のマルチシグアカウントを連署者を追加するだけです。
+マルチシグアカウントに別のマルチシグアカウントを連署者を追加することで構築することができます。
 
-このコードでも、便宜上コード内でアカウントを生成して、MLMSを構築します。
-
-同様に必要があればリダイレクトや`tee`コマンドで秘密鍵を保存してください。
+このコードでも、便宜上コード内でアカウントを生成していて、署名も済ませてしまっていますが、現実には`AggregateTransaction.createBonded`を用いて、署名要求を送る方法を使います。
 
 マルチシグレベルマルチシグの階層構造は`/account/{address}/multisig/graph`のAPIにアクセスすることで取得できます。
 
+```json
+[
+  {
+    level:0,
+    multisigEntries:[
+      {
+        multisig:{
+          account:"56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE",
+          accountAddress:"90AC011EFFEC06315E161D5A102DECA63127B931A97DE8BEFB",
+          minApproval:2,
+          minRemoval:2,
+          cosignatories:[
+            "01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1",
+            "6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058"
+          ],
+          multisigAccounts:[
+          ]
+        }
+      }
+    ]
+  },
+  {
+    level:1,
+    multisigEntries:[
+      {
+        multisig:{
+          account:"6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058",
+          accountAddress:"903AC3AE8C3C6FE2D608D55F6A693633758BB05A6715ACBD15",
+          minApproval:1,
+          minRemoval:2,
+          cosignatories:[
+            "55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097",
+            "5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD"
+          ],
+          multisigAccounts:[
+            "56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE"
+          ]
+        }
+      },
+      {
+        multisig:{
+          account:"01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1",
+          accountAddress:"90F8054A49A7E343205A6F64CB78F87763D7992263CE6E53C1",
+          minApproval:2,
+          minRemoval:2,
+          cosignatories:[
+            "5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0",
+            "6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80"
+          ],
+          multisigAccounts:[
+            "56FA04FFF8B386E291B08A91633C862133DA934E798F3831A0404BA0F2AF64FE"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    level:2,
+    multisigEntries:[
+      {
+        multisig:{
+          account:"5B6F5C4FB9587B364C7429372B68692FFBCA9E3CB2FC72D9642A4D21566745F0",
+          accountAddress:"909A2F0D76F95249DA5EA063DC34C8D64F912FF7F1B06EB6F1",
+          minApproval:0,
+          minRemoval:0,
+          cosignatories:[
 
+          ],
+          multisigAccounts:[
+            "01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1"
+          ]
+        }
+      },
+      {
+        multisig:{
+          account:"55A53A71A5F1A2968DF470D9AC596891E32F806917D382575FB2CE19A5A4B097",
+          accountAddress:"90D2FD62B558DEB246DF1ABB4A29E58F0E1970DD100A816CBA",
+          minApproval:0,
+          minRemoval:0,
+          cosignatories:[
+
+          ],
+          multisigAccounts:[
+            "6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058"
+          ]
+        }
+      },
+      {
+        multisig:{
+          account:"5CD2A02C00ABAE17A9BE3C454604E50A15217AFC0E689DCB31C2CE4A68D37EFD",
+          accountAddress:"90D4BC7246636385B5B5C342F22B65806586EE103BDF422A35",
+          minApproval:0,
+          minRemoval:0,
+          cosignatories:[
+
+          ],
+          multisigAccounts:[
+            "6148C5A73400D65F606B459E841482883CF27B3564EFE0E6CE4B6E93E7D62058"
+          ]
+        }
+      },
+      {
+        multisig:{
+          account:"6C423C282041404D16EB3B8AFBCD789D8DAC2218D18682AF11C685547CE49C80",
+          accountAddress:"903A42320D3D66FED4BD66ED2C6535EA4CCCF82C03F6254C71",
+          minApproval:0,
+          minRemoval:0,
+          cosignatories:[
+
+          ],
+          multisigAccounts:[
+            "01EAD78A9A0C9A7FA6E14084B61923727BEE9384ADE6650B84FF6EE343AFF6F1"
+          ]
+        }
+      }
+    ]
+  }
+]
+```
+
+各レベルごとの構造でマルチシグの情報が表示されます。

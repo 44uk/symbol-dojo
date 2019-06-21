@@ -1,21 +1,23 @@
-# アカウントフィルタ
+# アカウント制限
 
-アカウントにブロックチェーンレベルで動作するトランザクションのフィルタを定義する機能です。
+アカウントにブロックチェーンレベルで動作するトランザクションに関する制限を定義する機能です。
 
-- [アカウントフィルタ — NEM Developer Center](https://nemtech.github.io/ja/concepts/account-filter.html)
+- [アカウント制限 — NEM Developer Center](https://nemtech.github.io/ja/concepts/account-restriction.html)
 
-同様の機能を表現することは、アプリケーションレベルでも提供することができますが、フィルタに引っかかったトランザクションはエラーとして扱われるため、ブロックチェーンに取りこまれなくなります。
+制限に引っかかったトランザクションはエラーとして扱われるため、ブロックチェーンネットワークに承認されません。
+
+設定できる制限は三種類あります。
 
 
-## 受信トランザクションフィルタ
+## 受信トランザクション制限
 
-アカウントに、トランザクションの受信可否をブラック・ホワイトリスト形式で設定する機能です。
+アカウントにトランザクションの受信可否をブラック・ホワイトリスト形式で設定する機能です。
 
 - 余計なトランザクションを意図しないアカウントから受け入れたくない
 - 特定のアドレスからのトランザクションを受け入れたくない
 
 
-## 受信モザイクフィルタ
+## 受信モザイク制限
 
 アカウントに、モザイクの受信可否をブラック・ホワイトリスト形式で設定する機能です。
 
@@ -23,23 +25,25 @@
 - 既知の不要なモザイクを受け取りたくない
 
 
-## 送信トランザクションフィルタ
+## 送信トランザクション制限
 
 アカウントに、トランザクションの種類ごとに制限をかける機能です。
 
 自分自身が設定することになるので、誤操作によるトランザクションの送信防止が主な目的のようです。
 
 
-## 受信トランザクションブロックフィルタを設定する
+## 受信トランザクションブロック制限を設定する
 
-`scripts/filter/address.js`を実行してください。
+`scripts/restriction/address.js`を実行してください。
 
-このスクリプトは第一引数にアドレスを指定し、第二引数には`block/allow`、第三引数に`add/remove`を指定します。
+このスクリプトは第一引数にアドレスを指定し、第二引数には`block`または`allow`、第三引数に`add`または`remove`を指定します。
 
 ここではアドレスをブロック対象に追加してみます。
 
+ブロック確認後にブロックを解除する場合は第三引数に`remove`を指定して実行してください。
+
 ```javascript
-$ node filter/address.js SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4 block add
+$ node scripts/restriction/address.js SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4 block add
 Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Block:     SC3AWB-HBY2AB-QHQY3Q-AJLO4H-XSJ6IZ-VAYLN5-2HO4
@@ -89,7 +93,7 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 }
 ```
 
-値が`Base64`形式だったり、マジックナンバーでわかりにくいですが、ひとまず設定されたことだけを確認してください。
+`propertyType`が`129`がブロックです。設定されたことだけを確認してください。
 
 ブロック設定したアドレスからトランザクションを送ってみてください。
 
@@ -97,7 +101,7 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 nem2-cli transaction transfer -r SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5 -c @cat.currency::1000000 --profile bob
 ```
 
-このトランザクションがフィルタにブロックされると開いているターミナルにエラーが表示されます。
+このトランザクションが制限にブロックされると開いているターミナルにエラーが表示されます。
 
 ```shell
 [STATUS] SCGUWZ...

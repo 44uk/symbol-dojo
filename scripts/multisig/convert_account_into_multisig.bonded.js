@@ -1,5 +1,5 @@
 /**
- * $ node scripts/multisig/convert_account_into_multisig.js
+ * $ node scripts/multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__
  */
 const nem = require('nem2-sdk');
 const util = require('../util');
@@ -7,6 +7,12 @@ const util = require('../util');
 const url = process.env.API_URL || 'http://localhost:3000';
 const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
+  nem.NetworkType.MIJIN_TEST
+);
+
+// 引数の秘密鍵のアカウントをマルチシグ候補にする
+const toBeMultisig = nem.Account.createFromPrivateKey(
+  process.argv[2],
   nem.NetworkType.MIJIN_TEST
 );
 
@@ -28,14 +34,9 @@ const showAccountInfo = (account, label = null) => {
 }
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
-const accounts = [...Array(3)].map((_, idx) => {
+const cosigners = [...Array(2)].map((_, idx) => {
   return nem.Account.generateNewAccount(nem.NetworkType.MIJIN_TEST);
 });
-
-// 1つ目のアカウントをマルチシグ候補にする
-const toBeMultisig = accounts[0];
-// それ以降は連署者候補とする
-const cosigners = accounts.slice(1);
 // 環境変数にセットしているアカウントも連署者として追加する
 cosigners.push(initiator);
 
@@ -64,23 +65,44 @@ const convertIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
-// 実際はAggregateTransaction.createBondedメソッドを使い連署アカウントに署名を求める。
-// 今回は連署アカウントの秘密鍵がわかっているのでそれらを利用して署名してしまう。
-const aggregateTx = nem.AggregateTransaction.createComplete(
+// 連署アカウントになることを承認するために署名が要求される。
+const aggregateTx = nem.AggregateTransaction.createBonded(
   nem.Deadline.create(),
   [ convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount) ],
   nem.NetworkType.MIJIN_TEST
 );
 
+const signedTx = toBeMultisig.sign(aggregateTx, process.env.GENERATION_HASH);
+
+cosigners.forEach(cosigner => {
+  util.listener(url, cosigner.address);
+});
+
 util.listener(url, toBeMultisig.address, {
   onOpen: () => {
-    // signTransactionWithCosignatoriesを使う
-    const signedTx = toBeMultisig.signTransactionWithCosignatories(
-      aggregateTx,
-      cosigners,
-      process.env.GENERATION_HASH
+    const hashLockTx = nem.HashLockTransaction.create(
+      nem.Deadline.create(),
+      nem.NetworkCurrencyMosaic.createRelative(10),
+      nem.UInt64.fromUint(480),
+      signedTx,
+      nem.NetworkType.MIJIN_TEST
     );
-    util.announce(url, signedTx);
+    const signedHashLockTx = toBeMultisig.sign(hashLockTx, process.env.GENERATION_HASH);
+    util.announce(url, signedHashLockTx)
   },
-  onConfirmed: (_, listener) => listener.close()
+  onConfirmed: (tx, listener) => {
+    if(tx.type === nem.TransactionType.LOCK) {
+      util.announceAggregateBonded(url, signedTx);
+    } else {
+      listener.close()
+    }
+  },
+  onAggregateBondedAdded: (aggTx) => {
+    // 各連署アカウントに署名要求を署名させる
+    const cosignatureTx = nem.CosignatureTransaction.create(aggTx)
+    cosigners.forEach(cosigner => {
+      const signedCosignatureTx = cosigner.signCosignatureTransaction(cosignatureTx)
+      util.announceAggregateBondedCosignature(url, signedCosignatureTx)
+    });
+  }
 });

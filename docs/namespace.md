@@ -1,6 +1,6 @@
 # ネームスペース
 
-ネームスペースとはその名の通りで名前を持った定義です。
+ネームスペースとはその名の通り名前を持った定義です。
 
 - [ネームスペース — NEM Developer Center](https://nemtech.github.io/ja/concepts/namespace.html)
 
@@ -22,16 +22,21 @@
 
 ネームスペースにはレンタル期間(ブロック数)があり、ルートネームスペースに適用されます。
 
-つまりサブネームスペースの有効期間はルートネームスペースのレンタル期間と同じです。
+つまりサブネームスペースの有効期間はルートネームスペースのレンタル期間と同じになります。
 
 
 ## ネームスペースの用途
 
 ネームスペースは各レベルごとにアカウントのエイリアスまたはモザイクのエイリアス(別名)として割り当てることができます。
 
-例えば`foo`をアカウントAへ、`foo.bar`をアカウントBへ、`foo.bar.baz`をモザイクに紐付けるということができます。
+- `hoge`というネームスペースとあるアカウントに紐付けると、ネームスペースからアドレスを取得できるようになります。
+- `huga`というネームスペースとあるモザイクに紐付けると、ネームスペースからモザイクを取得できるようになります。
 
-基軸モザイクである`cat.currency`もモザイク定義に`cat.currency`というネームスペースが割当てられています。
+また、ネームスペースのレベルごとに異なる紐づけも可能です。
+
+例えば`foo`をアカウントAへ、`foo.bar`をアカウントBへ、`foo.bar.baz`をモザイクに紐付けるということもできます。
+
+基軸モザイクである`cat.currency`もモザイクに`cat.currency`というネームスペースが割当てられています。
 
 エイリアスとして利用するには、後述しているエイリアスリンクトランザクションを使います。
 
@@ -44,7 +49,7 @@
 
 第二引数でレンタル期間を指定できます。(ない場合は100ブロック)
 
-なお、現時点での仕様だと思われますが、`1 block`につき`1 cat.currency`必要です。
+なお、レンタル期間`1 block`につき`1 cat.currency`が必要です。
 
 ```shell
 $ node scripts/namespace/register_namespace.js test123
@@ -52,7 +57,7 @@ Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
 Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
 Namespace: test123 (ff87cc82daab0bbf)
 Endpoint:  http://localhost:3000/namespace/ff87cc82daab0bbf
-Blocks:    10000
+Blocks:    100
 
 connection open
 [Transaction announced]
@@ -119,6 +124,8 @@ if (child) {
 サブネームスペースを作りたい場合は`test123.sub123`のような引数を渡してください。
 
 この際、先にルートネームスペースが承認済みである必要があります。
+
+なお、サブネームスペースの取得には1つごとに`1 cat.currency`が必要です。
 
 
 ## ネームスペースをアグリゲートトランザクションで取得

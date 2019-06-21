@@ -5,7 +5,7 @@ const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
@@ -15,13 +15,14 @@ const debtor = nem.Account.createFromPrivateKey(
   nem.NetworkType.MIJIN_TEST
 );
 
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('Debtor:    %s', debtor.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, debtor.address.plain());
 console.log('');
 
-const fromInitiaterTx = nem.TransferTransaction.create(
+// 相手へ請求のメッセージを送信
+const frominitiatorTx = nem.TransferTransaction.create(
   nem.Deadline.create(),
   debtor.address,
   [],
@@ -29,25 +30,27 @@ const fromInitiaterTx = nem.TransferTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
+// 相手が自分へモザイクを送るトランザクションを作成
 const fromDebtorTx = nem.TransferTransaction.create(
   nem.Deadline.create(),
-  initiater.address,
+  initiator.address,
   [nem.NetworkCurrencyMosaic.createRelative(10)],
   nem.EmptyMessage,
   nem.NetworkType.MIJIN_TEST
 );
 
+// 配列に入れた順序で実行されていくので、メッセージ送信を先にする
 const aggregateTx = nem.AggregateTransaction.createBonded(
   nem.Deadline.create(),
   [
-    fromInitiaterTx.toAggregate(initiater.publicAccount),
+    frominitiatorTx.toAggregate(initiator.publicAccount),
     fromDebtorTx.toAggregate(debtor.publicAccount)
   ],
   nem.NetworkType.MIJIN_TEST
 );
-const signedTx = initiater.sign(aggregateTx);
+const signedTx = initiator.sign(aggregateTx, process.env.GENERATION_HASH);
 
-util.listener(url, initiater.address, {
+util.listener(url, initiator.address, {
   onConfirmed: (info) => {
     // LockFundが承認されたらアグリゲートトランザクションを発信
     if(info.type == nem.TransactionType.LOCK) {
@@ -89,7 +92,7 @@ util.listener(url, debtor.address, {
     signedTx,
     nem.NetworkType.MIJIN_TEST
   );
-  const signedLockFundsTx = initiater.sign(lockFundsTx);
 
+  const signedLockFundsTx = initiator.sign(lockFundsTx, process.env.GENERATION_HASH);
   util.announce(url, signedLockFundsTx)
 })();

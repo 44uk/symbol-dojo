@@ -1,10 +1,16 @@
 const nem = require('nem2-sdk');
 
 exports.listener = (url, address, hooks = {}) => {
-  const excerptAddress = address.plain().slice(0,6)
+  const excerptAddress = address.plain().slice(0,6);
   const nextObserver = (label, hook) => info => {
-    console.log('[%s] %s...\n%s\n', label, excerptAddress, JSON.stringify(info));
-    typeof hook === 'function' && hook(info, listener);
+    try {
+      console.log('[%s] %s...\n%s\n', label, excerptAddress, JSON.stringify(info));
+    }  catch (error) {
+      // console.error({error});
+    }
+    finally {
+      typeof hook === 'function' && hook(info, listener);
+    }
   };
   const errorObserver = err => console.error(err);
   // リスナーオブジェクトを用意

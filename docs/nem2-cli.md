@@ -29,7 +29,7 @@ Private Key:    490C117FE03A265FF9D0CEEB7DD59098867B078A86B04E1E1E1A93CF141029A1
 
 `--profile`オプションで、プロファイルに`alice`と名付けました。
 
-このプロファイルを使ってコマンドを実行するときには`--profile alice`を指定します。
+今後このプロファイルを使ってコマンドを実行するときには`--profile alice`を指定します。
 
 ```shell
 $ nem2-cli account info --profile alice
@@ -46,7 +46,7 @@ $ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile 
 
 なお、`--profile`オプションを省略した場合は`default`という名前が使用されます。
 
-今回は登録していませんが、`--profile`を指定しなかった場合は`default`で登録したプロファイルで動作します。
+今回は登録していませんが、`--profile`を指定しなかった場合は`default`という名前で登録したプロファイルで動作します。
 
 
 ### プロファイルの登録(ローカルにネットワークを構築している場合)
@@ -55,7 +55,7 @@ $ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile 
 
 ここでは初期分配されたアカウントを登録してみましょう。
 
-`addresses.yml`の`nemesis_addresses:`セクションのうち、前２２件から任意のアカウントの秘密鍵を選んでください。
+`addresses.yml`の`nemesis_addresses:`セクションのうち、前22件から任意のアカウントの秘密鍵を選んでください。
 
 ```shell
 $ nem2-cli profile create -n MIJIN_TEST -p B0C900E7E4270B60BB0B1199205A190F77BD1D0BBCD1B305E8790290A08C23F6 -u http://localhost:3000 --profile nemesis1
@@ -110,7 +110,7 @@ Signer:  294D4385F2AB9EA0D3A4070C9219784E269A96EDEB8A1679EA938BE639509826
 
 ### 初期分配アカウントの秘密鍵がわからない場合(用意されたネットワークを使用している場合など)
 
-公開されているネットワークを使用している場合は、そのネットワーク管理者から入手してください。
+公開されているネットワークを使用している場合は、そのネットワーク管理者から`alice`のアカウントへ`10000 cat.currency`を入手してください。
 
 ネットワーク提供者が蛇口を公開している場合はそれを利用してください。
 
@@ -133,7 +133,7 @@ Signer:  294D4385F2AB9EA0D3A4070C9219784E269A96EDEB8A1679EA938BE639509826
 
 ```shell
 $ nem2-cli account info --profile bob
-Account:        SCC3Z7-YEUYED-FWBRMS-V7OO3I-XPIURD-65EV2U-MB24
+Account:        SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT
 -------------------------------------------------------
 
 Address:        SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT
@@ -152,6 +152,8 @@ Mosaics
 `Mosaics`の部分に受け取ったモザイクが表示されました。
 
 16進数のモザイクIDで表示されるので若干わかりにくいですが、`7d09bf306c0b2e38`は`cat.currency`を表します。
+
+(`7d09bf306c0b2e38`というモザイクIDはネットワークごとに異なる場合があります)
 
 
 ## アカウントのモニタリング
@@ -173,7 +175,7 @@ $ nem2-cli monitor status --profile alice
 
 各種エラーメッセージの内容は以下で確認できます。
 
-- [REST API — NEM Developer Center](https://nemtech.github.io/api.html#status-errors)
+- [REST API — NEM Developer Center](https://nemtech.github.io/ja/api.html#status-errors)
 
 試しに`alice`が持ち合わせていない量のモザイクを送ろうとしてみましょう。
 
@@ -205,6 +207,24 @@ Deadline: 2019-03-22 00:36:06.648
 `Failure_Core_Insufficient_Balance`は残高不足の意味です。
 
 トランザクションのエラーはこのようにしてモニタリング(`websocket`を経由)して取得します。
+
+APIサーバへのトランザクション送信は残高不足などのトランザクションに不備があっても必ず成功レスポンスを返却します。
+
+そのトランザクションがネットワークに受理されたかどうかはモニタリングでエラーを捕捉するか、
+
+`http://localhost:3000/transaction/<TRANSACTION_HASH>/status` にアクセスすることで状態を確認することができます。
+
+```json
+{
+    hash: "1813FDF4A9AA43147AB5B035140A2D321ABA4674494C8D1A4F902A551BE07739",
+    status: "Failure_Core_Insufficient_Balance",
+    deadline: [
+        2620885366,
+        23
+    ],
+    group: "failed"
+}
+```
 
 
 ### 未承認トランザクションの捕捉
@@ -238,7 +258,7 @@ TransferTransaction: Recipient:SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT Me
 
 ### 承認トランザクションの捕捉
 
-同様に、トランザクションが承認されたときの情報を取得してみます。
+同様にトランザクションが承認されたときの情報を取得してみます。
 
 ```shell
 $ nem2-cli monitor confirmed --profile bob

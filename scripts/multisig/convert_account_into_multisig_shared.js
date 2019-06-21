@@ -5,7 +5,7 @@ const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
@@ -13,8 +13,8 @@ const initiater = nem.Account.createFromPrivateKey(
 const minApprovalDelta = 1; // 1人の承認でよい
 const minRemovalDelta = 2; // 連署者を外すには2人に承認が必要
 
-console.log('Initiater: %s', initiater.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('initiator: %s', initiator.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('');
 
 const showAccountInfo = (account, label = null) => {
@@ -37,7 +37,7 @@ const toBeMultisig = accounts[0]
 // それ以降は連署者候補とする
 const cosigners = accounts.slice(1)
 // 環境変数にセットしているアカウントも連署者として追加する
-cosigners.push(initiater)
+cosigners.push(initiator)
 
 // マルチシグアカウントとするアカウント情報を表示
 showAccountInfo(toBeMultisig, 'Multisig Account')
@@ -66,7 +66,7 @@ const convertIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
 
 util.listener(url, toBeMultisig.address, {
   onOpen: () => {
-    const signedTx = toBeMultisig.sign(convertIntoMultisigTx);
+    const signedTx = toBeMultisig.sign(convertIntoMultisigTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
   },
   onConfirmed: (_, listener) => listener.close()

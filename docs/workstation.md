@@ -1,53 +1,25 @@
 # テスト用ネットワークの環境構築
 
-お手元のマシン上にローカルネットワーク環境を構築して学習する場合に行います。
+お手元のマシンにローカルネットワーク環境を構築して学習する場合に行います。
 
 - [ワークステーションのセットアップ — NEM Developer Center](https://nemtech.github.io/ja/getting-started/setup-workstation.html)
 
-既に用意されたネットワークを使用する場合はこの作業をスキップできます。
+既に用意されたネットワークを使用する場合はこの作業をする必要はありません。
+
+外部ネットワークを使用する場合は、以降のドキュメントでは接続するURLのホストとポートは各自の環境で読み替えてください。
 
 APIエンドポイントはデフォルト設定で`http://localhost:3000`です。
-
-用意されたネットワークを使用する場合は、以降のドキュメントでは接続するURLのホストとポートは各自の環境で読み替えてください。
-
-
-## 開発用プライベートネットワーク
-
-NEM財団と有志によるネットワークが稼働しています。
-
-ローカルネットワークと立ち上げることが困難である場合は以下のネットワークを利用することができます。
-
-ただし、各ネットワークの管理者の都合により稼働が止まったり、チェーンが初期化される場合があります。
-
-
-### NEM Foundation's Catapult Testnet Web Wallet
-
-- [エンドポイント 13.114.200.132](http://13.114.200.132:3000)
-- [エンドポイント 40.90.163.184](http://40.90.163.184:3000)
-- [エンドポイント 52.194.207.217](http://52.194.207.217:3000)
-- [エンドポイント 47.107.245.217](http://47.107.245.217:3000)
-- [エクスプローラ](http://40.90.163.184:8000/#/blocks/0)
-- [フォーセット](http://nf-catapult-testnet.herokuapp.com/)
-- [ウォレット](http://nfwallet.z31.web.core.windows.net/)
-
-
-### catapult48gh23s.xyz
-
-- [APIエンドポイント](http://catapult.48gh23s.xyz:3000)
-- [エクスプローラ](http://explorer.48gh23s.xyz)
-- [フォーセット](https://faucet-cow.azurewebsites.net/)
-- [ウォレット](http://wallet.48gh23s.xyz/)
 
 
 ## catapult-service-bootstrapの起動
 
 任意の場所にアーカイブを展開してください。(`git`が利用できる場合はクローンしてもよいです)
 
-- https://github.com/tech-bureau/catapult-service-bootstrap/archive/v0.3.0.zip
+- https://github.com/tech-bureau/catapult-service-bootstrap/archive/v0.4.0.zip
 - [tech\-bureau/catapult\-service\-bootstrap: Starter project to get developers up and running with a running Catapult Service](https://github.com/tech-bureau/catapult-service-bootstrap)
 
 ```shell
-$ git clone https://github.com/tech-bureau/catapult-service-bootstrap.git -b v0.3.0
+$ git clone https://github.com/tech-bureau/catapult-service-bootstrap.git -b v0.4.0
 ```
 
 展開したディレクトリに移動して、`docker-compose`コマンドの実行でコンテナクラスタを立ち上げます。
@@ -168,7 +140,7 @@ APIにアクセスして確認してみましょう。
 ```shell
 $ cd scripts
 $ node -e "let uint64 = require('nem2-sdk').UInt64;console.log(new uint64([3863990592,95248]).compact())"
-409090909000000 # 整数値による表現
+409090909000000 # 絶対値による表現
 ```
 
 `409,090,909.000,000 cat.currency`が配布されていることが確認できました。
@@ -180,10 +152,14 @@ $ node -e "let uint64 = require('nem2-sdk').UInt64;console.log(new uint64([38639
 
 動作確認でつまづいた場合、以下を試してみてください。
 
+また、解決しない場合に助けを求めたり、詳しい原因を調べたりする場合はログが役に立ちます。
+
+`docker-compose logs` でログを表示して、エラーの出力を確認してみてください。
+
 
 ### ブロック生成が進まない
 
-ブロック情報の破損、設定ファイルの食い違いなどの問題があるようです。
+ブロック情報の破損、設定ファイルの食い違いなどの問題が発生することがあるようです。
 
 `./clean-all`というスクリプトを実行すると、環境を初期化できます。
 
@@ -224,7 +200,7 @@ APIサーバの起動に失敗している可能性があります。
 
 次に`docker-compose up`した際に、残した初期キーペアが使用されます。
 
-```bash
+```shell
 #!/bin/bash
 find data/* | grep -v "README.md" | xargs rm -rf
 find build/nemesis/* | grep -v "README.md" | xargs rm -rf
@@ -232,4 +208,25 @@ find build/nemesis/* | grep -v "README.md" | xargs rm -rf
 # find build/generated-addresses/* | grep -v "README.md" | xargs rm -rf
 find build/catapult-config/* | grep -v "README.md" | xargs rm -rf
 find build/state/* | grep -v "README.md" | xargs rm -rf
+```
+
+
+### 何度cleanしても動作しない
+
+`alpaca`や`bison`などの過去バージョンのイメージが残ってしまっていて、イメージの組み合わせに齟齬が起きている場合があります。
+
+一度イメージとコンテナもすべて削除してからやり直してみてください。
+
+```shell
+#!/bin/bash
+docker rmi -f \
+  catapult-service-bootstrap_api-node-0 \
+  catapult-service-bootstrap_peer-node-0 \
+  catapult-service-bootstrap_peer-node-1 \
+  catapult-service-bootstrap_api-node-0-nemgen \
+  catapult-service-bootstrap_peer-node-0-nemgen \
+  catapult-service-bootstrap_peer-node-1-nemgen \
+  catapult-service-bootstrap_generate-configs \
+  catapult-service-bootstrap_store-addresses
+docker container prune -f
 ```

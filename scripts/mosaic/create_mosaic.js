@@ -5,17 +5,17 @@ const nem = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiater = nem.Account.createFromPrivateKey(
+const initiator = nem.Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
   nem.NetworkType.MIJIN_TEST
 );
 
 const blocks = process.argv[2];
 const nonce = nem.MosaicNonce.createRandom();
-const mosId = nem.MosaicId.createFromNonce(nonce, initiater.publicAccount);
+const mosId = nem.MosaicId.createFromNonce(nonce, initiator.publicAccount);
 
-console.log('Initiater:    %s', initiater.address.pretty());
-console.log('Endpoint:     %s/account/%s', url, initiater.address.plain());
+console.log('initiator:    %s', initiator.address.pretty());
+console.log('Endpoint:     %s/account/%s', url, initiator.address.plain());
 console.log('Mosaic Nonce: %s', nonce.toDTO());
 console.log('Mosaic Hex:   %s', mosId.toHex());
 console.log('Blocks:       %s', blocks ? blocks : 'Infinity');
@@ -36,9 +36,10 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
   nem.NetworkType.MIJIN_TEST
 );
 
-util.listener(url, initiater.address, {
+util.listener(url, initiator.address, {
   onOpen: () => {
-    const signedTx = initiater.sign(definitionTx);
+    const signedTx = initiator.sign(definitionTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
-  }
+  },
+  onConfirmed: (_, listener) => listener.close()
 });

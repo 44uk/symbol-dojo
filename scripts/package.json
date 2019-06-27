@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "description": "nem2-dojo example scripts",
   "keywords": [
-    "nem2"
+    "nem",
+    "nem2",
+    "catapult"
   ],
   "repository": {
     "type": "git",

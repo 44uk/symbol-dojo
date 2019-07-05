@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "js-sha3": "^0.8.0",
-    "nem2-sdk": "0.12.3",
+    "nem2-sdk": "0.13.0",
     "ripemd160": "^2.0.2",
     "rxjs": "^6.5.2"
   }

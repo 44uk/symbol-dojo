@@ -1,22 +1,32 @@
 /**
  * $ node scripts/multisig/initiate_from_cosigner_without_cosigner.js MULTISIG_PUBLIC_KEY RECIPIENT_ADDRESS AMOUNT
  */
-const nem = require('nem2-sdk');
+const {
+  Account,
+  PublicAccount,
+  Address,
+  NetworkType,
+  NetworkCurrencyMosaic,
+  TransferTransaction,
+  AggregateTransaction,
+  PlainMessage,
+  Deadline
+} = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiator = nem.Account.createFromPrivateKey(
+const initiator = Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
-const multisig = nem.PublicAccount.createFromPublicKey(
+const multisig = PublicAccount.createFromPublicKey(
   process.argv[2],
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
-const recipient = nem.Address.createFromRawAddress(process.argv[3]);
-const amount = parseInt(process.argv[4] || '10');
+const recipient = Address.createFromRawAddress(process.argv[3]);
+const amount = parseInt(process.argv[4] || '0');
 
-console.log('initiator:  %s', initiator.address.pretty());
+console.log('Initiator:  %s', initiator.address.pretty());
 console.log('Endpoint:   %s/account/%s', url, initiator.address.plain());
 console.log('Multisig:   %s', multisig.address.pretty());
 console.log('Endpoint:   %s/account/%s', url, multisig.address.plain());
@@ -25,24 +35,24 @@ console.log('Recipient:  %s', recipient.pretty());
 console.log('Endpoint:   %s/account/%s', url, recipient.plain());
 console.log('');
 
-const transferTx = nem.TransferTransaction.create(
-  nem.Deadline.create(),
+const transferTx = TransferTransaction.create(
+  Deadline.create(),
   recipient,
-  [nem.NetworkCurrencyMosaic.createRelative(amount)],
-  nem.EmptyMessage,
-  nem.NetworkType.MIJIN_TEST
+  [NetworkCurrencyMosaic.createRelative(amount)],
+  new PlainMessage('Transaction from multisig account signed by cosigner.'),
+  NetworkType.MIJIN_TEST
 );
 
-// 1-of-m のマルチシグなら他に署名者が不要なのでコンプリートを使える
-const multisigTx = nem.AggregateTransaction.createComplete(
-  nem.Deadline.create(),
+// 1-of-m のマルチシグなら他に署名者が不要なのでコンプリートで送信できる
+const multisigTx = AggregateTransaction.createComplete(
+  Deadline.create(),
   [transferTx.toAggregate(multisig)],
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 util.listener(url, initiator.address, {
   onOpen: () => {
-    const signedTx = initiator.sign(multisigTx);
+    const signedTx = initiator.sign(multisigTx, process.env.GENERATION_HASH);
     util.announce(url, signedTx);
   }
 });

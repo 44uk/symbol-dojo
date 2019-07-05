@@ -1,10 +1,10 @@
 # モザイクとは
 
-`nem`ネットワーク上に通貨を定義する機能です。
+`nem`ネットワーク上に独自の通貨を定義する機能です。
 
 - [モザイク — NEM Developer Center](https://nemtech.github.io/ja/concepts/mosaic.html)
 
-基軸モザイクである`cat.currency`もモザイクで、それと同等の定義となります。
+基軸モザイクである`cat.currency`もモザイクで、定義上は同等な存在となります。
 
 モザイクには作成時に設定できる定義があります。
 
@@ -25,7 +25,11 @@
 
 ## モザイクの用途
 
-モザイクは独自のサービス用通貨として、保有によるフラグ制御や値の表現として、発行者と受信者間だけでやり取りされる権利の表現としてなど、
+モザイクは単なる通貨としてでなく、意味付け次第でいろいろな使い方ができます。
+
+- モザイクは独自のサービス用通貨
+- 保有によるフラグ制御や値の表現
+- 発行者と受信者間だけでやり取りされる権利の表現
 
 モザイクをどう使うかはそのサービス提供者の手腕が問われます。
 
@@ -42,23 +46,24 @@
 
 ```javascript
 $ node scripts/mosaic/create_mosaic.js 10000
-Initiater:    SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:     http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
-Mosaic Nonce: 114,2,14,52
-Mosaic Hex:   75caa6b686e7e7ba
-Endpoint:     http://localhost:3000/mosaic/75caa6b686e7e7ba
+initiator:    SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+Endpoint:     http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+Mosaic Nonce: 106,164,82,29
+Mosaic Hex:   6ffb0f4308e810f6
+Blocks:       10000
+Endpoint:     http://localhost:3000/mosaic/6ffb0f4308e810f6
 
 connection open
 [Transaction announced]
-Endpoint: http://localhost:3000/transaction/164AB63F3C01DFEB7AB07D9D55EE825A158D3974008672DE7D7386292F33E743
-Hash:     164AB63F3C01DFEB7AB07D9D55EE825A158D3974008672DE7D7386292F33E743
-Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
+Endpoint: http://localhost:3000/transaction/9F27D1F3ACF54FAAE5A14929109E0BA7F1C08D6128720E58CEEE7E3793AAB03A
+Hash:     9F27D1F3ACF54FAAE5A14929109E0BA7F1C08D6128720E58CEEE7E3793AAB03A
+Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
-[UNCONFIRMED] SCGUWZ...
-{"type":16717,"networkType":144,"version":3,"deadline":{"value":"2019-03-23T14:29:05.013"},"fee":{"lower":0,"higher":0},"signature":"8CC42F39B802038A2D06ADC46C4EFDE17B6C1330779B3AC913D310BCAFC5AA85C2EF35230A4255C37D12079739699EF9E3148F93120B6B94F7F7BE47C0377F03","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"164AB63F3C01DFEB7AB07D9D55EE825A158D3974008672DE7D7386292F33E743","merkleComponentHash":"164AB63F3C01DFEB7AB07D9D55EE825A158D3974008672DE7D7386292F33E743"},"nonce":873333362,"mosaicId":{"id":{"lower":2263345082,"higher":1976215222}},"mosaicProperties":{"divisibility":0,"duration":{"lower":10000,"higher":0},"supplyMutable":true,"transferable":true,"levyMutable":false}}
+[UNCONFIRMED] SAFPLK...
+{"transaction":{"type":16717,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063214264,23],"signature":"57454E59580739CD46FB79036DE865713895BBF1578C7030F8456AB997063C0C8F63BBA11B59E9D9F67065B0AF76BAB4F83F79A99D28EA045D4BDAD03AE6EE0D","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","nonce":491955306,"mosaicId":{"id":[149426422,1878724419]},"properties":[{"id":0,"value":[3,0]},{"id":1,"value":[0,0]},{"id":2,"value":[10000,0]}]}}
 
-[CONFIRMED] SCGUWZ...
-{"type":16717,"networkType":144,"version":3,"deadline":{"value":"2019-03-23T14:29:05.013"},"fee":{"lower":0,"higher":0},"signature":"8CC42F39B802038A2D06ADC46C4EFDE17B6C1330779B3AC913D310BCAFC5AA85C2EF35230A4255C37D12079739699EF9E3148F93120B6B94F7F7BE47C0377F03","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":4653,"higher":0},"hash":"164AB63F3C01DFEB7AB07D9D55EE825A158D3974008672DE7D7386292F33E743","merkleComponentHash":"164AB63F3C01DFEB7AB07D9D55EE825A158D3974008672DE7D7386292F33E743"},"nonce":873333362,"mosaicId":{"id":{"lower":2263345082,"higher":1976215222}},"mosaicProperties":{"divisibility":0,"duration":{"lower":10000,"higher":0},"supplyMutable":true,"transferable":true,"levyMutable":false}}
+[CONFIRMED] SAFPLK...
+{"transaction":{"type":16717,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063214264,23],"signature":"57454E59580739CD46FB79036DE865713895BBF1578C7030F8456AB997063C0C8F63BBA11B59E9D9F67065B0AF76BAB4F83F79A99D28EA045D4BDAD03AE6EE0D","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","nonce":491955306,"mosaicId":{"id":[149426422,1878724419]},"properties":[{"id":0,"value":[3,0]},{"id":1,"value":[0,0]},{"id":2,"value":[10000,0]}]}}
 ```
 
 承認されたらURLで確認してみましょう。
@@ -66,17 +71,17 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 APIのレスポンスだとすこし見にくいと思うので`nem2-cli`でも確認してみましょう。
 
 ```shell
-$ nem2-cli mosaic info -h 75caa6b686e7e7ba --profile alice
-Mosaic: Hex:    75caa6b686e7e7ba
-Uint64:         [ 2263345082, 1976215222 ]
+$ nem2-cli mosaic info -h 6ffb0f4308e810f6 --profile alice
+Mosaic:	Hex:	6ffb0f4308e810f6
+Uint64:		[ 149426422, 1878724419 ]
 
-divisibility:   0
-transferable:   true
-supply mutable: true
-block height:   4653
-duration:       10000
-owner:          SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-supply:         0
+divisibility:	0
+transferable:	true
+supply mutable:	true
+block height:	788
+duration:	10000
+owner:		SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+supply:		0
 ```
 
 この時点ではまだ供給量が設定されていません。
@@ -90,82 +95,84 @@ supply:         0
 モザイクIDには直前に作成したモザイクの16進数文字列を指定してください。
 
 ```shell
-$ node scripts/mosaic/mutate_mosaic_supply.js 75caa6b686e7e7ba 10000 add
-Initiater:  SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:   http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
-Mosaic Hex: 75caa6b686e7e7ba
+$ node scripts/mosaic/mutate_mosaic_supply.js 6ffb0f4308e810f6 10000 add
+initiator:  SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+Endpoint:   http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+Mosaic Hex: 6ffb0f4308e810f6
 Supply:     10000
 Delta:      add
-Endpoint:   http://localhost:3000/mosaic/75caa6b686e7e7ba
+Endpoint:   http://localhost:3000/mosaic/6ffb0f4308e810f6
 
 connection open
 [Transaction announced]
-Endpoint: http://localhost:3000/transaction/5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7
-Hash:     5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7
-Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
+Endpoint: http://localhost:3000/transaction/DA19F9479B3B7623005D6C2D9EC1A460DB5285FA039B9DDE4B5D7DDFA806F9E3
+Hash:     DA19F9479B3B7623005D6C2D9EC1A460DB5285FA039B9DDE4B5D7DDFA806F9E3
+Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
-[UNCONFIRMED] SCGUWZ...
-{"type":16973,"networkType":144,"version":2,"deadline":{"value":"2019-03-23T16:30:59.813"},"fee":{"lower":0,"higher":0},"signature":"2523C329452B031AA2DB767D6FB66D6BF33536789E133ACCCC413FD3BA737502118F7D368F016B6085BF585A8E5FAD6E17155D6DC14FE4F5497FE21361A64E00","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7","merkleComponentHash":"5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7"},"mosaicId":{"id":{"lower":2263345082,"higher":1976215222}},"direction":1,"delta":{"lower":10000,"higher":0}}
+[UNCONFIRMED] SAFPLK...
+{"transaction":{"type":16973,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063606945,23],"signature":"E9410E6BDC6B193C1986879ABF1D9ECE50E50F3397AE66087E09BB97B82102A27B87F88D4419D0A3A409EC0B3302A7CA33D800D2253DA22BC09051EF5F280C00","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"id":[149426422,1878724419]},"direction":1,"delta":[10000,0]}}
 
-[CONFIRMED] SCGUWZ...
-{"type":16973,"networkType":144,"version":2,"deadline":{"value":"2019-03-23T16:30:59.813"},"fee":{"lower":0,"higher":0},"signature":"2523C329452B031AA2DB767D6FB66D6BF33536789E133ACCCC413FD3BA737502118F7D368F016B6085BF585A8E5FAD6E17155D6DC14FE4F5497FE21361A64E00","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":4894,"higher":0},"hash":"5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7","merkleComponentHash":"5678903516A4AD7F601489779FB74D85F34C38FCF3B1A9BDD0E548FE4DFF23E7"},"mosaicId":{"id":{"lower":2263345082,"higher":1976215222}},"direction":1,"delta":{"lower":10000,"higher":0}}
+[CONFIRMED] SAFPLK...
+{"transaction":{"type":16973,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063606945,23],"signature":"E9410E6BDC6B193C1986879ABF1D9ECE50E50F3397AE66087E09BB97B82102A27B87F88D4419D0A3A409EC0B3302A7CA33D800D2253DA22BC09051EF5F280C00","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"id":[149426422,1878724419]},"direction":1,"delta":[10000,0]}}
+
+
 ```
 
 承認されたらもう一度モザイクのリソースURLを確認するか`nem2-cli`で確認してみましょう。
 
 ```shell
-$ nem2-cli mosaic info -h 75caa6b686e7e7ba --profile alice
-Mosaic: Hex:    75caa6b686e7e7ba
-Uint64:         [ 2263345082, 1976215222 ]
+$ nem2-cli mosaic info -h 6ffb0f4308e810f6 --profile alice
+Mosaic:	Hex:	6ffb0f4308e810f6
+Uint64:		[ 149426422, 1878724419 ]
 
-divisibility:   0
-transferable:   true
-supply mutable: true
-block height:   4653
-duration:       10000
-owner:          SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-supply:         10000
+divisibility:	0
+transferable:	true
+supply mutable:	true
+block height:	788
+duration:	10000
+owner:		SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+supply:		10000
 ```
 
 今度は`supply`に指定した量が表示され、`alice`が持っているモザイクとしても現れました。
 
 ```shell
-$ nem2-cli account info --profile alice
-Account:        SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
+$ nem2-cli account info  --profile alice
+Account:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 -------------------------------------------------------
 
-Address:        SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-at height:      64
+Address:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+at height:	298
 
-PublicKey:      64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
-at height:      77
+PublicKey:	A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
+at height:	382
 
-Importance:     0
-at height:      0
+Importance:	0
+at height:	0
 
 Mosaics
-75caa6b686e7e7ba:       10000
-7d09bf306c0b2e38:       56079.909091
+3f859f237d36c3ae:	9058
+6ffb0f4308e810f6:	10000
 ```
 
-これでモザイクの定義は完了です。
+これでモザイクの定義が完了しました。
 
 
 ### コード解説
 
 ```javascript
-const definitionTx = nem.MosaicDefinitionTransaction.create(
-  nem.Deadline.create(),
+const definitionTx = MosaicDefinitionTransaction.create(
+  Deadline.create(),
   nonce,
   mosId,
-  nem.MosaicProperties.create({
-    duration: blocks ? nem.UInt64.fromUint(blocks) : undefined,
+  MosaicProperties.create({
+    duration: blocks ? UInt64.fromUint(blocks) : undefined,
     divisibility: 0,
     transferable: true,
     supplyMutable: true,
     levyMutable: false
   }),
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 ```
 
@@ -179,15 +186,15 @@ const definitionTx = nem.MosaicDefinitionTransaction.create(
 
 ```javascript
 const supplyType = delta === 'remove'
-  ? nem.MosaicSupplyType.Decrease
-  : nem.MosaicSupplyType.Increase
+  ? MosaicSupplyType.Decrease
+  : MosaicSupplyType.Increase
 
-const supplyTx = nem.MosaicSupplyChangeTransaction.create(
-  nem.Deadline.create(),
+const supplyTx = MosaicSupplyChangeTransaction.create(
+  Deadline.create(),
   mosId,
   supplyType,
-  nem.UInt64.fromUint(absSupply),
-  nem.NetworkType.MIJIN_TEST
+  UInt64.fromUint(absSupply),
+  NetworkType.MIJIN_TEST
 );
 ```
 
@@ -205,26 +212,28 @@ const supplyTx = nem.MosaicSupplyChangeTransaction.create(
 第二引数にはモザイク有効期間を引数にとりますが、指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
 ```shell
-$ node scripts/mosaic/create_mosaic_with_supply.js 999
-Initiater:    SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:     http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
-Mosaic Nonce: 3,69,180,223
-Mosaic Hex:   1d967f35b9c255dc
-Blocks:       10000
-Supply:       999
-Endpoint:     http://localhost:3000/mosaic/1d967f35b9c255dc
+$ node scripts/mosaic/create_mosaic_with_supply.js 1000
+initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+Nonce:     202,218,131,213
+MosaicHex: 29c7073f2019365f
+Blocks:    Infinity
+Supply:    1000
+Endpoint:  http://localhost:3000/mosaic/29c7073f2019365f
 
 connection open
 [Transaction announced]
-Endpoint: http://localhost:3000/transaction/B947E6116099ED98841AD041734F22A9972216E038226744C31A50804F69A556
-Hash:     B947E6116099ED98841AD041734F22A9972216E038226744C31A50804F69A556
-Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
+Endpoint: http://localhost:3000/transaction/1B3EE2AFC0236FE8A64A03AECBEC07253A82A29C8578C0657B60162323D39AC7
+Hash:     1B3EE2AFC0236FE8A64A03AECBEC07253A82A29C8578C0657B60162323D39AC7
+Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
-[UNCONFIRMED] SCGUWZ...
-{"type":16705,"networkType":144,"version":2,"deadline":{"value":"2019-03-25T08:41:08.827"},"fee":{"lower":0,"higher":0},"signature":"8BFDA54D2B4CA2FCCB4FA800B1203FBB10887614B1DB69FB89B8FEE2051E9DAB8D553B8215C9085454F76997C6BECF64FF8A04F42D7371562ACB23F098990807","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"B947E6116099ED98841AD041734F22A9972216E038226744C31A50804F69A556","merkleComponentHash":"B947E6116099ED98841AD041734F22A9972216E038226744C31A50804F69A556"},"innerTransactions":[{"type":16717,"networkType":144,"version":3,"deadline":{"value":"2019-03-25T08:41:08.827"},"fee":{"lower":0,"higher":0},"signature":"8BFDA54D2B4CA2FCCB4FA800B1203FBB10887614B1DB69FB89B8FEE2051E9DAB8D553B8215C9085454F76997C6BECF64FF8A04F42D7371562ACB23F098990807","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"nonce":3753133315,"mosaicId":{"id":{"lower":3116520924,"higher":496402229}},"mosaicProperties":{"divisibility":0,"duration":{"lower":10000,"higher":0},"supplyMutable":true,"transferable":true,"levyMutable":false}},{"type":16973,"networkType":144,"version":2,"deadline":{"value":"2019-03-25T08:41:08.827"},"fee":{"lower":0,"higher":0},"signature":"8BFDA54D2B4CA2FCCB4FA800B1203FBB10887614B1DB69FB89B8FEE2051E9DAB8D553B8215C9085454F76997C6BECF64FF8A04F42D7371562ACB23F098990807","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"mosaicId":{"id":{"lower":3116520924,"higher":496402229}},"direction":1,"delta":{"lower":999,"higher":0}}],"cosignatures":[]}
+[UNCONFIRMED] SAFPLK...
+{"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063915490,23],"signature":"1A29846388E6D90E1166B8853FD7F7BC00D3DE3000C60E88D498D46A18AF7D5DB34E707968098C354012CC2A4B8919441FE60046C13486BFAD8FCDF87D1C100B","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","transactions":[{"transaction":{"type":16717,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063915490,23],"signature":"1A29846388E6D90E1166B8853FD7F7BC00D3DE3000C60E88D498D46A18AF7D5DB34E707968098C354012CC2A4B8919441FE60046C13486BFAD8FCDF87D1C100B","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","nonce":3582188234,"mosaicId":{"id":[538523231,700909375]},"properties":[{"id":0,"value":[3,0]},{"id":1,"value":[0,0]}]}},{"transaction":{"type":16973,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063915490,23],"signature":"1A29846388E6D90E1166B8853FD7F7BC00D3DE3000C60E88D498D46A18AF7D5DB34E707968098C354012CC2A4B8919441FE60046C13486BFAD8FCDF87D1C100B","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"id":[538523231,700909375]},"direction":1,"delta":[1000,0]}}],"cosignatures":[]}}
 
-[CONFIRMED] SCGUWZ...
-{"type":16705,"networkType":144,"version":2,"deadline":{"value":"2019-03-25T08:41:08.827"},"fee":{"lower":0,"higher":0},"signature":"8BFDA54D2B4CA2FCCB4FA800B1203FBB10887614B1DB69FB89B8FEE2051E9DAB8D553B8215C9085454F76997C6BECF64FF8A04F42D7371562ACB23F098990807","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":9712,"higher":0},"hash":"B947E6116099ED98841AD041734F22A9972216E038226744C31A50804F69A556","merkleComponentHash":"B947E6116099ED98841AD041734F22A9972216E038226744C31A50804F69A556"},"innerTransactions":[{"type":16717,"networkType":144,"version":3,"deadline":{"value":"2019-03-25T08:41:08.827"},"fee":{"lower":0,"higher":0},"signature":"8BFDA54D2B4CA2FCCB4FA800B1203FBB10887614B1DB69FB89B8FEE2051E9DAB8D553B8215C9085454F76997C6BECF64FF8A04F42D7371562ACB23F098990807","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"nonce":3753133315,"mosaicId":{"id":{"lower":3116520924,"higher":496402229}},"mosaicProperties":{"divisibility":0,"duration":{"lower":10000,"higher":0},"supplyMutable":true,"transferable":true,"levyMutable":false}},{"type":16973,"networkType":144,"version":2,"deadline":{"value":"2019-03-25T08:41:08.827"},"fee":{"lower":0,"higher":0},"signature":"8BFDA54D2B4CA2FCCB4FA800B1203FBB10887614B1DB69FB89B8FEE2051E9DAB8D553B8215C9085454F76997C6BECF64FF8A04F42D7371562ACB23F098990807","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"mosaicId":{"id":{"lower":3116520924,"higher":496402229}},"direction":1,"delta":{"lower":999,"higher":0}}],"cosignatures":[]}
+[CONFIRMED] SAFPLK...
+{"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063915490,23],"signature":"1A29846388E6D90E1166B8853FD7F7BC00D3DE3000C60E88D498D46A18AF7D5DB34E707968098C354012CC2A4B8919441FE60046C13486BFAD8FCDF87D1C100B","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","transactions":[{"transaction":{"type":16717,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063915490,23],"signature":"1A29846388E6D90E1166B8853FD7F7BC00D3DE3000C60E88D498D46A18AF7D5DB34E707968098C354012CC2A4B8919441FE60046C13486BFAD8FCDF87D1C100B","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","nonce":3582188234,"mosaicId":{"id":[538523231,700909375]},"properties":[{"id":0,"value":[3,0]},{"id":1,"value":[0,0]}]}},{"transaction":{"type":16973,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063915490,23],"signature":"1A29846388E6D90E1166B8853FD7F7BC00D3DE3000C60E88D498D46A18AF7D5DB34E707968098C354012CC2A4B8919441FE60046C13486BFAD8FCDF87D1C100B","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"id":[538523231,700909375]},"direction":1,"delta":[1000,0]}}],"cosignatures":[]}}
 ```
 
-前述の作業を一括で行っているだけなので省略しますが、作成されたモザイクの定義と供給量の存在を確認してみてください。
+前述の作業をアグリゲートトランザクションを用いて一括で行っているだけなので詳細は省略します。
+
+作成されたモザイクの定義と供給量の存在を確認してみてください。

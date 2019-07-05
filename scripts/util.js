@@ -1,4 +1,7 @@
-const nem = require('nem2-sdk');
+const {
+  Listener,
+  TransactionHttp,
+} = require('nem2-sdk');
 
 exports.listener = (url, address, hooks = {}) => {
   const excerptAddress = address.plain().slice(0,6);
@@ -14,7 +17,7 @@ exports.listener = (url, address, hooks = {}) => {
   };
   const errorObserver = err => console.error(err);
   // リスナーオブジェクトを用意
-  const listener = new nem.Listener(url);
+  const listener = new Listener(url);
   // リスナーを開いて接続を試みる
   listener.open().then(() => {
     hooks.onOpen && hooks.onOpen(listener);
@@ -40,19 +43,19 @@ exports.listener = (url, address, hooks = {}) => {
 
 // 以下は発信時に呼び出す`transactionHttp`のメソッドが異なるだけです。
 exports.announce = (url, tx, ...subscriber) => {
-  const transactionHttp = new nem.TransactionHttp(url)
+  const transactionHttp = new TransactionHttp(url)
   const subscription = transactionHttp.announce(tx)
   announceUtil(subscription, url, tx, ...subscriber)
 }
 
 exports.announceAggregateBonded = (url, tx, ...subscriber) => {
-  const transactionHttp = new nem.TransactionHttp(url)
+  const transactionHttp = new TransactionHttp(url)
   const subscription = transactionHttp.announceAggregateBonded(tx)
   announceUtil(subscription, url, tx, ...subscriber)
 }
 
 exports.announceAggregateBondedCosignature = (url, tx, ...subscriber) => {
-  const transactionHttp = new nem.TransactionHttp(url)
+  const transactionHttp = new TransactionHttp(url)
   const subscription = transactionHttp.announceAggregateBondedCosignature(tx)
   announceUtil(subscription, url, tx, ...subscriber)
 }

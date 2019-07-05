@@ -1,47 +1,56 @@
 /**
  * $ node scripts/filter/address.js SDPF2RAQ6CUSOHCJD5U7YWRYF7Y3GRXNKTBL5C2V block add
  */
-const nem = require('nem2-sdk');
+const {
+  Account,
+  NetworkType,
+  Address,
+  PropertyType,
+  PropertyModificationType,
+  AccountPropertyModification,
+  AccountPropertyTransaction,
+  Deadline
+} = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiator = nem.Account.createFromPrivateKey(
+const initiator = Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 const rawAddress = process.argv[2];
 const propertyType = process.argv[3] || 'block';
 const modType = process.argv[4] || 'add';
-const address = nem.Address.createFromRawAddress(rawAddress);
+const address = Address.createFromRawAddress(rawAddress);
 
-console.log('initiator: %s', initiator.address.pretty());
+console.log('Initiator: %s', initiator.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
-console.log('Block:     %s', address.pretty());
+console.log('Subject:   %s', address.pretty());
 console.log('Property:  %s', propertyType);
 console.log('Modify:    %s', modType);
-console.log('Endpoint:  %s/account/%s/properties', url, initiator.address.plain());
+console.log('Endpoint:  %s/account/%s/restrictions', url, initiator.publicKey);
 console.log('Endpoint:  %s/account/%s', url, address.plain());
 console.log('');
 
 const propType = propertyType === 'allow'
-  ? nem.PropertyType.AllowAddress
-  : nem.PropertyType.BlockAddress
+  ? PropertyType.AllowAddress
+  : PropertyType.BlockAddress
 
 const propModType = modType === 'remove'
-  ? nem.PropertyModificationType.Remove
-  : nem.PropertyModificationType.Add
+  ? PropertyModificationType.Remove
+  : PropertyModificationType.Add
 
-const addressPropertyFilter = nem.AccountPropertyModification.createForAddress(
+const addressPropertyFilter = AccountPropertyModification.createForAddress(
   propModType,
   address
 );
 
-const propModTx = nem.AccountPropertyTransaction.createAddressPropertyModificationTransaction(
-  nem.Deadline.create(),
+const propModTx = AccountPropertyTransaction.createAddressPropertyModificationTransaction(
+  Deadline.create(),
   propType,
   [addressPropertyFilter],
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 util.listener(url, initiator.address, {

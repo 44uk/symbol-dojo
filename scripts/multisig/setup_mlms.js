@@ -1,20 +1,24 @@
 /**
- * $ node scripts/multisig/setup_mlms.js PUBLIC_KEY
+ * $ node scripts/multisig/setup_mlms.js
  */
-const nem = require('nem2-sdk');
+const {
+  Account,
+  NetworkType,
+  MultisigCosignatoryModification,
+  MultisigCosignatoryModificationType,
+  ModifyMultisigAccountTransaction,
+  AggregateTransaction,
+  Deadline,
+} = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiator = nem.Account.createFromPrivateKey(
+const initiator = Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
-const cosignerPublicAccount = nem.PublicAccount.createFromPublicKey(
-  process.argv[2],
-  nem.NetworkType.MIJIN_TEST
-)
 
-console.log('initiator: %s', initiator.address.pretty());
+console.log('Initiator: %s', initiator.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('');
 
@@ -31,7 +35,7 @@ const showAccountInfo = (account, label = null) => {
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
 const accounts = [...Array(7)].map((_, idx) => {
-  return nem.Account.generateNewAccount(nem.NetworkType.MIJIN_TEST);
+  return Account.generateNewAccount(NetworkType.MIJIN_TEST);
 });
 
 // 1つ目のアカウントを最上位のマルチシグ候補にする
@@ -54,19 +58,19 @@ showAccountInfo(toBeRightMultisig, 'Right Multisig Account');
 // Leftをマルチシグにする
 const leftCosignatoryModifications = leftCosigners.map((account, idx) => {
   showAccountInfo(account, `Left Cosigner Account${idx+1}:`)
-  return new nem.MultisigCosignatoryModification(
-    nem.MultisigCosignatoryModificationType.Add,
+  return new MultisigCosignatoryModification(
+    MultisigCosignatoryModificationType.Add,
     account.publicAccount
   );
 });
 
 // いずれかの連署者が署名すれば承認とみなすため、`minApprovalDelta`は`1`とする
-const convertLeftIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
-  nem.Deadline.create(),
+const convertLeftIntoMultisigTx = ModifyMultisigAccountTransaction.create(
+  Deadline.create(),
   1, // minApprovalDelta
   2, // minRemovalDelta
   leftCosignatoryModifications,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 // -----------------------------------------------------------------------------
@@ -74,52 +78,52 @@ const convertLeftIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
 // Rightをマルチシグにする
 const rightCosignatoryModifications = rightCosigners.map((account, idx) => {
   showAccountInfo(account, `Right Cosigner Account${idx+1}:`)
-  return new nem.MultisigCosignatoryModification(
-    nem.MultisigCosignatoryModificationType.Add,
+  return new MultisigCosignatoryModification(
+    MultisigCosignatoryModificationType.Add,
     account.publicAccount
   );
 });
 
 // 2人が署名して承認とみなすため、`minApprovalDelta`は`2`とする
-const convertRightIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
-  nem.Deadline.create(),
+const convertRightIntoMultisigTx = ModifyMultisigAccountTransaction.create(
+  Deadline.create(),
   2, // minApprovalDelta
   2, // minRemovalDelta
   rightCosignatoryModifications,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 // -----------------------------------------------------------------------------
 
 // Rootをマルチシグにする
 const cosignatoryModifications = [
-  new nem.MultisigCosignatoryModification(
-    nem.MultisigCosignatoryModificationType.Add,
+  new MultisigCosignatoryModification(
+    MultisigCosignatoryModificationType.Add,
     toBeLeftMultisig.publicAccount
   ),
-  new nem.MultisigCosignatoryModification(
-    nem.MultisigCosignatoryModificationType.Add,
+  new MultisigCosignatoryModification(
+    MultisigCosignatoryModificationType.Add,
     toBeRightMultisig.publicAccount
   )
 ];
 
 // 2つのマルチシグアカウントが承認して承認とみなすため、`minApprovalDelta`は`2`とする
-const convertIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
-  nem.Deadline.create(),
+const convertIntoMultisigTx = ModifyMultisigAccountTransaction.create(
+  Deadline.create(),
   2, // minApprovalDelta
   2, // minRemovalDelta
   cosignatoryModifications,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
-const aggregateTx = nem.AggregateTransaction.createComplete(
-  nem.Deadline.create(),
+const aggregateTx = AggregateTransaction.createComplete(
+  Deadline.create(),
   [
     convertLeftIntoMultisigTx.toAggregate(toBeLeftMultisig.publicAccount),
     convertRightIntoMultisigTx.toAggregate(toBeRightMultisig.publicAccount),
     convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount)
   ],
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 util.listener(url, toBeMultisig.address, {

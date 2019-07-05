@@ -1,11 +1,11 @@
 /**
- * $ node scripts/filter/mosaic.js MOSAIC_HEX block add
+ * $ node scripts/filter/entity.js type block add
  */
 const {
   Account,
   NetworkType,
-  MosaicId,
   PropertyType,
+  TransactionType,
   PropertyModificationType,
   AccountPropertyTransaction,
   AccountPropertyModification,
@@ -19,36 +19,36 @@ const initiator = Account.createFromPrivateKey(
   NetworkType.MIJIN_TEST
 );
 
-const mosaicHex = process.argv[2];
-const propertyType = process.argv[3] || 'block';
+const entType = process.argv[2] || 'TRANSFER';
+const propType = process.argv[3] || 'block';
 const modType = process.argv[4] || 'add';
-const mosaicId = new MosaicId(mosaicHex)
 
 console.log('Initiator: %s', initiator.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
-console.log('Subject:   %s', mosaicId.toHex());
-console.log('Property:  %s', propertyType);
+console.log('Subject:   %s', entType);
+console.log('Property:  %s', propType);
 console.log('Modify:    %s', modType);
 console.log('Endpoint:  %s/account/%s/restrictions', url, initiator.publicKey);
-console.log('Endpoint:  %s/mosaic/%s', url, mosaicId.toHex());
 console.log('');
 
-const propType = propertyType === 'allow'
-  ? PropertyType.AllowMosaic
-  : PropertyType.BlockMosaic
-const propModType = modType === 'remove'
+const entityType = TransactionType[entType];
+
+const propertyType = propType === 'allow'
+  ? PropertyType.AllowTransaction
+  : PropertyType.BlockTransaction
+const propertyModificationType = modType === 'remove'
   ? PropertyModificationType.Remove
   : PropertyModificationType.Add
 
-const mosaicPropertyFilter = AccountPropertyModification.createForMosaic(
-  propModType,
-  mosaicId
+const entityTypePropertyFilter = AccountPropertyModification.createForEntityType(
+  propertyModificationType,
+  entityType
 );
 
-const propModTx = AccountPropertyTransaction.createMosaicPropertyModificationTransaction(
+const propModTx = AccountPropertyTransaction.createEntityTypePropertyModificationTransaction(
   Deadline.create(),
-  propType,
-  [mosaicPropertyFilter],
+  propertyType,
+  [entityTypePropertyFilter],
   NetworkType.MIJIN_TEST
 );
 

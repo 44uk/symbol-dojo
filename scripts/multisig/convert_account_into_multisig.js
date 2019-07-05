@@ -1,19 +1,27 @@
 /**
  * $ node scripts/multisig/convert_account_into_multisig.js
  */
-const nem = require('nem2-sdk');
+const {
+  Account,
+  NetworkType,
+  MultisigCosignatoryModification,
+  MultisigCosignatoryModificationType,
+  ModifyMultisigAccountTransaction,
+  AggregateTransaction,
+  Deadline,
+} = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiator = nem.Account.createFromPrivateKey(
+const initiator = Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 const minApprovalDelta = 2; // 2人の承認が必要
 const minRemovalDelta = 2; // 連署者を外すには2人に承認が必要
 
-console.log('initiator: %s', initiator.address.pretty());
+console.log('Initiator: %s', initiator.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('');
 
@@ -29,7 +37,7 @@ const showAccountInfo = (account, label = null) => {
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
 const accounts = [...Array(3)].map((_, idx) => {
-  return nem.Account.generateNewAccount(nem.NetworkType.MIJIN_TEST);
+  return Account.generateNewAccount(NetworkType.MIJIN_TEST);
 });
 
 // 1つ目のアカウントをマルチシグ候補にする
@@ -50,26 +58,26 @@ const cosignerPublicAccounts = cosigners.map((account, idx) => {
 
 // 連署者の追加定義集合を作る
 const cosignatoryModifications = cosignerPublicAccounts.map(publicAccount => {
-  return new nem.MultisigCosignatoryModification(
-    nem.MultisigCosignatoryModificationType.Add,
+  return new MultisigCosignatoryModification(
+    MultisigCosignatoryModificationType.Add,
     publicAccount
   );
 });
 
-const convertIntoMultisigTx = nem.ModifyMultisigAccountTransaction.create(
-  nem.Deadline.create(),
+const convertIntoMultisigTx = ModifyMultisigAccountTransaction.create(
+  Deadline.create(),
   minApprovalDelta,
   minRemovalDelta,
   cosignatoryModifications,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 // 実際はAggregateTransaction.createBondedメソッドを使い連署アカウントに署名を求める。
 // 今回は連署アカウントの秘密鍵がわかっているのでそれらを利用して署名してしまう。
-const aggregateTx = nem.AggregateTransaction.createComplete(
-  nem.Deadline.create(),
+const aggregateTx = AggregateTransaction.createComplete(
+  Deadline.create(),
   [ convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount) ],
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 util.listener(url, toBeMultisig.address, {

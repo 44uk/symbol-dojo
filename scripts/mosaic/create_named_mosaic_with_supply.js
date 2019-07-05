@@ -1,25 +1,41 @@
 /**
  * $ node scripts/mosaic/create_named_mosaic.js aaa.bbb.ccc 100
  */
-const nem = require('nem2-sdk');
+const {
+  Account,
+  NetworkType,
+  MosaicNonce,
+  MosaicId,
+  NamespaceId,
+  MosaicSupplyType,
+  AliasActionType,
+  RegisterNamespaceTransaction,
+  MosaicProperties,
+  MosaicDefinitionTransaction,
+  MosaicAliasTransaction,
+  MosaicSupplyChangeTransaction,
+  AggregateTransaction,
+  UInt64,
+  Deadline
+} = require('nem2-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
-const initiator = nem.Account.createFromPrivateKey(
+const initiator = Account.createFromPrivateKey(
   process.env.PRIVATE_KEY,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 
 const namespace = process.argv[2];
 const blocks = process.argv[4] || 100;
 const parts = namespace.split('.');
 
-console.log('initiator: %s', initiator.address.pretty());
+console.log('Initiator: %s', initiator.address.pretty());
 console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
 console.log('Blocks:    %s', blocks);
 parts.reduce((accum, part) => {
   accum.push(part);
-  const ns = new nem.NamespaceId(accum.join('.'));
+  const ns = new NamespaceId(accum.join('.'));
   console.log('Namespace: %s (%s)', ns.fullName, ns.toHex());
   console.log('Endpoint:  %s/namespace/%s', url, ns.toHex());
   return accum;
@@ -31,18 +47,18 @@ const txes = parts.reduce((accum, part, idx, array) => {
   const parent = array.slice(0, idx).join('.');
   let registerTx;
   if (accum.length === 0) {
-    registerTx = nem.RegisterNamespaceTransaction.createRootNamespace(
-      nem.Deadline.create(),
+    registerTx = RegisterNamespaceTransaction.createRootNamespace(
+      Deadline.create(),
       part,
-      nem.UInt64.fromUint(blocks),
-      nem.NetworkType.MIJIN_TEST
+      UInt64.fromUint(blocks),
+      NetworkType.MIJIN_TEST
     );
   } else {
-    registerTx = nem.RegisterNamespaceTransaction.createSubNamespace(
-      nem.Deadline.create(),
+    registerTx = RegisterNamespaceTransaction.createSubNamespace(
+      Deadline.create(),
       part,
       parent,
-      nem.NetworkType.MIJIN_TEST
+      NetworkType.MIJIN_TEST
     );
   }
   accum.push(registerTx);
@@ -50,8 +66,8 @@ const txes = parts.reduce((accum, part, idx, array) => {
 }, []);
 
 // create mosaic
-const nonce = nem.MosaicNonce.createRandom();
-const mosId = nem.MosaicId.createFromNonce(nonce, initiator.publicAccount);
+const nonce = MosaicNonce.createRandom();
+const mosId = MosaicId.createFromNonce(nonce, initiator.publicAccount);
 const absSupply = process.argv[3];
 
 console.log('Mosaic Nonce: %s', nonce.toDTO());
@@ -60,47 +76,47 @@ console.log('Supply:       %s', absSupply);
 console.log('Endpoint:     %s/mosaic/%s', url, mosId.toHex());
 console.log('');
 
-const definitionTx = nem.MosaicDefinitionTransaction.create(
-  nem.Deadline.create(),
+const definitionTx = MosaicDefinitionTransaction.create(
+  Deadline.create(),
   nonce,
   mosId,
-  nem.MosaicProperties.create({
+  MosaicProperties.create({
     supplyMutable: true,
     transferable: true,
     levyMutable: false,
     divisibility: 0,
-    duration: nem.UInt64.fromUint(blocks)
+    duration: UInt64.fromUint(blocks)
   }),
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 txes.push(definitionTx)
 
-const supplyTx = nem.MosaicSupplyChangeTransaction.create(
-  nem.Deadline.create(),
+const supplyTx = MosaicSupplyChangeTransaction.create(
+  Deadline.create(),
   mosId,
-  nem.MosaicSupplyType.Increase,
-  nem.UInt64.fromUint(absSupply),
-  nem.NetworkType.MIJIN_TEST
+  MosaicSupplyType.Increase,
+  UInt64.fromUint(absSupply),
+  NetworkType.MIJIN_TEST
 );
 txes.push(supplyTx)
 
 // link
-const nsId = new nem.NamespaceId(namespace);
-const aliasTx = nem.MosaicAliasTransaction.create(
-  nem.Deadline.create(),
-  nem.AliasActionType.Link,
+const nsId = new NamespaceId(namespace);
+const aliasTx = MosaicAliasTransaction.create(
+  Deadline.create(),
+  AliasActionType.Link,
   nsId,
   mosId,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 txes.push(aliasTx)
 
 console.log('Txes Len: ', txes.length);
 console.log('');
-const aggregateTx = nem.AggregateTransaction.createComplete(
-  nem.Deadline.create(),
+const aggregateTx = AggregateTransaction.createComplete(
+  Deadline.create(),
   txes.map(tx => tx.toAggregate(initiator.publicAccount)),
-  nem.NetworkType.MIJIN_TEST,
+  NetworkType.MIJIN_TEST,
   []
 );
 

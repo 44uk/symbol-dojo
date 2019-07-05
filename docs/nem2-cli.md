@@ -9,7 +9,11 @@
 
 ウォレットのようにアカウントにプロファイル名をつけて保存し、呼び出して使うことができます。
 
-プロファイルは`~/.nem2rc.json`として保存されます。
+プロファイルは`~/.nem2rc.json`としてこのように保存されます。
+
+```json
+{"alice":{"privateKey":"7EF4AAA5507C7DBDFDD30D52922DF3AC46D2384593FA2E620D19848ED7F60636","networkType":144,"url":"http://localhost:3000","networkGenerationHash":"53F73344A12341618CEE455AC412A0B57D41CEC058965511C0BA016156F4BF47"}}
+```
 
 
 ### アカウントの生成
@@ -20,9 +24,11 @@
 
 ```shell
 $ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile alice
-New Account:    SB4WQN-WTACKJ-SJSJNK-BPKG5A-NNWCSL-JSJCYF-SW4I
-Public Key:     76D17FB217FB46930D0A4C071716FE4D825DCB268F1262EB0A391484E04DD5E9
-Private Key:    490C117FE03A265FF9D0CEEB7DD59098867B078A86B04E1E1E1A93CF141029A1
+New Account:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+Public Key:	A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
+Private Key:	7EF4AAA5507C7DBDFDD30D52922DF3AC46D2384593FA2E620D19848ED7F60636
+
+Stored alice profile
 ```
 
 ここでは各設定をオプションで渡しましたが、指定しない場合は対話式で入力していきます。
@@ -33,15 +39,20 @@ Private Key:    490C117FE03A265FF9D0CEEB7DD59098867B078A86B04E1E1E1A93CF141029A1
 
 ```shell
 $ nem2-cli account info --profile alice
-Error {"code":"ResourceNotFound","message":"no resource exists with id 'SB4WQNWTACKJSJSJNKBPKG5ANNWCSLJSJCYFSW4I'"}
+Error {"code":"ResourceNotFound","message":"no resource exists with id 'SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4'"}
 ```
 
 まだこのアカウントはネットワーク上で認識されていないため`ResourceNotFound`が返ってきますが、このようにしてプロファイルの指定をします。
 
-もう一つ、`bob`というプロファイル名でアカウントを作っておきます。
+もう一つ`bob`というプロファイル名でアカウントを作っておきます。
 
 ```shell
 $ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile bob
+New Account:	SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
+Public Key:	97980E89374802B5A0DD63D32A3897496431486E9DB210B00B43A9B41D08550B
+Private Key:	72524C849DF216E0FE96A5011B1329107993D9DE39D0574835CB47511253AD61
+
+Stored bob profile
 ```
 
 なお、`--profile`オプションを省略した場合は`default`という名前が使用されます。
@@ -55,18 +66,19 @@ $ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile 
 
 ここでは初期分配されたアカウントを登録してみましょう。
 
-`addresses.yml`の`nemesis_addresses:`セクションのうち、前22件から任意のアカウントの秘密鍵を選んでください。
+`addresses.yml`の`nemesis_addresses:`セクションのうち、**前20件**から任意のアカウントの秘密鍵を選んでください。
 
 ```shell
-$ nem2-cli profile create -n MIJIN_TEST -p B0C900E7E4270B60BB0B1199205A190F77BD1D0BBCD1B305E8790290A08C23F6 -u http://localhost:3000 --profile nemesis1
+nem2-cli profile create -n MIJIN_TEST -p 7F4AFBB8B8C009EA21F1AF243DC20CD2B551FD79D4B5877054186BDDAE012FA6 -u http://localhost:3000 --profile nemesis1
 
 Profile stored correctly
 nemesis1->
-        Network:        MIJIN_TEST
-        Url:            http://localhost:3000
-        Address:        SBPKTXJYSCHBGHRAFEETGITGW6AS22KX4GI5WZ25
-        PublicKey:      F02D33764A08DEBEF4B9FFD514FE99DFB084879F09C32E183F087610246C8BB2
-        PrivateKey:     57062D8B532D0423B324998E251DD77B972802B6FB3DDB57289BCF9246284AE0
+	Network:	MIJIN_TEST
+	Url:		http://localhost:3000
+	GenerationHash:	53F73344A12341618CEE455AC412A0B57D41CEC058965511C0BA016156F4BF47
+	Address:	SCD3UFCNDZ3AYOAX5SMYW56OWITPWK4DGHRIASPI
+	PublicKey:	9D5F3C543293458521020F5260B1CEBCFEF6846AAD4EC9DE5E1D658F1B850023
+	PrivateKey:	7F4AFBB8B8C009EA21F1AF243DC20CD2B551FD79D4B5877054186BDDAE012FA6
 ```
 
 `--profile nemesis1`にて`nemesis1`というプロファイル名をつけました。
@@ -80,6 +92,21 @@ nemesis1->
 
 ```shell
 $ nem2-cli account info --profile nemesis1
+Account:	SCMK5Y-DNUATK-IFHBV4-Y22VEX-3N4YBV-BT5YG4-AX5V
+-------------------------------------------------------
+
+Address:	SCMK5Y-DNUATK-IFHBV4-Y22VEX-3N4YBV-BT5YG4-AX5V
+at height:	1
+
+PublicKey:	0000000000000000000000000000000000000000000000000000000000000000
+at height:	0
+
+Importance:	3750000
+at height:	1
+
+Mosaics
+75bd75ce0203c054:	3750
+3f859f237d36c3ae:	449949999.9
 ```
 
 先の確認と同じフォーマットで結果が表示されます。
@@ -94,66 +121,101 @@ $ nem2-cli account info --profile nemesis1
 
 ### 初期分配アカウントから配布する(ローカルにネットワークを構築している場合)
 
-`cat.currency`を`10,000`ほど`nemesis1`から`alice`へ配布してください。
+`10,000 cat.currency`ほど`nemesis1`から`alice`へ配布してください。
 
 `@cat.currency::10000000000`は`cat.currency`というネームスペースが紐付けられたモザイクを意味します。
 
 絶対値で指定する必要があるので、可分性`6`を加味した`10000000000`を指定します。
 
 ```shell
-$ nem2-cli transaction transfer -r SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5 -c @cat.currency::10000000000 --profile nemesis1
+$ nem2-cli transaction transfer -r SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4 -c @cat.currency::10000000000 --profile nemesis1
 Transaction announced correctly
-Hash:    7BD02193E7D0F97356C3DC7FBBB29BCF889876BC58D9A0E451DC1F3482064B42
-Signer:  294D4385F2AB9EA0D3A4070C9219784E269A96EDEB8A1679EA938BE639509826
+Hash:    711B9A48414D3BDB92B12A4D113420BA948A8CCC090F6F776DF9C83E6B61A900
+Signer:  7F4AFBB8B8C009EA21F1AF243DC20CD2B551FD79D4B5877054186BDDAE012FA6
 ```
+
+表示された`Hash`を引数に`transaction status`コマンドでトランザクションの成功を確認してみます。
+
+```shell
+$ nem2-cli transaction status -h D99B59C76C9ABA91D5BC9DDD5DCBBDC3EF38FFDC044DA00B51ABAB769F0FFFC5 --profile nemesis1
+group: confirmed
+status: Success
+hash: < D99B59C76C9ABA91D5BC9DDD5DCBBDC3EF38FFDC044DA00B51ABAB769F0FFFC5 >
+deadline: 2019-07-05T15:32:12.974
+height: 298
+```
+
+`group`が`confirmed`となっていればブロックチェーンに書き込まれています。
+
+宛先の`alice`に`10,000 cat.currency`届いているかを確認してみましょう。
+
+```shell
+$ nem2-cli account info --profile alice
+Account:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+-------------------------------------------------------
+
+Address:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+at height:	298
+
+PublicKey:	0000000000000000000000000000000000000000000000000000000000000000
+at height:	0
+
+Importance:	0
+at height:	0
+
+Mosaics
+3f859f237d36c3ae:	10000
+```
+
+`nem2-cli`を用いてモザイクを送りたい場合はこのようにして送信できます。
 
 
 ### 初期分配アカウントの秘密鍵がわからない場合(用意されたネットワークを使用している場合など)
 
-公開されているネットワークを使用している場合は、そのネットワーク管理者から`alice`のアカウントへ`10000 cat.currency`を入手してください。
+公開されているネットワークを使用している場合は、そのネットワークの管理者から`alice`のアカウントへ`10000 cat.currency`を入手してください。
 
-ネットワーク提供者が蛇口を公開している場合はそれを利用してください。
+ネットワーク提供者が誰でも利用可能な蛇口などを公開している場合はそれを利用してください。
 
 
 ### aliceからbobへ受け渡す
 
-`alice`から`bob`へ`10 cat.currency`送ってみましょう。
+`alice`から`bob`へ`10 cat.currency`とメッセージを送ってみましょう。
 
 ```shell
-$ nem2-cli transaction transfer -r SBU4GPX2BJSESXN5KBTCAI63GGDVJYQFZ62M2QTT -c @cat.currency::10000000 -m "Hello, Bob" --profile alice
+$ nem2-cli transaction transfer -r SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 -c @cat.currency::10000000 -m "Hello, Bob" --profile alice
 Transaction announced correctly
-Hash:    7BD02193E7D0F97356C3DC7FBBB29BCF889876BC58D9A0E451DC1F3482064B42
-Signer:  294D4385F2AB9EA0D3A4070C9219784E269A96EDEB8A1679EA938BE639509826
+Hash:    38298286E32D18CA73B53314870972BBD56F27C1819ABB1592A273741A69DE5D
+Signer:  A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 ```
 
 こちらもオプションを指定しなかった場合は対話的に入力を求められます。
 
-メッセージ通り、トランザクションが受理されたので、少し待ってから`bob`の残高を確認します。
+レスポンスの通り、トランザクションが受理されたので、少し待ってから`bob`の残高を確認します。
 
 
 ```shell
 $ nem2-cli account info --profile bob
-Account:        SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT
+Account:	SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
 -------------------------------------------------------
 
-Address:        SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT
-at height:      77
+Address:	SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
+at height:	382
 
-PublicKey:      00000000000000000000000000000000000000000000000000000000000000000
-at height:      0
+PublicKey:	0000000000000000000000000000000000000000000000000000000000000000
+at height:	0
 
-Importance:     0
-at height:      0
+Importance:	0
+at height:	0
 
 Mosaics
-7d09bf306c0b2e38:       10
+3f859f237d36c3ae:	10
 ```
 
 `Mosaics`の部分に受け取ったモザイクが表示されました。
 
-16進数のモザイクIDで表示されるので若干わかりにくいですが、`7d09bf306c0b2e38`は`cat.currency`を表します。
+16進数のモザイクIDで表示されるので若干わかりにくいですが、`3f859f237d36c3ae`は`cat.currency`を表します。
 
-(`7d09bf306c0b2e38`というモザイクIDはネットワークごとに異なる場合があります)
+(`3f859f237d36c3ae`というモザイクIDはネットワークごとに異なる場合があります)
 
 
 ## アカウントのモニタリング
@@ -165,17 +227,9 @@ Mosaics
 
 ### トランザクションのエラーの捕捉
 
-```shell
-$ nem2-cli monitor status --profile alice
-```
-
 トランザクションを発信したとき、それに関するエラーが起きた場合に通知がきます。
 
 例えばアカウントの残高が足りていなかったり、登録しようとしたネームスペースが既に取得されていた場合、署名が壊れていた場合などです。
-
-各種エラーメッセージの内容は以下で確認できます。
-
-- [REST API — NEM Developer Center](https://nemtech.github.io/ja/api.html#status-errors)
 
 試しに`alice`が持ち合わせていない量のモザイクを送ろうとしてみましょう。
 
@@ -183,36 +237,41 @@ $ nem2-cli monitor status --profile alice
 
 ```shell
 $ nem2-cli monitor status --profile alice
-Monitoring SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5 using http://localhost:3000
+Monitoring SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4 using http://localhost:3000
 connection open
 ```
 
-続いて、持ち合わせていない量のモザイクを指定してください。
+
+続いて、持ち合わせていない量のモザイクを指定して、トランザクションを送信します。
 
 ```shell
-$ nem2-cli transaction transfer -r SBU4GPX2BJSESXN5KBTCAI63GGDVJYQFZ62M2QTT -c @cat.currency::409090909000000 -m "Hello, bob" --profile alice
+$ nem2-cli transaction transfer -r SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 -c @cat.currency::409090909000000 --profile alice
 Transaction announced correctly
 Hash:    1813FDF4A9AA43147AB5B035140A2D321ABA4674494C8D1A4F902A551BE07739
 Signer:  294D4385F2AB9EA0D3A4070C9219784E269A96EDEB8A1679EA938BE639509826
 ```
 
-`Transaction announced correctly`が返り、発行はエラーになりませんが、モニタリングしている方へ通知が届きます。
+`Transaction announced correctly`となり、発行はエラーになりませんがモニタリングしている方へ通知が届きます。
 
 ```shell
-Hash: 1813FDF4A9AA43147AB5B035140A2D321ABA4674494C8D1A4F902A551BE07739
+Hash: 1055E87CB6018DB55CFA1A88EBF3E78A7821B61C9F726B31596FBCAC419FD97A
 Error code: Failure_Core_Insufficient_Balance
-Deadline: 2019-03-22 00:36:06.648
+Deadline: 2019-07-05 15:57:29.685
 ```
 
 `Failure_Core_Insufficient_Balance`は残高不足の意味です。
 
-トランザクションのエラーはこのようにしてモニタリング(`websocket`を経由)して取得します。
+なお、各種エラーメッセージの内容は以下で確認できます。
+
+- [REST API — NEM Developer Center](https://nemtech.github.io/ja/api.html#status-errors)
+
+トランザクションのエラーはこのようにしてモニタリング(`websocket`を経由)して補足できます。
 
 APIサーバへのトランザクション送信は残高不足などのトランザクションに不備があっても必ず成功レスポンスを返却します。
 
 そのトランザクションがネットワークに受理されたかどうかはモニタリングでエラーを捕捉するか、
 
-`http://localhost:3000/transaction/<TRANSACTION_HASH>/status` にアクセスすることで状態を確認することができます。
+`http://localhost:3000/transaction/<TRANSACTION_HASH>/status` にアクセスすることでトランザクションの状態を確認することができます。
 
 ```json
 {
@@ -226,6 +285,16 @@ APIサーバへのトランザクション送信は残高不足などのトラ�
 }
 ```
 
+`status`を取得するコマンドも`nem2-cli`に用意されています。
+
+```shell
+$ nem2-cli transaction status -h 1055E87CB6018DB55CFA1A88EBF3E78A7821B61C9F726B31596FBCAC419FD97A --profile alice
+group: failed
+status: Failure_Core_Insufficient_Balance
+hash: < 1055E87CB6018DB55CFA1A88EBF3E78A7821B61C9F726B31596FBCAC419FD97A >
+deadline: 2019-07-05T15:57:29.685
+```
+
 
 ### 未承認トランザクションの捕捉
 
@@ -233,6 +302,8 @@ APIサーバへのトランザクション送信は残高不足などのトラ�
 
 ```shell
 $ nem2-cli monitor unconfirmed --profile bob
+Monitoring SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 using http://localhost:3000
+connection open
 ```
 
 未承認トランザクションが発生したとき、情報が流れてきます。
@@ -242,18 +313,20 @@ $ nem2-cli monitor unconfirmed --profile bob
 上記のコマンドを実行して、モニタリングが始まった状態で`alice`からモザイクを送ってみてください。
 
 ```shell
-$ nem2-cli transaction transfer -r SBU4GPX2BJSESXN5KBTCAI63GGDVJYQFZ62M2QTT -c @cat.currency::1000000 -m "Bob monitors unconfirmed" --profile alice
+$ nem2-cli transaction transfer -r SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 -c @cat.currency::1000000 -m "Bob monitors unconfirmed" --profile alice
 ```
 
 するとモニタしていたウィンドウにトランザクションが現れます。
 
 ```shell
 $ nem2-cli monitor unconfirmed --profile bob
-Monitoring SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT using http://localhost:3000
+Monitoring SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 using http://localhost:3000
 connection open
 
-TransferTransaction: Recipient:SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT Message:"Bob monitors unconfirmed" Mosaics: NamespaceId:85bbea6cc462b244::1000000 Signer:SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5 Deadline:2019-03-22 Hash:F1851A4068B83107AEEE06FF44C3DC82914B58310B3DC471AA25AAE8625C426C
+TransferTransaction: Recipient:SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 Message:"Bob monitors unconfirmed" Mosaics: NamespaceId:85bbea6cc462b244::1000000 Signer:SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4 Deadline:2019-07-05 Hash:80819891793B5271F0798DCFA99547A14ADBF901A09474F4A040E33F8D1380C0
 ```
+
+未承認状態として追加されたトランザクションが表示されました。
 
 
 ### 承認トランザクションの捕捉
@@ -262,26 +335,28 @@ TransferTransaction: Recipient:SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT Me
 
 ```shell
 $ nem2-cli monitor confirmed --profile bob
+Monitoring SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 using http://localhost:3000
+connection open
 ```
 
 トランザクションが承認されると、情報が流れてきます。
 
-`alice`のトランザクションが承認され、`bob`の残高に反映されるときに流れてくるでしょう。
+`alice`のトランザクションが承認され`bob`の残高に反映されるときに流れてきます。
 
 上記のコマンドを実行して、モニタリングが始まった状態で`alice`からモザイクを送ってみてください。
 
 ```shell
-$ nem2-cli transaction transfer -r SBU4GPX2BJSESXN5KBTCAI63GGDVJYQFZ62M2QTT -c @cat.currency::1000000 -m "Bob monitors confirmed" --profile alice
+$ nem2-cli transaction transfer -r SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 -c @cat.currency::1000000 -m "Bob monitors confirmed" --profile alice
 ```
 
 しばらくしてトランザクションが承認されると、モニタしていたウィンドウにトランザクションが現れます。
 
 ```shell
 $ nem2-cli monitor confirmed --profile bob
-Monitoring SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT using http://localhost:3000
+Monitoring SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 using http://localhost:3000
 connection open
 
-TransferTransaction: Recipient:SBU4GP-X2BJSE-SXN5KB-TCAI63-GGDVJY-QFZ62M-2QTT Message:"Bob monitors confirmed" Mosaics: NamespaceId:85bbea6cc462b244::1000000 Signer:SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5 Deadline:2019-03-22 Hash:4958B56B762B5BC5BD8A46592481854CE7E6048384E6D2EBC202ACD90A9BBEA5
+TransferTransaction: Recipient:SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 Message:"Bob monitors confirmed" Mosaics: NamespaceId:85bbea6cc462b244::1000000 Signer:SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4 Deadline:2019-07-05 Hash:D95716F627ED74DC2594F59E2074B2CDD5026157FF08AB443FA1950163C11866
 ```
 
 
@@ -310,7 +385,46 @@ $ nem2-cli monitor
 
 複数のタイプを監視したい場合は複数枚のウィンドウを開いて、それぞれでコマンドを叩いてください。
 
-ちなみに`block`だけはアカウントに関係なく、接続しているノードにブロックが生成されると通知を受け取るコマンドです。
+```shell
+$ nem2-cli monitor block --profile bob
+Using http://localhost:3000
+connection open
+
+
+BlockInfo {
+  hash:
+   '30A396B34CCBDB477AF962F721A6C2E5951948D500197F7FA7AB77C0BF32C76A',
+  generationHash:
+   '1B15EB6062E7F2DCF01CAAF12813517E558E4337302E6C6D04CE449995D34C49',
+  totalFee: UInt64 { lower: 0, higher: 0 },
+  numTransactions: undefined,
+  signature:
+   'EF2C80D87A12EFD38BC6FEC460377E8846DD7CF0ED7926A6427670B532679DB72056B8BBDBA4BD81884AE1936FEF92F1642338FF7D66196FFEEDE59120AF1D08',
+  signer:
+   PublicAccount {
+     publicKey:
+      '1657E5568F833E4A2AEBBA56BF9265E9CFBDAD2CCD2181BB699FE918EF89B56E',
+     address:
+      Address {
+        address: 'SBWSQTF63PRCCLHLUF3ITZAVNLJESQ6N4KMHN5PB',
+        networkType: 144 } },
+  networkType: 144,
+  version: 3,
+  type: 33091,
+  height: UInt64 { lower: 440, higher: 0 },
+  timestamp: UInt64 { lower: 4050218533, higher: 23 },
+  difficulty: UInt64 { lower: 1010403612, higher: 8773 },
+  feeMultiplier: undefined,
+  previousBlockHash:
+   '0000000058C368685EBD494A949A1ED22B1D974E8108F8872462128ACD597183',
+  blockTransactionsHash:
+   'A00E794D00000000000000000000000000000000000000000000000000000000',
+  blockReceiptsHash: undefined,
+  stateHash: undefined,
+  beneficiaryPublicKey: undefined }
+```
+
+例えばこれは`monitor block`の結果で、ブロックが生成されるとこのようなデータを受信します。
 
 
 ## 各種トランザクションの発行
@@ -320,4 +434,3 @@ $ nem2-cli monitor
 ここでは扱いませんが、各コマンドヘルプやドキュメントを参照してみてください。
 
 - [クライアント — NEM Developer Center](https://nemtech.github.io/ja/cli.html#commands)
-

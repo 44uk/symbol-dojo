@@ -15,7 +15,7 @@ const absSupply = process.argv[3];
 const delta = process.argv[4] || 'add';
 const mosId = new nem.MosaicId(mosIdent)
 
-console.log('initiator:  %s', initiator.address.pretty());
+console.log('Initiator:  %s', initiator.address.pretty());
 console.log('Endpoint:   %s/account/%s', url, initiator.address.plain());
 console.log('Mosaic Hex: %s', mosId.toHex());
 console.log('Supply:     %s', absSupply);

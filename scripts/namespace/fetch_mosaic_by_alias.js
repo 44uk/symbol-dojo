@@ -1,10 +1,13 @@
-const nem = require('nem2-sdk');
+const {
+  NamespaceId,
+  NamespaceHttp
+} = require('nem2-sdk');
 
 const url = process.env.API_URL || 'http://localhost:3000';
 const namespace = process.argv[2];
 
-const nsId = new nem.NamespaceId(namespace);
-const nsHttp = new nem.NamespaceHttp(url);
+const nsId = new NamespaceId(namespace);
+const nsHttp = new NamespaceHttp(url);
 
 console.log('Namespace: %s (%s)', nsId.fullName, nsId.toHex());
 console.log('Endpoint:  %s/namespace/%s', url, nsId.toHex());

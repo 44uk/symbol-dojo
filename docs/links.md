@@ -4,22 +4,22 @@
 
 ## 公式ドキュメント
 
+- [NEM Developer Center](https://nemtech.github.io/ja/)
 - [NEM Foundation Roadmap \| NEM Documentation](https://docs.nem.io/en/roadmap)
 - [NEM Catapult Testnet \| NEM Documentation](https://docs.nem.io/en/testnet)
 
 
 ## APIドキュメント
 
-- [ホーム — NEM Developer Center](https://nemtech.github.io/ja/)
-- [Endpoints — NEM Developer Center](https://nemtech.github.io/endpoints.html)
-- https://petstore.swagger.io/
-- https://nemtech.github.io/_downloads/swagger.yaml
+- [エンドポイント — NEM Developer Center](https://nemtech.github.io/ja/endpoints.html)
+    - https://nemtech.github.io/_downloads/openapi3.yaml
+- [ガイド — NEM Developer Center](https://nemtech.github.io/ja/guides)
 
 
 ## 有志による情報
 
 - [NEMTionary](https://scrapbox.io/NEMTionary/)
-- [catapultに関する70件の記事 \- Qiita](https://qiita.com/tags/catapult)
+- [catapultに関する96件の記事 \- Qiita](https://qiita.com/tags/catapult)
 - [my\-catapult\-docs/reverse\_lookup\.md at master · mijinc0/my\-catapult\-docs](https://github.com/mijinc0/my-catapult-docs/blob/master/reverse_lookup.md)
 
 
@@ -46,15 +46,16 @@
 - [planethouki/nem2\-helper\-web: NEM2 サクサク データ変換Web](https://github.com/planethouki/nem2-helper-web)
 - [planethouki/nem2\-unsafe\-wallet\-nuxt: NEM2 テスト用ウォレット](https://github.com/planethouki/nem2-unsafe-wallet-nuxt)
 - [Matsushin/nem2\-sdk\-wallet\-vue\-sample](https://github.com/Matsushin/nem2-sdk-wallet-vue-sample)
-- [44uk/nem2\-dev\-ui: nem2\(catapult\) development Utility Interface](https://github.com/44uk/nem2-dev-ui)
 - [44uk/nem2\-faucet: Faucet application for nem2 \(catapult\)](https://github.com/44uk/nem2-faucet)
+- [44uk/nem2\-dev\-ui: nem2\(catapult\) development Utility Interface](https://github.com/44uk/nem2-dev-ui)
 
 
 ## 参考プロジェクト
 
-- [aleixmorgadas/nem2\-wallet\-browserextension: nem2 browser wallet\. Experimental, use in your own risk\.](https://github.com/aleixmorgadas/nem2-wallet-browserextension)
+- [nemfoundation/nem2\-wallet\-browserextension: nem2 browser wallet\. Experimental, use in your own risk\.](https://github.com/nemfoundation/nem2-wallet-browserextension)
+- [nemfoundation/nem2\-hd\-wallets: Experimental library to handle hyper deterministic wallets for Catapult](https://github.com/nemfoundation/nem2-hd-wallets)
+- [nemtech/nem2\-camel: A component to turn the asynchronous transaction announcement into synchronous\.](https://github.com/nemtech/nem2-camel)
 - [NemTechCN/Nem2\-Dapp\-Plugin](https://github.com/NemTechCN/Nem2-Dapp-Plugin)
 - [sleepyOwl14/NEM2\-GraphQL: GraphQL for NEM2 MongoDB](https://github.com/sleepyOwl14/NEM2-GraphQL)
-- [nemtech/nem2\-camel: A component to turn the asynchronous transaction announcement into synchronous\.](https://github.com/nemtech/nem2-camel)
-- [evias/nem2\-hd\-wallets: Experimental library to handle hyper deterministic wallets for Catapult](https://github.com/evias/nem2-hd-wallets)
-
+- [empleos/catapult\-server\-docs: Documentation on NEM 2 Catapult server](https://github.com/empleos/catapult-server-docs)
+- [CrackTheCode016/cat\-config\-scripts: A series of shell scripts used for configuring a Catapult node](https://github.com/CrackTheCode016/cat-config-scripts)

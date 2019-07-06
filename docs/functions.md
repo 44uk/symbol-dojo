@@ -1,6 +1,6 @@
 # クロスチェーンスワップ
 
-シークレットロックトランザクションとシークレットプルーフトランザクションを用いることで、他チェーンとの間で安全にモザイクや暗号通貨を交換することができます。
+シークレットロックトランザクションとシークレットプルーフトランザクションを用いることで、他チェーンとの間で安全にモザイクを交換することができます。
 
 - [クロスチェーンスワップ — NEM Developer Center](https://nemtech.github.io/ja/concepts/cross-chain-swaps.html)
 
@@ -27,7 +27,7 @@
 
 これまで使用していたネットワークだけで動作確認をします。
 
-クロスチェーンスワップを実現できていませんが、この挙動は前述の理屈のとおり、クロスチェーンスワップに応用することができます。
+異なるチェーン間のスワップにはなりませんが、この挙動は前述の理屈のとおり、クロスチェーンスワップに応用することができます。
 
 ここではシークレットロック/スワップトランザクションの機能についての実演です。
 
@@ -38,39 +38,33 @@
 半角文字で10文字程度入力してください。渡さなかった場合はランダムな値が使用されます。
 
 ```shell
-$ node secretlock/lock_and_proof.js SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4 ALL_YOUR_BASE_ARE_BELONG_TO_US
-Initiater: SCGUWZ-FCZDKI-QCACJH-KSMRT7-R75VY6-FQGJOU-EZN5
-Endpoint:  http://localhost:3000/account/SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5
-Recipient: SC3AWB-HBY2AB-QHQY3Q-AJLO4H-XSJ6IZ-VAYLN5-2HO4
-Endpoint:  http://localhost:3000/account/SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4
+$ node scripts/secretlock/lock_and_proof.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 ALL_YOUR_BASE_ARE_BELONG_TO_US
+Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+Recipient: SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
+Endpoint:  http://localhost:3000/account/SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2
 Proof:     414C4C5F594F55525F424153455F4152455F42454C4F4E475F544F5F5553 (ALL_YOUR_BASE_ARE_BELONG_TO_US)
 Secret:    53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573
 
 connection open
 [Transaction announced]
-Endpoint: http://localhost:3000/transaction/E16871D99A96965EEA864AAE06EEEED7E0A657319F9648265EBFD66B4A5D68A3
-Hash:     E16871D99A96965EEA864AAE06EEEED7E0A657319F9648265EBFD66B4A5D68A3
-Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
+Endpoint: http://localhost:3000/transaction/366C702BCD42514A9FBD63DE8443E562185ED0FC7DFFE57F2432891993296A03
+Hash:     366C702BCD42514A9FBD63DE8443E562185ED0FC7DFFE57F2432891993296A03
+Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
-[UNCONFIRMED] SCGUWZ...
-{"type":16722,"networkType":144,"version":1,"deadline":{"value":"2019-03-24T11:39:07.260"},"fee":{"lower":0,"higher":0},"signature":"B2D765A54C2A3186275FBA528FE3A9A2910CF84B66F141892F8ED0C77574C3F2B40D62ADF70E8C93C399C3894909C3D14783FD202F103BCDDED03EE407EDE20A","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"E16871D99A96965EEA864AAE06EEEED7E0A657319F9648265EBFD66B4A5D68A3","merkleComponentHash":"E16871D99A96965EEA864AAE06EEEED7E0A657319F9648265EBFD66B4A5D68A3"},"mosaic":{"id":{"id":{"lower":3294802500,"higher":2243684972}},"amount":{"lower":2000000,"higher":0}},"duration":{"lower":2,"higher":0},"hashType":0,"secret":"53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573","recipient":{"address":"SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4","networkType":144}}
+[UNCONFIRMED] SAFPLK...
+{"transaction":{"type":16722,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4081556051,23],"signature":"FA800AF3C510EC842526F1EDB64964010A80F5BCF250237B5623ABB904822BE2DF2FC0FD9F813FE3A4B6E09807EB874B1CA5EF7FE7C8694D01DA0C447434A70E","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"lower":3294802500,"higher":2243684972},"amount":[2000000,0],"duration":[2304,0],"hashAlgorithm":0,"secret":"53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573","recipient":{"address":"SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2","networkType":144}}}
 
-[CONFIRMED] SCGUWZ...
-{"type":16722,"networkType":144,"version":1,"deadline":{"value":"2019-03-24T11:39:07.260"},"fee":{"lower":0,"higher":0},"signature":"B2D765A54C2A3186275FBA528FE3A9A2910CF84B66F141892F8ED0C77574C3F2B40D62ADF70E8C93C399C3894909C3D14783FD202F103BCDDED03EE407EDE20A","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":7195,"higher":0},"hash":"E16871D99A96965EEA864AAE06EEEED7E0A657319F9648265EBFD66B4A5D68A3","merkleComponentHash":"E16871D99A96965EEA864AAE06EEEED7E0A657319F9648265EBFD66B4A5D68A3"},"mosaic":{"id":{"id":{"lower":3294802500,"higher":2243684972}},"amount":{"lower":2000000,"higher":0}},"duration":{"lower":2,"higher":0},"hashType":0,"secret":"53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573","recipient":{"address":"SC3AWBHBY2ABQHQY3QAJLO4HXSJ6IZVAYLN52HO4","networkType":144}}
+[CONFIRMED] SAFPLK...
+{"transaction":{"type":16722,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4081556051,23],"signature":"FA800AF3C510EC842526F1EDB64964010A80F5BCF250237B5623ABB904822BE2DF2FC0FD9F813FE3A4B6E09807EB874B1CA5EF7FE7C8694D01DA0C447434A70E","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"lower":3294802500,"higher":2243684972},"amount":[2000000,0],"duration":[2304,0],"hashAlgorithm":0,"secret":"53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573","recipient":{"address":"SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2","networkType":144}}}
 
 [Secret Recognized]
 {"secret": "53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573"}
 
 [Transaction announced]
-Endpoint: http://localhost:3000/transaction/872889BA38256158B573F17AE7637D4527A9A80B2AA50303C92C97D27FD34E4D
-Hash:     872889BA38256158B573F17AE7637D4527A9A80B2AA50303C92C97D27FD34E4D
-Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
-
-[UNCONFIRMED] SCGUWZ...
-{"type":16978,"networkType":144,"version":1,"deadline":{"value":"2019-03-24T11:39:34.682"},"fee":{"lower":0,"higher":0},"signature":"9FB58D06C74D57783063659F095643B53AB045D207D331BA225EFB07D2EC6DCB3321FC4317C40A3E6A78A93FB9817056BBC225F80834285EDC28E3E764E38703","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":0,"higher":0},"hash":"872889BA38256158B573F17AE7637D4527A9A80B2AA50303C92C97D27FD34E4D","merkleComponentHash":"872889BA38256158B573F17AE7637D4527A9A80B2AA50303C92C97D27FD34E4D"},"hashType":0,"secret":"53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573","proof":"414C4C5F594F55525F424153455F4152455F42454C4F4E475F544F5F5553"}
-
-[CONFIRMED] SCGUWZ...
-{"type":16978,"networkType":144,"version":1,"deadline":{"value":"2019-03-24T11:39:34.682"},"fee":{"lower":0,"higher":0},"signature":"9FB58D06C74D57783063659F095643B53AB045D207D331BA225EFB07D2EC6DCB3321FC4317C40A3E6A78A93FB9817056BBC225F80834285EDC28E3E764E38703","signer":{"publicKey":"64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0","address":{"address":"SCGUWZFCZDKIQCACJHKSMRT7R75VY6FQGJOUEZN5","networkType":144}},"transactionInfo":{"height":{"lower":7196,"higher":0},"hash":"872889BA38256158B573F17AE7637D4527A9A80B2AA50303C92C97D27FD34E4D","merkleComponentHash":"872889BA38256158B573F17AE7637D4527A9A80B2AA50303C92C97D27FD34E4D"},"hashType":0,"secret":"53911BA20016A8C927EEDC50E456E76F2F84C5BEABACB9ADF224E23B964D8573","proof":"414C4C5F594F55525F424153455F4152455F42454C4F4E475F544F5F5553"}
+Endpoint: http://localhost:3000/transaction/DA8F05DE41439A4209187E49030B0914D53047F58DE83FB56CE9818CB66C007F
+Hash:     DA8F05DE41439A4209187E49030B0914D53047F58DE83FB56CE9818CB66C007F
+Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
 [Proof Recognized]
 {"proof": "414C4C5F594F55525F424153455F4152455F42454C4F4E475F544F5F5553"}
@@ -85,7 +79,7 @@ Signer:   64DFE4120D0F960C6602B9386542768556D2CD5242975F37837C8C5F238C78C0
 // 入力値がない場合は10byteのランダムな値を用意します
 const input = process.argv[3] || crypto.randomBytes(10).toString('hex');
 // proofを16進数文字列へ変換します
-const proof = convert.utf8ToHex(input).toUpperCase()
+const proof = Convert.utf8ToHex(input).toUpperCase()
 // secretを生成します(SHA3-256アルゴリズムを使用)
 const secret = sha3_256(input).toUpperCase()
 ```
@@ -101,14 +95,14 @@ const secret = sha3_256(input).toUpperCase()
 - [クロスチェーンスワップ — NEM Developer Center](https://nemtech.github.io/ja/concepts/cross-chain-swaps.html#lockhashalgorithm)
 
 ```javascript
-const secretLockTx = nem.SecretLockTransaction.create(
-  nem.Deadline.create(),
-  nem.NetworkCurrencyMosaic.createRelative(2),
-  nem.UInt64.fromUint(2),
-  nem.HashType.Op_Sha3_256,
+const secretLockTx = SecretLockTransaction.create(
+  Deadline.create(),
+  NetworkCurrencyMosaic.createRelative(2),
+  UInt64.fromUint(96 * 360 / 15),
+  HashType.Op_Sha3_256,
   secret,
   recipient,
-  nem.NetworkType.MIJIN_TEST
+  NetworkType.MIJIN_TEST
 );
 ```
 
@@ -118,19 +112,22 @@ const secretLockTx = nem.SecretLockTransaction.create(
 
 
 ```javascript
-if(info.type === nem.TransactionType.SECRET_LOCK) {
-  const secretProofTx = nem.SecretProofTransaction.create(
-    nem.Deadline.create(),
-    nem.HashType.Op_Sha3_256,
+if(info.type === TransactionType.SECRET_LOCK) {
+  const secretProofTx = SecretProofTransaction.create(
+    Deadline.create(),
+    HashType.Op_Sha3_256,
     info.secret, // トランザクションから得られるsecret
+    recipient,
     proof, // 本来は受信者が認知して使用するproof
-    nem.NetworkType.MIJIN_TEST
+    NetworkType.MIJIN_TEST
   );
-  const signedTx = initiater.sign(secretProofTx);
+  const signedTx = initiater.sign(secretProofTx, process.env.GENERATION_HASH);
   util.announce(url, signedTx);
 }
 ```
 
 承認された`SecretLockTransaction`から`secret`を手に入れることが出来ます。
 
-クロスチェーンスワップであれば受信者がこの値を使って、別のチェーンで`SecretLockTransaction`を発行します。
+今回は自分でロックして、自分でアンロックする形になっています。
+
+異なるチェーン間でスワップするのあれば、受信者がこの値を使って別のチェーンで`SecretLockTransaction`を発行します。

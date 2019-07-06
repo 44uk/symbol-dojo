@@ -1,10 +1,12 @@
 {
   "private": true,
-  "name": "scripts",
+  "name": "examples",
   "version": "0.0.1",
   "description": "nem2-dojo example scripts",
   "keywords": [
-    "nem2"
+    "nem",
+    "nem2",
+    "catapult"
   ],
   "repository": {
     "type": "git",
@@ -14,7 +16,8 @@
   "license": "MIT",
   "dependencies": {
     "js-sha3": "^0.8.0",
-    "nem2-sdk": "0.11.5",
-    "rxjs": "^6.4.0"
+    "nem2-sdk": "0.13.0",
+    "ripemd160": "^2.0.2",
+    "rxjs": "^6.5.2"
   }
 }

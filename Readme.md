@@ -47,10 +47,10 @@
     - nem2-sdkのインストール
     - Docker/docker-composeのセットアップ
 - [テスト用ネットワークの環境構築](docs/workstation.md)
-    - 有志によるプライベートネットワーク
     - catapult-service-bootstrapの起動
     - クラスタの動作確認
     - 初期分配の確認
+    - クラスタの停止
     - クラスタ立ち上げ時のトラブルシューティング
 - [nem2-cli](docs/nem2-cli.md)
     - プロファイル登録

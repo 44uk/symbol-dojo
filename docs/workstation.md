@@ -29,7 +29,9 @@ $ cd catapult-service-bootstrap
 $ ./cmds/start-all -d
 ```
 
-初期設定などが動き出し、ブロック生成が始まるまで1分程度待ちます。
+`-d`オプションでバックグラウンド動作させます。
+
+初期設定などが動き出すので、ブロック生成が始まるまで1分程度待ちます。
 
 
 ## クラスタの動作確認
@@ -196,6 +198,39 @@ $ node -e "let uint64 = require('nem2-sdk').UInt64;console.log(new uint64([63603
 ```
 
 `449,949,999.900,000 cat.currency`が配布されていることが確認できました。
+
+
+## クラスタの停止
+
+クラスタを停止するには`./cmds/stop-all`を実行してください。
+
+```shell
+$ ./cmds/stop-all
+Stopping catapult-service-bootstrap_faucet_1            ... done
+Stopping catapult-service-bootstrap_peer-node-1_1       ... done
+Stopping catapult-service-bootstrap_peer-node-0_1       ... done
+Stopping catapult-service-bootstrap_api-node-0_1        ... done
+Stopping catapult-service-bootstrap_rest-gateway_1      ... done
+Stopping catapult-service-bootstrap_db_1                ... done
+Stopping catapult-service-bootstrap_api-node-broker-0_1 ... done
+Removing catapult-service-bootstrap_faucet_1                 ... done
+Removing catapult-service-bootstrap_peer-node-1_1            ... done
+Removing catapult-service-bootstrap_peer-node-0_1            ... done
+Removing catapult-service-bootstrap_api-node-0_1             ... done
+Removing catapult-service-bootstrap_rest-gateway_1           ... done
+Removing catapult-service-bootstrap_init-db_1                ... done
+Removing catapult-service-bootstrap_peer-node-0-nemgen_1     ... done
+Removing catapult-service-bootstrap_peer-node-1-nemgen_1     ... done
+Removing catapult-service-bootstrap_api-node-0-nemgen_1      ... done
+Removing catapult-service-bootstrap_db_1                     ... done
+Removing catapult-service-bootstrap_setup-network_1          ... done
+Removing catapult-service-bootstrap_generate-raw-addresses_1 ... done
+Removing catapult-service-bootstrap_api-node-broker-0_1      ... done
+Removing catapult-service-bootstrap_store-addresses_1        ... done
+Removing network catapult-service-bootstrap_default
+```
+
+再開する場合は起動と同様に`./cmds/start-all -d`を実行してください。
 
 
 ## クラスタ立ち上げ時のトラブルシューティング

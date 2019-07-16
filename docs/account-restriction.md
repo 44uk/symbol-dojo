@@ -1,15 +1,17 @@
 # アカウント制限
 
-アカウントにブロックチェーンレベルで動作するトランザクションに関する制限を定義する機能です。
+アカウントにトランザクションに関する制限をブロックチェーンレベルで定義する機能です。
 
 - [アカウント制限 — NEM Developer Center](https://nemtech.github.io/ja/concepts/account-restriction.html)
 
 制限に引っかかったトランザクションはエラー扱いになるため、ブロックチェーンネットワークに承認されません。
 
-設定できる制限は三種類あります。
+## アカウント制限の種類
+
+設定できる制限は3種類あります。
 
 
-## 受信トランザクション制限
+### 受信トランザクション制限
 
 アカウントにトランザクションの受信可否をブラック・ホワイトリスト形式で設定する機能です。
 
@@ -17,7 +19,7 @@
 - 特定のアドレスからのトランザクションを受け入れたくない
 
 
-## 受信モザイク制限
+### 受信モザイク制限
 
 アカウントに、モザイクの受信可否をブラック・ホワイトリスト形式で設定する機能です。
 
@@ -25,7 +27,7 @@
 - 既知の不要なモザイクを受け取りたくない
 
 
-## 送信トランザクション制限
+### 送信トランザクション制限
 
 アカウントに、トランザクションの種類ごとに制限をかける機能です。
 
@@ -47,7 +49,7 @@ Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH
 Block:     SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
 Property:  block
 Modify:    add
-Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4/restrictions
+Endpoint:  http://localhost:3000/account/A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0/restrictions
 Endpoint:  http://localhost:3000/account/SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2
 
 connection open
@@ -73,7 +75,7 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 まず`alice`のアカウントの`status`モニターを開始しておきます。
 
 ```shell
-$ nem2-cli monitor status  --profile alice
+$ nem2-cli monitor status --profile alice
 Monitoring SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4 using http://localhost:3000
 connection open
 ```

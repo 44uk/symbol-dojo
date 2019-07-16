@@ -86,7 +86,7 @@ $ ./cmds/start-all -d
 
 初期分配された基軸モザイクは初期生成アドレスへ分配されています。
 
-初期アドレスは`./build/generated_addresses/address.yml`にあります。
+初期アドレスは`./build/generated-addresses/addresses.yml`にあります。
 
 `nemesis_addresses:`という箇所から下が初期アドレスです。以下は一例です。
 

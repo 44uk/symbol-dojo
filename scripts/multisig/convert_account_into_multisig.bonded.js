@@ -1,5 +1,5 @@
 /**
- * $ node scripts/multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__
+ * $ node multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__
  */
 const {
   Account,

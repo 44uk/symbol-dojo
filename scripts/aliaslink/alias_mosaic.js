@@ -1,5 +1,5 @@
 /**
- * $ node scripts/alias/alias_mosaic.js namespaceString mosaicHex
+ * $ node alias/alias_mosaic.js namespaceString mosaicHex
  */
 const {
   Account,

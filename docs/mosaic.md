@@ -36,7 +36,7 @@
 
 ## モザイクの作成
 
-`scripts/create_mosaic.js`を実行してください。
+`create_mosaic.js`を実行してください。
 
 このコードはモザイクが有効であるブロック数を引数にとります。
 
@@ -45,7 +45,7 @@
 なお、モザイクの定義にはその定義内容にかかわらず`500 cat:currency`が必要です。
 
 ```javascript
-$ node scripts/mosaic/create_mosaic.js 10000
+$ node mosaic/create_mosaic.js 10000
 initiator:    SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:     http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Mosaic Nonce: 106,164,82,29
@@ -88,14 +88,14 @@ supply:		0
 
 定義だけが存在していてモザイクは発行されていない状態なので`supply 0`と表示されています。
 
-次に`scripts/mutate_mosaic_supply.js`を実行してください。
+次に`mutate_mosaic_supply.js`を実行してください。
 
 このコードは第一引数にモザイクIDを、第二引数に供給量を、第三引数に`add`(追加)または`remove`(削除)を指定します。
 
 モザイクIDには直前に作成したモザイクの16進数文字列を指定してください。
 
 ```shell
-$ node scripts/mosaic/mutate_mosaic_supply.js 6ffb0f4308e810f6 10000 add
+$ node mosaic/mutate_mosaic_supply.js 6ffb0f4308e810f6 10000 add
 initiator:  SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:   http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Mosaic Hex: 6ffb0f4308e810f6
@@ -205,14 +205,14 @@ const supplyTx = MosaicSupplyChangeTransaction.create(
 
 前述のネームスペースのように、アグリゲートトランザクションでトランザクションをまとめることで、定義と供給量の設定を一括で行うことができます。
 
-`scripts/create_mosaic_with_supply.js`を実行してください。
+`create_mosaic_with_supply.js`を実行してください。
 
 このコードは第一引数に供給量を絶対値で指定してください。
 
 第二引数にはモザイク有効期間を引数にとりますが、指定しない場合は`duration: undefined`となり無期限のモザイクとなります。
 
 ```shell
-$ node scripts/mosaic/create_mosaic_with_supply.js 1000
+$ node mosaic/create_mosaic_with_supply.js 1000
 initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Nonce:     202,218,131,213

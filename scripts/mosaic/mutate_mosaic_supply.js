@@ -1,5 +1,5 @@
 /**
- * $ node scripts/mosaic/mutate_mosaic.js deadbeefcafebabe 1000000 add|remove
+ * $ node mosaic/mutate_mosaic.js deadbeefcafebabe 1000000 add|remove
  */
 const nem = require('nem2-sdk');
 const util = require('../util');

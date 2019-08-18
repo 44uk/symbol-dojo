@@ -36,14 +36,14 @@
 
 ## 指定アドレスからの受信ブロック制限を設定する
 
-`scripts/restriction/address.js`を実行してください。
+`restriction/address.js`を実行してください。
 
 このスクリプトは第一引数にアドレスを指定し、第二引数には`block`または`allow`、第三引数に`add`または`remove`を指定します。
 
 ここでは`alice`のアカウントに`bob`のアカウントアドレスをブロック対象に追加してみます。
 
 ```shell
-$ node scripts/restriction/address.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 block add
+$ node restriction/address.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 block add
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Block:     SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
@@ -110,13 +110,13 @@ $ nem2-cli account info --profile bob
 確認後にはブロックを解除するトランザクションを実行しておきます。
 
 ```shell
-$ node scripts/restriction/address.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 block remove
+$ node restriction/address.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 block remove
 ```
 
 
 ## 指定モザイクの受信ブロック制限を設定する
 
-`scripts/restriction/mosaic.js`を実行してください。
+`restriction/mosaic.js`を実行してください。
 
 このスクリプトは第一引数にモザイクIDを指定し、第二引数には`block`または`allow`、第三引数に`add`または`remove`を指定します。
 
@@ -124,7 +124,7 @@ $ node scripts/restriction/address.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 b
 
 
 ```shell
-$ node scripts/restriction/mosaic.js 3f859f237d36c3ae block add
+$ node restriction/mosaic.js 3f859f237d36c3ae block add
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Block:     3f859f237d36c3ae
@@ -166,20 +166,20 @@ Deadline: 2019-07-05 21:22:53.585
 確認後にはブロックを解除するトランザクションを実行しておきます。
 
 ```shell
-$ node scripts/restriction/mosaic.js 3f859f237d36c3ae block remove
+$ node restriction/mosaic.js 3f859f237d36c3ae block remove
 ```
 
 
 ## 指定トランザクションタイプを設定する
 
-`scripts/restriction/entity_type.js`を実行してください。
+`restriction/entity_type.js`を実行してください。
 
 このスクリプトは第一引数にトランザクションのタイプを指定し、第二引数には`block`または`allow`、第三引数に`add`または`remove`を指定します。
 
 ここでは`alice`のアカウントに`TRANSFER`のトランザクションタイプの利用の制限を追加してみます。
 
 ```shell
-$ node scripts/restriction/entity.js TRANSFER block add
+$ node restriction/entity.js TRANSFER block add
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Subject:   TRANSFER
@@ -217,5 +217,5 @@ Deadline: 2019-07-05 22:37:44.433
 確認後にはブロックを解除するトランザクションを実行しておきます。
 
 ```shell
-$ node scripts/restriction/entity.js TRANSFER block remove
+$ node restriction/entity.js TRANSFER block remove
 ```

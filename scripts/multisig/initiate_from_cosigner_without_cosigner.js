@@ -1,5 +1,5 @@
 /**
- * $ node scripts/multisig/initiate_from_cosigner_without_cosigner.js MULTISIG_PUBLIC_KEY RECIPIENT_ADDRESS AMOUNT
+ * $ node multisig/initiate_from_cosigner_without_cosigner.js MULTISIG_PUBLIC_KEY RECIPIENT_ADDRESS AMOUNT
  */
 const {
   Account,

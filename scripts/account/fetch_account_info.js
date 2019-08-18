@@ -1,5 +1,5 @@
 /**
- * $ node scripts/account/fetch_account_info.js ADDRESS
+ * $ node account/fetch_account_info.js ADDRESS
  */
 const {
   Account,

@@ -1,5 +1,5 @@
 /**
- * $ node scripts/account/fetch_transactions.js PUBLIC_KEY
+ * $ node account/fetch_transactions.js PUBLIC_KEY
  */
 const {
   PublicAccount,

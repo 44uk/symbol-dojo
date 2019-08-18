@@ -19,7 +19,7 @@
 
 ## マルチシグアカウントへの変換
 
-`scripts/multisig/convert_account_into_multisig.js`を実行してください。
+`multisig/convert_account_into_multisig.js`を実行してください。
 
 このスクリプトはアカウントを3つ生成し、そのうち1つをマルチシグアカウントに、
 
@@ -35,7 +35,7 @@
 
 
 ```shell
-$ node scripts/multisig/convert_account_into_multisig.js | tee multisig.txt
+$ node multisig/convert_account_into_multisig.js | tee multisig.txt
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 
@@ -186,7 +186,7 @@ util.listener(url, toBeMultisig.address, {
 
 アカウントがアグリゲートボンドトランザクションを発信する必要があるため、`10 cat.currency`以上を保有させておく必要があります。
 
-`node scripts/multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__`として実行してみてください。
+`node multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__`として実行してみてください。
 
 
 ## マルチシグアカウントからの送信
@@ -195,7 +195,7 @@ util.listener(url, toBeMultisig.address, {
 
 マルチシグアカウントからトランザクションを発信する場合は連署者のアカウントからアグリゲートトランザクションを発信します。
 
-`scripts/multisig/initiate_from_cosigner.js`を実行してください。
+`multisig/initiate_from_cosigner.js`を実行してください。
 
 このスクリプトは第一引数に連署者の秘密鍵、第二引数マルチシグアカウントの公開鍵、第三引数に受信者アドレスを渡します。
 
@@ -204,7 +204,7 @@ util.listener(url, toBeMultisig.address, {
 ここでは前の項で作った、連署者として`Cosigner Account1`の秘密鍵を、マルチシグアカウントの公開鍵を、受信者には`Cosigner Account2`のアドレスを指定しました。
 
 ```shell
-$ node scripts/multisig/initiate_from_cosigner.js 3E1252C565E3ACD98748DF7B6FD819BFB69A91593C4FBFBC78F6F88362336A42 DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0 SDJT56GJNCWG74QL3GDGRMKM2IG7QD7NBLI7XEBK
+$ node multisig/initiate_from_cosigner.js 3E1252C565E3ACD98748DF7B6FD819BFB69A91593C4FBFBC78F6F88362336A42 DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0 SDJT56GJNCWG74QL3GDGRMKM2IG7QD7NBLI7XEBK
 Initiator:  SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:   http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Cosignator: SCYCYQ-XUV3DZ-ENGPQI-ANCQJ5-HO6VPI-R7JUBZ-CZ6C
@@ -317,10 +317,10 @@ util.listener(url, initiater.address, {
 
 `1-of-m`構成(最小承認数が1)である場合、トランザクションを送ろうとする連署者だけの署名で十分なので、アグリゲートコンプリートトランザクションとして発行できます。
 
-`scripts/multisig/convert_account_into_multisig_shared.js`は`1-of-2`のマルチシグアカウントを構築します。
+`multisig/convert_account_into_multisig_shared.js`は`1-of-2`のマルチシグアカウントを構築します。
 
 ```shell
-$ node scripts/multisig/convert_account_into_multisig_shared.js
+$ node multisig/convert_account_into_multisig_shared.js
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 
@@ -358,10 +358,10 @@ Signer:   CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833
 {"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071132140,23],"signature":"594F9B05FC989FADA031D519CF10B997AAEDDC3147E4C7ABA66D457CE70E96FC2B4EA74F5F18A76B6626CEE289326F68202184C36124C7F7C400AD0C54B25D0C","signer":"CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833","transactions":[{"transaction":{"type":16725,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071132140,23],"signature":"594F9B05FC989FADA031D519CF10B997AAEDDC3147E4C7ABA66D457CE70E96FC2B4EA74F5F18A76B6626CEE289326F68202184C36124C7F7C400AD0C54B25D0C","signer":"CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833","minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"5363E0EFA521A766E8B95641ABDA106AB2009D197CAF30402870117460DA1293","type":0},{"cosignatoryPublicKey":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","type":0}]}}],"cosignatures":[{"signature":"F28D234E96863EB58222CA486522C63691083FA9A7662D50714CD2B1F3AD2360DC4778E2799779A1AD1F20E0B6AED75F15DC92CE48213888E9EC4FBB78C1C401","signer":{"publicKey":"5363E0EFA521A766E8B95641ABDA106AB2009D197CAF30402870117460DA1293","address":{"address":"SAIJF6GT5YBNRPT65HOKZ2C2KGJTWY63VIUSH7JW","networkType":144}}},{"signature":"FBBAF194CD43E4958D9719A9B82E8DEDD0AF124170F70B97E16BDB5EE8DB4C838CD4A08919BA597835BB09D6D386F72AFBC8306867C14A535AAD7F9282DCAB02","signer":{"publicKey":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","address":{"address":"SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4","networkType":144}}}]}}
 ```
 
-`scripts/multisig/initiate_from_cosigner_without_cosigner.js`はアグリゲートコンプリートで転送するスクリプトです。
+`multisig/initiate_from_cosigner_without_cosigner.js`はアグリゲートコンプリートで転送するスクリプトです。
 
 ```shell
-$ node scripts/multisig/initiate_from_cosigner_without_cosigner.js CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833 SAIJF6GT5YBNRPT65HOKZ2C2KGJTWY63VIUSH7JW
+$ node multisig/initiate_from_cosigner_without_cosigner.js CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833 SAIJF6GT5YBNRPT65HOKZ2C2KGJTWY63VIUSH7JW
 Initiator:  SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:   http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Multisig:   SAAU3C-6TZRMX-HQI3OF-W2MYYO-IBXB52-233PZ5-ASU4
@@ -399,7 +399,7 @@ MLMSを構築する際に特別な方法は必要とせず、単にマルチシ�
 
 ### MLMSの作成
 
-`scripts/multisig/setup_mlms.js`を実行してください。
+`multisig/setup_mlms.js`を実行してください。
 
 このスクリプトはアカウントを7つ生成し、そのうち1つをトップのマルチシグアカウントに、
 
@@ -418,7 +418,7 @@ MLMSを構築する際に特別な方法は必要とせず、単にマルチシ�
 図にするとこのような状態になります。
 
 ```shell
-$ node scripts/multisig/setup_mlms.js
+$ node multisig/setup_mlms.js
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 

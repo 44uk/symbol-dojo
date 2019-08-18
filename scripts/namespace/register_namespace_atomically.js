@@ -1,5 +1,5 @@
 /**
- * $ node scripts/namespace/register_namespace_atomically.js aaa.bbb.ccc 10000
+ * $ node namespace/register_namespace_atomically.js aaa.bbb.ccc
  */
 const {
   Account,
@@ -19,7 +19,7 @@ const initiator = Account.createFromPrivateKey(
 );
 
 const namespace = process.argv[2];
-const blocks = process.argv[3] || 100; // NOTE: 現時点の仕様だと1blockにつき1cat.currencyかかる
+const blocks = process.argv[3] || 1000; // NOTE: 現時点の仕様だと1blockにつき1cat.currencyかかる
 const parts = namespace.split('.');
 
 console.log('Initiator: %s', initiator.address.pretty());

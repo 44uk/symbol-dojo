@@ -1,5 +1,5 @@
 /**
- * $ node scripts/transfer/create_mosaic_transfer_by_named_mosaic.js RECIPIENT NAMESPACE AMOUNT
+ * $ node transfer/create_mosaic_transfer_by_named_mosaic.js RECIPIENT NAMESPACE AMOUNT
  */
 const {
   Account,

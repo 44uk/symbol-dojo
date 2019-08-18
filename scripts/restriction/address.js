@@ -1,5 +1,5 @@
 /**
- * $ node scripts/filter/address.js SDPF2RAQ6CUSOHCJD5U7YWRYF7Y3GRXNKTBL5C2V block add
+ * $ node filter/address.js SDPF2RAQ6CUSOHCJD5U7YWRYF7Y3GRXNKTBL5C2V block add
  */
 const {
   Account,

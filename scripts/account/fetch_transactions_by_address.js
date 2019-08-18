@@ -1,5 +1,5 @@
 /**
- * $ node scripts/account/fetch_transactions_by_address.js ADDRESS
+ * $ node account/fetch_transactions_by_address.js ADDRESS
  */
 const {
   Address,

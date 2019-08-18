@@ -7,10 +7,10 @@
 
 ## アカウント情報の取得
 
-`scripts/account/fetch_account_info.js`を実行してください。
+`account/fetch_account_info.js`を実行してください。
 
 ```shell
-$ node scripts/account/fetch_account_info.js
+$ node account/fetch_account_info.js
 AccountInfo {
   meta:
    AccountMetaDTO {
@@ -73,10 +73,10 @@ accountHttp.getAccountInfo(address)
 
 ## 保有モザイクの定義情報の取得
 
-`scripts/account/fetch_owned_mosaics.js`を実行してください。
+`account/fetch_owned_mosaics.js`を実行してください。
 
 ```shell
-$ node scripts/account/fetch_owned_mosaics.js SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+$ node account/fetch_owned_mosaics.js SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 [ MosaicAmountView {
     mosaicInfo:
      MosaicInfo {
@@ -203,14 +203,14 @@ $ node scripts/account/fetch_owned_mosaics.js SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH
 
 ## アカウント情報と保有モザイク情報を同時に取得
 
-`scripts/fetch_account_info_with_mosaics.js`を実行してください。
+`fetch_account_info_with_mosaics.js`を実行してください。
 
 これは`rxjs`の応用による、その2つをあわせて扱う場合のコードです。
 
 このコードはアドレスの保有するモザイクを定義情報付きで取得します。
 
 ```shell
-$ node scripts/account/fetch_account_info_with_mosaics.js
+$ node account/fetch_account_info_with_mosaics.js
 AccountInfo {
   meta:
    AccountMetaDTO {
@@ -403,14 +403,14 @@ accountHttp.getAccountInfo(address)
 
 アカウントに関するトランザクションのAPIは、公開鍵を指定することで取得することが出来ます。
 
-`scripts/account/fetch_transactions.js`を実行します。
+`account/fetch_transactions.js`を実行します。
 
 このスクリプトは受信トランザクション、送信トランザクション、未承認トランザクションそれぞれをまとめて取得します。
 
 第一引数に取得したいアドレスの公開鍵を渡して実行します。
 
 ```shell
-$ node scripts/account/fetch_transactions.js A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
+$ node account/fetch_transactions.js A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 { incomings:
    [ TransferTransaction {
        type: 16724,
@@ -600,7 +600,7 @@ forkJoin([
 公開鍵が晒されていないアカウントの受信トランザクションを取得したい場合は公開鍵を直接指定するしかありません。
 
 ```shell
-$ node scripts/account/fetch_transactions.js SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+$ node account/fetch_transactions.js SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 { account:
    AccountInfo {
      meta:

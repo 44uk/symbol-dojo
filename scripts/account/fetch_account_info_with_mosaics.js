@@ -1,5 +1,5 @@
 /**
- * $ node scripts/account/fetch_account_info_with_mosaics.js ADDRESS
+ * $ node account/fetch_account_info_with_mosaics.js ADDRESS
  */
 const {
   Account,

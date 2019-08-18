@@ -1,5 +1,5 @@
 /**
- * $ node scripts/multisig/convert_account_into_multisig_shared.js
+ * $ node multisig/convert_account_into_multisig_shared.js
  */
 const {
   Account,

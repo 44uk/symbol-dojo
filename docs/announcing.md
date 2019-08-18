@@ -57,14 +57,14 @@ alice->
 
 ### コード実行
 
-`scripts/transfer/create_mosaic_transfer.js`を実行してみましょう。
+`transfer/create_mosaic_transfer.js`を実行してみましょう。
 
 このスクリプトは引数に宛先アドレスとモザイク(`cat.currency`の相対量)を指定します。
 
 ここでは`bob`のアドレスへ送ってみます。
 
 ```shell
-$ node scripts/transfer/create_mosaic_transfer.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 10
+$ node transfer/create_mosaic_transfer.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 10
 initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Recipient: SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
@@ -458,7 +458,7 @@ DBMSにおける「トランザクション」と同じような概念です。
 
 ## 一括転送トランザクション(アグリゲートコンプリート)
 
-`scripts/transfer/create_transfers_atomically.js`を実行してみましょう。
+`transfer/create_transfers_atomically.js`を実行してみましょう。
 
 このコードは便宜上、実行時に生成した3つのアカウントへ同時にモザイクを送信します。
 
@@ -467,7 +467,7 @@ DBMSにおける「トランザクション」と同じような概念です。
 生成したアカウントはコンソールに出力されるだけなので、必要があれば保存してください。
 
 ```shell
-$ node scripts/transfer/create_transfers_atomically.js 10
+$ node transfer/create_transfers_atomically.js 10
 initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 
@@ -571,7 +571,7 @@ const aggregateTx = AggregateTransaction.createComplete(
 
 ## 転送要求トランザクション(アグリゲートボンド)
 
-`scripts/transfer/create_pullfunds.js`を実行してください。
+`transfer/create_pullfunds.js`を実行してください。
 
 このコードは`alice`が`10 cat.currency`の支払いの請求を行い、請求を受取った`bob`はそれを支払うシーンです。
 
@@ -584,7 +584,7 @@ const aggregateTx = AggregateTransaction.createComplete(
 現実的な仕組みのコードではないですが、トランザクションや署名タイミングの流れを掴んでください。
 
 ```shell
-$ node scripts/transfer/create_pullfunds.js 72524C849DF216E0FE96A5011B1329107993D9DE39D0574835CB47511253AD61
+$ node transfer/create_pullfunds.js 72524C849DF216E0FE96A5011B1329107993D9DE39D0574835CB47511253AD61
 initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Debtor:    SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2

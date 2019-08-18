@@ -1,5 +1,5 @@
 /**
- * $ node scripts/filter/entity.js type block add
+ * $ node filter/entity.js type block add
  */
 const {
   Account,

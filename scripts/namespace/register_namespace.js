@@ -1,5 +1,5 @@
 /**
- * $ node scripts/namespace/register_namespace.js japan 10000
+ * $ node namespace/register_namespace.js test
  */
 const {
   Account,
@@ -18,7 +18,7 @@ const initiator = Account.createFromPrivateKey(
 );
 
 const namespace = process.argv[2];
-const blocks = process.argv[3] || 100; // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
+const blocks = process.argv[3] || 5000; // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
 const nsId = new NamespaceId(namespace);
 
 console.log('Initiator: %s', initiator.address.pretty());

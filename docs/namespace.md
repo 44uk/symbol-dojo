@@ -43,7 +43,7 @@
 
 ## ネームスペースの取得
 
-`scripts/namespace/register_namespace.js`を実行してください。
+`namespace/register_namespace.js`を実行してください。
 
 このスクリプトは第一引数に取得したいネームスペース名を渡します。
 
@@ -52,7 +52,7 @@
 なお、レンタル期間`1 block`につき`1 cat.currency`が必要です。
 
 ```shell
-$ node scripts/namespace/register_namespace.js test123
+$ node namespace/register_namespace.js test123
 initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Namespace: test123 (ff87cc82daab0bbf)
@@ -153,14 +153,14 @@ if (child) {
 
 この順序を変えることはできませんが、これらのトランザクションをアグリゲートトランザクションで1つのトランザクションにすることができます。
 
-`scripts/namespace/register_namespace_atomically.js`を実行してください。
+`namespace/register_namespace_atomically.js`を実行してください。
 
 このスクリプトは第一引数にドットで区切ったサブネームスペースを含めたネームスペース名を渡します。
 
 第二引数でレンタル期間を指定できます。(ない場合は100ブロック)
 
 ```shell
-$ node scripts/namespace/register_namespace_atomically.js aaa.bbb.ccc
+$ node namespace/register_namespace_atomically.js aaa.bbb.ccc
 initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Blocks:    100

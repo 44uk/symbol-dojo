@@ -1,5 +1,5 @@
 /**
- * $ node scripts/mosaic/create_mosaic.js 10000
+ * $ node mosaic/create_mosaic.js 10000
  */
 const {
   Account,

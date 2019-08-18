@@ -1,5 +1,5 @@
 /**
- * $ node scripts/mosaic/create_mosaic_with_supply.js 1000000
+ * $ node mosaic/create_mosaic_with_supply.js 1000000
  */
 const {
   Account,

@@ -19,12 +19,12 @@
 
 リンクする前にネームスペース名でモザイクを取得するコードを実行してみましょう。
 
-`scripts/namespace/fetch_mosaic_by_alias.js test123`
+`namespace/fetch_mosaic_by_alias.js test123`
 
 第一引数にはネームスペース名を渡します。
 
 ```shell
-$ node scripts/namespace/fetch_mosaic_by_alias.js test123
+$ node namespace/fetch_mosaic_by_alias.js test123
 Namespace: test123 (ff87cc82daab0bbf)
 Endpoint:  http://localhost:3000/namespace/ff87cc82daab0bbf
 
@@ -37,12 +37,12 @@ Error:  Error: No mosaicId is linked to namespace '3668642751,4287089794'
 
 それではネームスペースとモザイクをリンクさせてみましょう。
 
-`scripts/aliaslink/alias_mosaic.js test123 6ffb0f4308e810f6`
+`aliaslink/alias_mosaic.js test123 6ffb0f4308e810f6`
 
 第一引数にはネームスペース名を渡し、第二引数にはモザイクIDを渡します。
 
 ```shell
-$ node scripts/aliaslink/alias_mosaic.js test123 6ffb0f4308e810f6
+$ node aliaslink/alias_mosaic.js test123 6ffb0f4308e810f6
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Namespace: test123
@@ -63,10 +63,10 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 {"transaction":{"type":17230,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4065705116,23],"signature":"203139A29C9ED3EADEBDAB4FFE958F8346309E9B486B1C3FD970844C12AAF04FDE96BC920B6F18887A37E87828505FCA618086CC62424D66AC7936EE419BAC0D","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","namespaceId":{"id":[3668642751,4287089794],"fullName":""},"mosaicId":{"id":[149426422,1878724419]}}}
 ```
 
-承認されたら、再度`scripts/namespace/fetch_mosaic_by_alias.js`を実行してみましょう。
+承認されたら、再度`namespace/fetch_mosaic_by_alias.js`を実行してみましょう。
 
 ```shell
-$ node scripts/namespace/fetch_mosaic_by_alias.js test123
+$ node namespace/fetch_mosaic_by_alias.js test123
 Namespace: test123 (ff87cc82daab0bbf)
 Endpoint:  http://localhost:3000/namespace/ff87cc82daab0bbf
 
@@ -138,16 +138,16 @@ nsHttp.getLinkedMosaicId(nsId).subscribe(
 
 ```shell
 # ネームスペース`alice`を取得
-$ node scripts/namespace/register_namespace.js alice
+$ node namespace/register_namespace.js alice
 
 # ネームスペースで取得に失敗することを確認
-$ node scripts/namespace/fetch_account_by_alias.js alice
+$ node namespace/fetch_account_by_alias.js alice
 
 # ネームスペースをアカウントへリンク
-$ node scripts/aliaslink/alias_account.js alice SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
+$ node aliaslink/alias_account.js alice SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 
 # 取得できることを確認
-$ node scripts/namespace/fetch_account_by_alias.js alice
+$ node namespace/fetch_account_by_alias.js alice
 Namespace: alice (9cf66fb0cfeed2e0)
 Endpoint:  http://localhost:3000/namespace/9cf66fb0cfeed2e0
 
@@ -155,7 +155,7 @@ Namespace: alice
 Address:   SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 
 # ネームスペース名でモザイクを送信できることを確認
-$ node scripts/transfer/create_mosaic_transfer_by_namespace.js alice 10
+$ node transfer/create_mosaic_transfer_by_namespace.js alice 10
 ```
 
 
@@ -163,7 +163,7 @@ $ node scripts/transfer/create_mosaic_transfer_by_namespace.js alice 10
 
 サブネームスペースをアグリゲートトランザクションで取得したように、この一連の作業もアトミックにできます。
 
-`scripts/mosaic/create_named_mosaic_with_supply.js`を実行してください。
+`mosaic/create_named_mosaic_with_supply.js`を実行してください。
 
 このスクリプトは第一引数に取得したいネームスペース名を渡し、第二引数でモザイク供給量を指定します。
 
@@ -174,7 +174,7 @@ $ node scripts/transfer/create_mosaic_transfer_by_namespace.js alice 10
 中を確認してみてください。
 
 ```shell
-$ node scripts/mosaic/create_named_mosaic_with_supply.js qwe.rty.uio 3000
+$ node mosaic/create_named_mosaic_with_supply.js qwe.rty.uio 3000
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Blocks:    100
@@ -208,7 +208,7 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 実行後、ネームスペース名でモザイクが取得できるか、モザイクは作成できているかなど確認してみてください。
 
 ```shell
-$ node scripts/namespace/fetch_mosaic_by_alias.js qwe.rty.uio
+$ node namespace/fetch_mosaic_by_alias.js qwe.rty.uio
 Namespace: qwe.rty.uio (c994422e6a5c5dc3)
 Endpoint:  http://localhost:3000/namespace/c994422e6a5c5dc3
 
@@ -240,7 +240,7 @@ Mosaics
 
 ## ネームスペースでモザイクを送信する
 
-`scripts/transfer/create_mosaic_transfer_by_named_mosaic.js`を実行します。
+`transfer/create_mosaic_transfer_by_named_mosaic.js`を実行します。
 
 ネームスペースとリンクさせたモザイクを、ネームスペースの指定によって送信してみます。
 
@@ -249,7 +249,7 @@ Mosaics
 このスクリプトは第一引数に宛先アドレスを、第二引数にネームスペースを、第三引数に送信量を指定します。
 
 ```shell
-$ node scripts/transfer/create_mosaic_transfer_by_named_mosaic.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 qwe.rty.uio 10
+$ node transfer/create_mosaic_transfer_by_named_mosaic.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 qwe.rty.uio 10
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
 Recipient: SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2
@@ -327,7 +327,7 @@ nsHttp.getLinkedMosaicId(nsId)
     }
 ```
 
-それ以外の処理は`scripts/transfer/create_mosaic_transfer.js`とほとんど同じです。
+それ以外の処理は`transfer/create_mosaic_transfer.js`とほとんど同じです。
 
 
 

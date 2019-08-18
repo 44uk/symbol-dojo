@@ -1,5 +1,5 @@
 /**
- * $ node scripts/filter/mosaic.js MOSAIC_HEX block add
+ * $ node filter/mosaic.js MOSAIC_HEX block add
  */
 const {
   Account,

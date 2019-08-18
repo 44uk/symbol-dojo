@@ -1,5 +1,5 @@
 /**
- * $ node scripts/transfer/create_pullfunds.js DEBTOR_PRIVATE_KEY
+ * $ node transfer/create_pullfunds.js DEBTOR_PRIVATE_KEY
  */
 const {
   Account,

@@ -1,5 +1,5 @@
 /**
- * $ node scripts/mosaic/create_named_mosaic.js aaa.bbb.ccc 100
+ * $ node mosaic/create_named_mosaic.js aaa.bbb.ccc 5000
  */
 const {
   Account,
@@ -27,7 +27,7 @@ const initiator = Account.createFromPrivateKey(
 );
 
 const namespace = process.argv[2];
-const blocks = process.argv[4] || 100;
+const blocks = process.argv[4] || 1000;
 const parts = namespace.split('.');
 
 console.log('Initiator: %s', initiator.address.pretty());
@@ -111,8 +111,6 @@ const aliasTx = MosaicAliasTransaction.create(
 );
 txes.push(aliasTx)
 
-console.log('Txes Len: ', txes.length);
-console.log('');
 const aggregateTx = AggregateTransaction.createComplete(
   Deadline.create(),
   txes.map(tx => tx.toAggregate(initiator.publicAccount)),

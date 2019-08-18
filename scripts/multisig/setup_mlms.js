@@ -1,5 +1,5 @@
 /**
- * $ node scripts/multisig/setup_mlms.js
+ * $ node multisig/setup_mlms.js
  */
 const {
   Account,

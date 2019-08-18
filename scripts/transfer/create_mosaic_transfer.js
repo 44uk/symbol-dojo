@@ -1,5 +1,5 @@
 /**
- * $ node scripts/transfer/create_mosaic_transfer.js RECIPIENT_ADDRESS 10
+ * $ node transfer/create_mosaic_transfer.js RECIPIENT_ADDRESS 10
  */
 const {
   Account,

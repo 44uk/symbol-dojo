@@ -1,5 +1,5 @@
 /**
- * $ node scripts/secretlock/lock_and_proof.js RECI{IEMT_ADDRESS PROOF
+ * $ node secretlock/lock_and_proof.js RECI{IEMT_ADDRESS PROOF
  */
 const sha3_256 = require('js-sha3').sha3_256;
 const crypto = require('crypto');

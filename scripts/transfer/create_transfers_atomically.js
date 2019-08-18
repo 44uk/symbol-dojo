@@ -1,5 +1,5 @@
 /**
- * $ node scripts/transfer/create_transfers_atomically.js 1
+ * $ node transfer/create_transfers_atomically.js 1
  */
 const {
   Account,

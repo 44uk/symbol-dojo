@@ -1,5 +1,5 @@
 /**
- * $ node scripts/alias/alias_account.js namespaceString address
+ * $ node alias/alias_account.js namespaceString address
  */
 const {
   Account,

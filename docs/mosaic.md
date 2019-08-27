@@ -1,10 +1,10 @@
 # モザイクとは
 
-`nem`ネットワーク上に独自の通貨を定義する機能です。
-
-- [モザイク — NEM Developer Center](https://nemtech.github.io/ja/concepts/mosaic.html)
+モザイクとはnemネットワーク上で定義される通貨であり、それを定義する機能があります。
 
 基軸モザイクである`cat.currency`もモザイクで、定義上は同等な存在となります。
+
+- [モザイク — NEM Developer Center](https://nemtech.github.io/ja/concepts/mosaic.html)
 
 モザイクには作成時に設定できる定義があります。
 
@@ -14,13 +14,7 @@
 - 供給量変更許可
 - Levy変更許可
 
-モザイク供給量はモザイク作成後に設定するトランザクションを発信します。
-
-モザイクは`75caa6b686e7e7ba`というようなネットワーク上で一意なIDを持ちます。
-
-先のネームスペースがこのモザイクIDと紐づくことで`test123`という名称のモザイクとして認識されるようになります。
-
-モザイクについて`nem1`の仕様を知っている方は「おや？」と感じたかと思いますが、これについては後の仕様変更にて触れます。
+モザイクは`229bd68b3145ee8f`というようなネットワーク上で一意なIDを持ちます。
 
 
 ## モザイクの用途
@@ -31,7 +25,7 @@
 - 保有によるフラグ制御や値の表現
 - 発行者と受信者間だけでやり取りされる権利の表現
 
-モザイクをどう使うかはそのサービス提供者の手腕が問われます。
+モザイクをどう使うかはそのサービス開発・提供者の手腕が問われます。
 
 
 ## モザイクの作成
@@ -66,9 +60,7 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 {"transaction":{"type":16717,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063214264,23],"signature":"57454E59580739CD46FB79036DE865713895BBF1578C7030F8456AB997063C0C8F63BBA11B59E9D9F67065B0AF76BAB4F83F79A99D28EA045D4BDAD03AE6EE0D","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","nonce":491955306,"mosaicId":{"id":[149426422,1878724419]},"properties":[{"id":0,"value":[3,0]},{"id":1,"value":[0,0]},{"id":2,"value":[10000,0]}]}}
 ```
 
-承認されたらURLで確認してみましょう。
-
-APIのレスポンスだとすこし見にくいと思うので`nem2-cli`でも確認してみましょう。
+承認されたら`nem2-cli`で確認してみましょう。
 
 ```shell
 $ nem2-cli mosaic info -h 6ffb0f4308e810f6 --profile alice
@@ -114,11 +106,9 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
 [CONFIRMED] SAFPLK...
 {"transaction":{"type":16973,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4063606945,23],"signature":"E9410E6BDC6B193C1986879ABF1D9ECE50E50F3397AE66087E09BB97B82102A27B87F88D4419D0A3A409EC0B3302A7CA33D800D2253DA22BC09051EF5F280C00","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","mosaicId":{"id":[149426422,1878724419]},"direction":1,"delta":[10000,0]}}
-
-
 ```
 
-承認されたらもう一度モザイクのリソースURLを確認するか`nem2-cli`で確認してみましょう。
+承認されたらもう一度`nem2-cli`で確認します。
 
 ```shell
 $ nem2-cli mosaic info -h 6ffb0f4308e810f6 --profile alice
@@ -156,6 +146,8 @@ Mosaics
 ```
 
 これでモザイクの定義が完了しました。
+
+このモザイクは基軸モザイクの`cat.currency`と同様に、他のアカウントへ転送することができます。
 
 
 ### コード解説
@@ -199,6 +191,8 @@ const supplyTx = MosaicSupplyChangeTransaction.create(
 ```
 
 モザイクID、追加または削除の固定値、供給量を指定して`MosaicSupplyChangeTransaction`オブジェクトを作成します。
+
+これらのトランザクションを発信して、承認されれば独自モザイクを利用する準備が整います。
 
 
 ## モザイク定義と供給量をアトミックに定義する

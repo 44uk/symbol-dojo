@@ -1,43 +1,33 @@
 # 動作環境の構築
 
-このプロジェクトでは次のソフトウェアを利用します。
+このプロジェクトで使用しているバージョンは次のとおりです
 
-各ソフトウェアをインストールして、実行可能な状態に準備してください。
-
-このプロジェクトでは次のバージョンのツールを使用しています。
-
-- nodejs 10.15.3
+- Node.js 10.15.3
 - nem2-cli 0.13.0
 - nem2-sdk 0.13.0
+- catapult-service-bootstrap 0.6.0.1
 
 - (ローカルネットワークを構築する場合)
-    - Docker version 18.09.2, build 6247962
-    - docker-compose version 1.23.2, build 1110ad01
+    - Docker version 18.09.3, build 74b1e89
+    - docker-compose version 1.24.1, build 4667896b
 
-メジャーバージョンが大きく異なっていなければ、これらのバージョン以外でも動作すると思われます。
+メジャーバージョンが大きく異なっていなければ、これらのバージョン以外でも動作すると思われますが、問題が発生する場合は上記に合わせてください。
 
-問題が起きるようであれば、上記に合わせてみてください。
+特に`nem2-cli`,`nem2-sdk`,`catapult-service-bootstrap`の組み合わせについて、APIノードのレスポンススキーマの差異によって正常に動作しない場合があります。
 
-`MacOS`/`Linux`環境下にて、`Node.js`と`ターミナルエミュレータ`が利用できれば進められる内容となっています。
+`macOS`上で動作させた内容のため、`Windows`や`Linux`環境で行う場合はコマンドライン操作が異なる場合があります。
 
-(`Windows`環境では確認できておりませんが、一部のサンプルで用いられているCLIツールのコマンドを除けば`JavaScript`コードは動作するはずです)
+適宜読み替えて操作してください。
 
 
 ## Node.jsのインストール
 
-`Node.js`がすでにインストール済みである場合、はバージョンを確認してください。
-
-`nem2`関連のソースを動作させるためには最低でも`8.9.x`以上が必要です。
+`Node.js`のインストールは公式のインストーラや`nodenv`などのバージョンマネージャなどを用いてインストールしてください。
 
 - [Node\.js](https://nodejs.org/ja/)
-
-公式サイトよりインストーラをダウンロードしてインストールを行ってください。
-
-お好みで`nodenv`のような複数バージョンの環境構築ツールを用いたインストールでもよいです。
-
 - [nodenv/nodenv: Manage multiple NodeJS versions\.](https://github.com/nodenv/nodenv)
 
-インストールができたらターミナルを開いて動作の確認を行ってください。
+コマンドパスが通っており、バージョンが確認できる状態にしてください。
 
 ```shell
 $ node -v
@@ -50,25 +40,14 @@ v6.9.0
 
 ## nem2-cliのインストール
 
-`npm`コマンドによってパッケージのインストールを行います。
-
-```shell
-$ npm install nem2-cli@0.13.0 -g
-```
-
-`nem2-cli`はコマンドラインツールのため、`-g`オプションをつけて実行できるようにします。
-
-`npm`でパッケージをインストールし、`nodejs`によりコードが実行できる状態にエディタ等の準備してください。
-
-バージョン`0.13.0`以上が`elephant`対応版です。
-
-更新により異なるバージョンがダウンロードされるかもしれないのでバージョン指定をしています。
+`nem2-cli`はnemネットワークからアカウントやトランザクションの情報を取得したり、トランザクションを発信するコマンドラインツールです。
 
 - [nem2\-cli \- npm](https://www.npmjs.com/package/nem2-cli)
 
-コマンドを実行して動作を確認してください。
+グローバルインストールをして、パスが通っていることを確認してください。
 
 ```shell
+$ npm install nem2-cli@0.13.0 -g
 $ nem2-cli
                         ____            _ _
    _ __   ___ _ __ ___ |___ \       ___| (_)
@@ -77,20 +56,6 @@ $ nem2-cli
   |_| |_|\___|_| |_| |_|_____|     \___|_|_|
 
                                      v0.13.0
-
-  USAGE
-
-    nem2-cli <subcommand>
-
-  SUBCOMMANDS
-
-    account     - Fetch account information
-    blockchain  - Fetch blockchain information
-    mosaic      - Fetch mosaic information
-    namespace   - Fetch namespace information
-    transaction - Send transactions
-    monitor     - Monitor blocks, transactions and errors
-    profile     - Profile management
 ```
 
 
@@ -125,8 +90,7 @@ $ npm install
 
 ```shell
 $ docker -v
-Docker version 18.09.2, build 6247962
-
+Docker version 19.03.1, build 74b1e89
 $ docker-compose -v
-docker-compose version 1.23.2, build 1110ad01
+docker-compose version 1.24.1, build 4667896b
 ```

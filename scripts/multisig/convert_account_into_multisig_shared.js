@@ -80,6 +80,7 @@ const aggregateTx = AggregateTransaction.createComplete(
 
 util.listener(url, toBeMultisig.address, {
   onOpen: () => {
+    // 連署者アカウントによる署名を回避するために`signTransactionWithCosignatories`を使う
     const signedTx = toBeMultisig.signTransactionWithCosignatories(
       aggregateTx,
       cosigners,

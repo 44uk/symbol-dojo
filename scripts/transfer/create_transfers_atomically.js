@@ -1,5 +1,5 @@
 /**
- * $ node transfer/create_transfers_atomically.js 1
+ * $ node transfer/create_transfers_atomically.js 30
  */
 const {
   Account,
@@ -51,8 +51,7 @@ const txes = recipients.map(account => {
 const aggregateTx = AggregateTransaction.createComplete(
   Deadline.create(),
   txes.map(tx => tx.toAggregate(initiator.publicAccount)),
-  NetworkType.MIJIN_TEST,
-  []
+  NetworkType.MIJIN_TEST
 );
 
 util.listener(url, initiator.address, {

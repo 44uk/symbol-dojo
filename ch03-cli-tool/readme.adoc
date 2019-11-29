@@ -1,0 +1,363 @@
+== nem2-cli
+
+アカウントを登録して、NEMネットワークから情報を取得したり、トランザクションを発行するコマンドラインツールです。
+
+* https://nemtech.github.io/ja/cli.html[クライアント — NEM Developer Center]
+
+
+=== プロファイルの登録
+
+ウォレットのようにアカウントにプロファイル名をつけて保存し、呼び出して使うことができます。
+
+プロファイルは `$HOME/.nem2rc.json` として次の形式で保存されます。
+
+[source,json]
+----
+{"alice":{
+  "privateKey":"7EF4AAA5507C7DBDFDD30D52922DF3AC46D2384593FA2E620D19848ED7F60636",
+  "networkType":144,
+  "url":"http://localhost:3000",
+  "networkGenerationHash":"53F73344A12341618CEE455AC412A0B57D41CEC058965511C0BA016156F4BF47"
+}}
+----
+
+
+=== プロファイルの登録
+
+各種コマンドを動かすために初期配布アカウントをプロファイルとして保存します。
+
+.build/generated-addresses/addresses.yml nemesis_addresses例
+----
+nemesis_addresses:
+- private: 791107322244D47D71F3A7CBD71C6BAC50D34554D094DB12E7C37BD3167AE70F
+  public: 2ADD369D13AF5E3C9B628E1CA4CF7D48C0A9031EAE3BD1BDF21DC22B54DDFE02
+  address: SB7CEHTBPPP7NHTKBXWFU7A44T5RFF7GO5OJQWCF
+(省略)
+----
+
+先に確認した初期分配アドレスの秘密鍵を使います。
+
+[source,shell]
+----
+$ nem2-cli profile create -n MIJIN_TEST -p 791107322244D47D71F3A7CBD71C6BAC50D34554D094DB12E7C37BD3167AE70F -u http://localhost:3000 --profile nemesis
+Profile stored correctly
+nemesis->
+	Network:	MIJIN_TEST
+	Url:		http://localhost:3000
+	GenerationHash:	0EE13AFBE49394B9985DB8AF1BBCD98859BA9277ACF3A413D639D9C8D76D538F
+	Address:	SB7CEHTBPPP7NHTKBXWFU7A44T5RFF7GO5OJQWCF
+	PublicKey:	2ADD369D13AF5E3C9B628E1CA4CF7D48C0A9031EAE3BD1BDF21DC22B54DDFE02
+	PrivateKey:	791107322244D47D71F3A7CBD71C6BAC50D34554D094DB12E7C37BD3167AE70F
+----
+
+`-n` でネットワークタイプを指定します。 `MIJIN_TEST` を渡します。
+`-p` で秘密鍵を指定します。初期分配アドレスの秘密鍵を渡します。
+`-u` でAPIゲートウェイのURLを指定します。 http://localhost:3000 を渡します。
+`--profile` でプロファイル名を指定します。 `nemesis` を渡します。
+各コマンド実行時に `--profile nemesis` とプロファイル名を指定することで、この設定を利用できます。
+
+NOTE: catapult-service-bootstrapはデフォルトではMIJIN_TESTとして稼働します。ネットワークはMIJIN_TEST,MIJIN,TEST_NET,MAIN_NETの４つが定義されています。NEM/Mijinの関係については公式ブログの記事を参照してください。 https://blog.nem.io/jp-outlining-the-relationship-between-nem-mijin-catapult/
+
+次は新たにアカウントを生成してプロファイルとして登録します。
+
+[source,shell]
+----
+$ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile alice
+New Account:	SDUCBS-RYQTSW-EGAOZW-YO6AAK-BSM6LV-ON7E5W-BHVQ
+Public Key:	B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B
+Private Key:	C2337B8926ED13EA2C481AB559FFD716E5C3AD76273759B4F7A0DB9315745972
+
+Stored alice profile
+----
+
+ここでは各設定をオプションで渡しましたが、指定しない場合は対話式で入力を問われます。
+今回は `--profile` オプションでプロファイルに `alice` と名付けました。
+こちらもプロファイルを使ってコマンドを叩く際には `--profile alice` をつけて実行します。
+
+さらに `bob` というアカウントも作っておきます。
+
+[source,shell]
+----
+$ nem2-cli account generate -n MIJIN_TEST -u http://localhost:3000 -s --profile bob
+(省略)
+----
+
+
+=== プロファイルの確認
+
+これで `nemesis` , `alice` , `bob` の3つのプロファイルが登録されたので確認します。
+登録したプロファイルは `profile list` コマンドで確認できます。
+
+[source,shell]
+----
+$ nem2-cli profile list
+
+alice->
+	Network:	MIJIN_TEST
+	Url:		http://localhost:3000
+	GenerationHash:	0EE13AFBE49394B9985DB8AF1BBCD98859BA9277ACF3A413D639D9C8D76D538F
+	Address:	SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ
+	PublicKey:	B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B
+	PrivateKey:	C2337B8926ED13EA2C481AB559FFD716E5C3AD76273759B4F7A0DB9315745972
+
+nemesis->
+	Network:	MIJIN_TEST
+	Url:		http://localhost:3000
+	GenerationHash:	0EE13AFBE49394B9985DB8AF1BBCD98859BA9277ACF3A413D639D9C8D76D538F
+	Address:	SB7CEHTBPPP7NHTKBXWFU7A44T5RFF7GO5OJQWCF
+	PublicKey:	2ADD369D13AF5E3C9B628E1CA4CF7D48C0A9031EAE3BD1BDF21DC22B54DDFE02
+	PrivateKey:	791107322244D47D71F3A7CBD71C6BAC50D34554D094DB12E7C37BD3167AE70F
+
+bob->
+	Network:	MIJIN_TEST
+	Url:		http://localhost:3000
+	GenerationHash:	0EE13AFBE49394B9985DB8AF1BBCD98859BA9277ACF3A413D639D9C8D76D538F
+	Address:	SDJ2MDGUVL7LST7LD4SVXHA76JTTH5HOAJEWCMIB
+	PublicKey:	9E84E95578C130B64D2F5B35BB7A6AAA1394FB35DF09F6CD334EBF17E0BA6D48
+	PrivateKey:	6C89BC27D54F5F85ECB3123BBF9D01AEF8CE0C269DAEFDEFC3BF40F26B75F26F
+----
+
+
+=== アカウント情報を取得
+
+登録したプロファイルを使ってアカウントの情報を取得します。
+
+[source,shell]
+----
+$ nem2-cli account info --profile nemesis
+
+Address:	SB7CEH-TBPPP7-NHTKBX-WFU7A4-4T5RFF-7GO5OJ-QWCF
+at height:	1
+
+PublicKey:	0000000000000000000000000000000000000000000000000000000000000000
+at height:	0
+
+Importance:	3750000
+at height:	1
+
+Mosaics
+154ee4e837704ed3:	449949999.9
+76d77e2e68673039:	3750
+----
+
+`nemesis` のアカウント情報を取得した結果です。APIゲートウェイのレスポンスから確認したように `449,949,999.9 cat.currency` を保有しています。
+（ `154ee4e837704ed3` は `cat.currency` を示します。値はネットワーク立ち上げ時にランダムに生成されるので都度異なります。）
+
+
+=== 転送トランザクションを発信
+
+モザイクを送信するトランザクションを発信します。
+`10,000 cat.currency` を `nemesis` から `alice` へ移動します。
+
+[source,shell]
+----
+$ nem2-cli transaction transfer -r SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ -c @cat.currency::10000000000 --profile nemesis
+Transaction announced correctly
+Hash:    539D69C798F8EFF2DB371A3D1936FE0C8A9A208634FDC80507FBBD6150EF9D1D
+Signer:  2ADD369D13AF5E3C9B628E1CA4CF7D48C0A9031EAE3BD1BDF21DC22B54DDFE02
+----
+
+`@cat.currency::10000000000` は `cat.currency` というネームスペースが紐付けられたモザイクを意味します。
+（ネームスペースとモザイクの関連については後の節で説明します。）
+モザイク量は可分性の `6` を加味した絶対値の `10000000000` を指定します。
+
+NOTE: 可分性を考慮した小数を含む表現を相対値、相対値を可分性の値でシフトした値(@<m>|x \times 10^{divisibility` |)を絶対値として扱います。
+
+トランザクションを発信すると表示されるHashを引数に `transaction status` コマンドを実行してトランザクションの状態を確認できます。
+
+[source,shell]
+----
+$ nem2-cli transaction status -h 539D69C798F8EFF2DB371A3D1936FE0C8A9A208634FDC80507FBBD6150EF9D1D --profile nemesis
+group:	confirmed
+status:	Success
+hash:	<539D69C798F8EFF2DB371A3D1936FE0C8A9A208634FDC80507FBBD6150EF9D1D>
+deadline:	2019-08-18T00:35:44.537
+height:	25
+----
+
+`group: confirmed` となっていれば発信は成功し、ブロックチェーンに書き込まれています。
+宛先の `alice` に `10,000 cat.currency` 届いているかを確認します。
+
+[source,shell]
+----
+$ nem2-cli account info --profile alice
+Account:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+-------------------------------------------------------
+
+Address:	SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
+at height:	25
+
+PublicKey:	0000000000000000000000000000000000000000000000000000000000000000
+at height:	0
+
+Importance:	0
+at height:	0
+
+Mosaics
+154ee4e837704ed3:	10000
+----
+
+`nem2-cli` を用いてモザイクを送る場合はこのようにして送信できます。
+なお、コマンドオプションを指定しなかった場合は対話式での入力が求められます。
+
+
+=== アカウントのモニタリング
+
+アカウントに向けたトランザクションが発生したり、受理されたり、エラーになったかどうかを確認します。
+`monitor` のサブコマンドを実行すると待機状態になり、ステータスが変わるたびにその情報が流れてきます。
+
+
+==== トランザクションのエラー捕捉
+
+トランザクションを発信したとき、その時点でアカウントの残高が足りない、署名が壊れていたなどの理由で、
+トランザクションが受理できない場合、エラーメッセージが通知されます。
+
+試しに `alice` が持ってない量のモザイクを送ろうとします。まず、もうひとつターミナルを開いてモニタリングを開始します。
+
+[source,shell]
+----
+$ nem2-cli monitor status --profile alice
+Monitoring SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4 using http://localhost:3000
+connection open
+----
+
+続いて、持ち合わせていない量のモザイクを指定して、トランザクションを送信します。
+
+[source,shell]
+----
+$ nem2-cli transaction transfer -r SB7CEHTBPPP7NHTKBXWFU7A44T5RFF7GO5OJQWCF -c @cat.currency::409090909000000 --profile alice
+Transaction announced correctly
+Hash:    1372967B7AE2AAE15C2EC2956F9B329DC2439C4B1F23FF77326F2C65D93231A5
+Signer:  B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B
+----
+
+`Transaction announced correctly` が返却され、リクエストはエラーになりませんが、モニタリングしている方へ通知が届きます。
+
+[source,shell]
+----
+Hash: 1372967B7AE2AAE15C2EC2956F9B329DC2439C4B1F23FF77326F2C65D93231A5
+Error code: Failure_Core_Insufficient_Balance
+Deadline: 2019-08-18 01:22:32.650
+----
+
+なお `Failure_Core_Insufficient_Balance` は残高不足の意味です。
+各種エラーメッセージの詳細は次のURLのドキュメントで確認できます。
+
+- https://nemtech.github.io/ja/api.html#status-errors
+
+APIゲートウェイへのトランザクション送信は残高不足などによるトランザクションの結果が成功しないものであったとしても、必ず成功レスポンスを返却します。
+
+そのトランザクションがネットワークに受理されたかどうかは、モニタリングでエラーを捕捉するか、 `transaction status` コマンドで確認します。
+
+[source,shell]
+----
+$ nem2-cli transaction status -h 1372967B7AE2AAE15C2EC2956F9B329DC2439C4B1F23FF77326F2C65D93231A5 --profile alice
+group:	failed
+status:	Failure_Core_Insufficient_Balance
+hash:	<1372967B7AE2AAE15C2EC2956F9B329DC2439C4B1F23FF77326F2C65D93231A5>
+deadline:	2019-08-18T01:22:32.650
+----
+
+エンドポイントでは `http://localhost:3000/transaction/<TRANSACTION_HASH>/status` からトランザクションの状態を確認できます。
+
+.トランザクション状態レスポンス例(整形済み)
+[source,json]
+----
+{ hash: "1372967B7AE2AAE15C2EC2956F9B329DC2439C4B1F23FF77326F2C65D93231A5",
+  status: "Failure_Core_Insufficient_Balance",
+  deadline: [ 3510937546, 24 ],
+  group: "failed" }
+----
+
+
+==== 承認トランザクションの捕捉
+
+`alice` 宛のトランザクションが承認されたときにトランザクションを捕捉します。
+
+[source,shell]
+----
+$ nem2-cli monitor confirmed --profile alice
+----
+
+`alice` のトランザクションが承認され `bob` の残高に反映されるときに情報が通知されます。
+上記のコマンドを実行して、モニタリングが始まった状態で `alice` からモザイクを送ります。
+
+[source,shell]
+----
+$ nem2-cli transaction transfer -r SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ -c @cat.currency::1000000 -m "Alice monitors confirmed" --profile nemesis
+----
+
+トランザクションが承認されると、モニタしていたウィンドウにトランザクションが現れます。
+
+[source,shell]
+----
+$ nem2-cli monitor confirmed --profile alice
+Monitoring SCJ3XM-WIITJT-5DIFZY-KQ27VD-IYYKAV-XIAAMJ-W6K2 using http://localhost:3000
+connection open
+TransferTransaction: Recipient:SDUCBS-RYQTSW-EGAOZW-YO6AAK-BSM6LV-ON7E5W-BHVQ Message:"Alice monitors confirmed" Mosaics: NamespaceId:85bbea6cc462b244::1000000 Signer:SB7CEH-TBPPP7-NHTKBX-WFU7A4-4T5RFF-7GO5OJ-QWCF Deadline:2019-08-18 Hash:DD68E72F572DD8172CFD4D9BE45A6F193876282D2A6A80EE126F5FB7FAD2200E
+----
+
+このようにリアルタイムにトランザクションの状態変化を捕捉することができます。
+
+
+=== その他のトランザクションタイプのモニタ
+
+その他、トランザクションのタイプごとにサブコマンドがあります。
+
+[source,shell]
+----
+$ nem2-cli monitor
+
+  USAGE
+
+    nem2-cli monitor <subcommand>
+
+  SUBCOMMANDS
+
+    aggregatebonded - Monitor aggregate bonded transactions added
+    block           - Monitor new blocks
+    confirmed       - Monitor confirmed transactions added
+    cosignature     - Monitor cosignatures added
+    status          - Monitor transaction status error
+    unconfirmed     - Monitor unconfirmed transactions added
+----
+
+モニタリングしたいトランザクションのタイプを指定して監視を始めます。
+複数のタイプを監視したい場合は、複数枚のウィンドウを開いてコマンドを実行します。
+
+
+==== 各種トランザクションの発信
+
+`nem2-cli` は他のトランザクション発信にも対応しています。
+
+[source,shell]
+----
+$ nem2-cli transaction
+
+  USAGE
+
+    nem2-cli transaction <subcommand>
+
+  SUBCOMMANDS
+
+    accountaddressrestriction   - Allow or block incoming and outgoing transactions for a given a set of addresses
+    accountlink                 - Delegate the account importance to a proxy account
+    accountmosaicrestriction    - Allow or block incoming transactions containing a given set of mosaics
+    accountoperationrestriction - Allow or block outgoing transactions by transaction type
+    addressalias                - Set an alias to a mosaic
+    cosign                      - Cosign an aggregate bonded transaction
+    info                        - Fetch transaction info
+    mosaic                      - Create a new mosaic
+    mosaicalias                 - Set an alias to a mosaic
+    mosaicsupplychange          - Change a mosaic supply
+    multisigmodification        - Create or modify a multisig account
+    namespace                   - Register a namespace
+    secretlock                  - Announce a secret lock transaction
+    secretproof                 - Announce a secret proof transaction
+    status                      - Fetch transaction status
+    transfer                    - Send transfer transaction
+----
+
+本章では扱いませんが、ヘルプやドキュメントに詳細がありますので参考にしてください。
+
+- https://nemtech.github.io/ja/cli.html#commands

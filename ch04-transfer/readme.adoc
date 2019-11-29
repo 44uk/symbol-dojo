@@ -1,0 +1,246 @@
+== 転送トランザクション
+
+`nem2-sdk` を使った `JavaScript` コードを用いて転送トランザクションを発信します。
+トランザクションの発信後にはモニタリングを開始する処理も実装しています。
+
+`transfer/create_mosaic_transfer.js` を実行します。
+このスクリプトは第一引数に宛先アドレスを第二引数に送信するモザイク（ `cat.currency` ）の相対量を指定します。
+
+ここでは `bob` のアドレスへ `100 cat.currency` 送ります。
+
+[source,shell]
+----
+$ node transfer/create_mosaic_transfer.js SDJ2MDGUVL7LST7LD4SVXHA76JTTH5HOAJEWCMIB 100
+Initiator: SDUCBS-RYQTSW-EGAOZW-YO6AAK-BSM6LV-ON7E5W-BHVQ
+Endpoint:  http://localhost:3000/account/SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ
+Recipient: SDJ2MD-GUVL7L-ST7LD4-SVXHA7-6JTTH5-HOAJEW-CMIB
+Endpoint:  http://localhost:3000/account/SDJ2MDGUVL7LST7LD4SVXHA76JTTH5HOAJEWCMIB
+
+connection open
+[Transaction announced]
+Endpoint: http://localhost:3000/transaction/6FE3B213DCF817C16607FA5B262D6EC1347246FA47AEBBE7880DF6A3C58CD406
+Hash:     6FE3B213DCF817C16607FA5B262D6EC1347246FA47AEBBE7880DF6A3C58CD406
+Signer:   B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B
+
+[UNCONFIRMED] SDUCBS...
+{"transaction":{"type":16724,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[3630012528,24],"signature":"EC201DAF4080178547793C451ED67532C7D40D6FF6651A3F41DA85E5FB705D40758062DBC1B06ED56059294150F8D0DCC71381DF5E70BE4846CA0C1F7F01C902","signer":"B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B","recipient":{"address":"SDJ2MDGUVL7LST7LD4SVXHA76JTTH5HOAJEWCMIB","networkType":144},"mosaics":[{"amount":[100000000,0],"id":[3294802500,2243684972]}],"message":{"type":0,"payload":"Ticket fee"}}}
+
+[CONFIRMED] SDUCBS...
+{"transaction":{"type":16724,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[3630012528,24],"signature":"EC201DAF4080178547793C451ED67532C7D40D6FF6651A3F41DA85E5FB705D40758062DBC1B06ED56059294150F8D0DCC71381DF5E70BE4846CA0C1F7F01C902","signer":"B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B","recipient":{"address":"SDJ2MDGUVL7LST7LD4SVXHA76JTTH5HOAJEWCMIB","networkType":144},"mosaics":[{"amount":[100000000,0],"id":[3294802500,2243684972]}],"message":{"type":0,"payload":"Ticket fee"}}}
+----
+
+`[Unconfirmed]` と `[Confirmed]` にはそれぞれ未承認トランザクションと承認済みトランザクションの内容が表示されます。
+承認されたら `bob` の残高を確認します。
+
+[source,shell]
+----
+$ nem2-cli account info --profile bob
+Account:	SDJ2MD-GUVL7L-ST7LD4-SVXHA7-6JTTH5-HOAJEW-CMIB
+-------------------------------------------------------
+
+Address:	SDJ2MD-GUVL7L-ST7LD4-SVXHA7-6JTTH5-HOAJEW-CMIB
+at height:	1439
+
+PublicKey:	0000000000000000000000000000000000000000000000000000000000000000
+at height:	0
+
+Importance:	0
+at height:	0
+
+Mosaics
+154ee4e837704ed3:	100
+----
+
+`100 cat.currency` が到着していることが確認できました。
+
+
+=== コード解説
+
+後に使用するサンプルコードで共通する部分を前もって解説しておきます。
+
+[source,typescript]
+----
+include::../scripts/transfer/create_mosaic_transfer.ts[lines=1..16]
+----
+
+`nem2-sdk` の各クラスをインポートしています。この部分はコード内で使用するクラスによって異なります。
+`util` は共通する発信処理やモニタリング処理をまとめたコードです。
+`env` は環境変数にセットした秘密鍵やURLの取り回し用のコードです。
+
+[source,typescript]
+----
+include::../scripts/transfer/create_mosaic_transfer.ts[lines=18..27]
+----
+
+前述で設定したとおり `env` からAPIゲートウェイURL（`API_URL` ）、秘密鍵（ `PRIVATE_KEY`）、ネットワーク（ `NETWORK_TYPE` ）を取得しています。
+
+`Account.createFromPrivateKey` でアカウントのオブジェクトを生成しています。
+アカウントオブジェクトは対になる公開鍵やアドレスの情報などを持ち、署名のメソッドも持ちます。
+
+.アドレス文字列からアドレスオブジェクトを作る
+[source,typescript]
+----
+include::../scripts/transfer/create_mosaic_transfer.ts[lines=26..28]
+----
+
+`Address.createFromRawAddress` にアドレス文字列を渡すことでアドレスオブジェクトを生成しています。
+アドレスを扱う場合はアドレス文字列をオブジェクトでラップした形で使用します。
+
+.確認用の情報を出力
+[source,typescript]
+----
+console.log('Initiater: %s', initiater.address.pretty());
+console.log('Endpoint:  %s/account/%s', url, initiater.address.plain());
+console.log('Recipient: %s', recipient.pretty());
+console.log('Endpoint:  %s/account/%s', url, recipient.plain());
+----
+
+ここでは確認用に情報を出力しています。
+リソースURLも出しているので、ブラウザで開けばAPIゲートウェイ経由で確認することができます。
+
+[source,typescript]
+----
+// 送信するモザイク配列
+// ここでは`NetworkCurrencyMosaic`すなわち`cat.currency`モザイクオブジェクトを準備
+// モザイクIDで作る場合は以下のようにする。
+// 可分性がわからないので送信量は絶対値で指定する必要がある。
+// new Mosaic(new MosaicId('7d09bf306c0b2e38'), UInt64.fromUint(absoluteAmount)
+const mosaics = [NetworkCurrencyMosaic.createRelative(amount)];
+----
+
+転送したいモザイクの配列を作成します。
+配列には `NetworkCurrencyMosaic` を入れています。
+複数のモザイクを送る場合は配列にモザイクオブジェクトを追加します。
+
+`NetworkCurrencyMosaic` とは基軸通貨である `cat.currency` に特化したクラスです。
+`createRelative` メソッドは可分性 `6` を考慮してくれます。
+
+特定のモザイクを16進数のモザイクIDで送信する場合はコメントにあるコード例を使います。
+こちらの場合は可分性の情報がないため、絶対値で指定する必要があります。
+
+[source,typescript]
+----
+// メッセージオブジェクトを作成
+// 空メッセージを送る場合は EmptyMessage を使います。
+const message = PlainMessage.create('Ticket fee');
+----
+
+添付するメッセージはオブジェクトで文字列をラップします。
+
+[source,typescript]
+----
+// トランザクションオブジェクトを作成
+// Deadline.create() デフォルトでは2時間。引数の単位は`時間`です。(第二引数で単位を変えられる)
+// SDKでは最大24時間未満とされているので、`24`を渡すとエラーになります。
+// Deadline.create(1439, jsJoda.ChronoUnit.MINUTES) // ex) 23時間59分
+const transferTx = TransferTransaction.create(
+  Deadline.create(23),
+  recipient,
+  mosaics,
+  message,
+  NetworkType.MIJIN_TEST
+);
+----
+
+ここまでのオブジェクトを引数に、トランザクションのオブジェクトを作成します。
+
+`Deadline.create(23)` はトランザクションが署名されてからの有効な期限を設定します。
+設定可能な期限は24時間未満の未来まで。引数がない場合はデフォルトの2時間がセットされます。
+コメントの補足より `js-joda` の時間単位を渡すことでより細かい単位の時間を設定できます。
+
+この期限までにトランザクションがネットワークに承認されなかった場合は、無効なトランザクションとして扱われます。
+
+.トランザクション成功/失敗,未承認,承認のモニタリング接続
+[source,typescript]
+----
+util.listener(url, initiater.address, {
+  onOpen: () => {
+    // 署名して発信
+    const signedTx = initiater.sign(transferTx, process.env.GENERATION_HASH);
+    util.announce(url, signedTx);
+  },
+  onConfirmed: (_, listener) => listener.close()
+});
+----
+
+モニタリングを開始し、接続が完了して待機状態になったらトランザクションに署名して発信します。
+トランザクション署名時に発信したいネットワークの初期ブロックの `generationHash` の値を渡す必要があります。
+トランザクションの未承認・承認のタイミングで通知が表示され、承認されたらリスナーを終了します。
+
+
+=== util.tsの解説
+
+`util.ts` は主にトランザクション発信やリスナー監視の実装をまとめたものです。
+
+アカウントのステータスをモニタリングするにはリスナーオブジェクトを作ります。
+APIゲートウェイのURLを渡してオブジェクトを作成します。
+
+[source,typescript]
+----
+include::../scripts/util.ts[lines=18..55]
+----
+
+作成した `listener` オブジェクトは各イベントのメソッドを持ち、それらメソッドが返却する購読オブジェクトの `subscribe` を呼ぶことで購読が開始します。
+
+[source,typescript]
+----
+// 以下は発信時に呼び出す`transactionHttp`のメソッドが異なるだけです。
+exports.announce = (url, tx, ...subscriber) => {
+  const transactionHttp = new TransactionHttp(url)
+  const subscription = transactionHttp.announce(tx)
+  announceUtil(subscription, url, tx, ...subscriber)
+}
+
+exports.announceAggregateBonded = (url, tx, ...subscriber) => {
+  const transactionHttp = new TransactionHttp(url)
+  const subscription = transactionHttp.announceAggregateBonded(tx)
+  announceUtil(subscription, url, tx, subscriber)
+}
+
+exports.announceAggregateBondedCosignature = (url, tx, ...subscriber) => {
+  const transactionHttp = new TransactionHttp(url)
+  const subscription = transactionHttp.announceAggregateBondedCosignature(tx)
+  announceUtil(subscription, url, tx, subscriber)
+}
+----
+
+トランザクションをリクエストするには `TransactionHttp` オブジェクトを作成します。
+ここでの実装は、呼び出すメソッドを選べるように実装しています。
+`announceXXX` メソッドに署名済みトランザクションオブジェクトを渡すことで、購読オブジェクトを返却しています。
+
+.発信用の便利関数
+[source,typescript]
+----
+const announceUtil = (subscription, url, tx, ...subscriber) => {
+  if (0 < subscriber.length && subscriber.length <= 3) {
+    return subscription.subscribe(...subscriber);
+  }
+  // `announce`メソッドに署名済みトランザクションオブジェクトを渡す
+  // `subscribe`メソッドで処理が開始される
+  return subscription.subscribe(
+    () => {
+      // 流れてくるレスポンスは常に成功しか返さないので`tx`の情報を出力する。
+      console.log('[Transaction announced]');
+      console.log('Endpoint: %s/transaction/%s', url, tx.hash);
+      console.log('Hash:     %s', tx.hash);
+      console.log('Signer:   %s', tx.signer);
+      console.log('');
+    },
+    err => {
+      console.log(
+        'Error: %s',
+        err.response !== undefined ? err.response.text : err
+      );
+    }
+  );
+};
+----
+
+ここでは渡されてきた購読オブジェクトの購読を開始しています。
+`subscribe` メソッドによってリクエストが開始され、成功したら `tx` オブジェクトの内容を出力しています。
+
+これが基本的なトランザクションオブジェクトの作成と発信の方法です。
+他のトランザクションを実行する場合も作成するオブジェクトが異なるくらいで大枠は同じです。
+
+`nem2-sdk` は `RxJS` ライブラリに依存しています。
+より複雑に使いこなすには `RxJS` について、公式サイトなどを参照して学習してください。

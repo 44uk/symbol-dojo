@@ -1,0 +1,24 @@
+== テストネット(TEST_NET)
+
+NEM財団によるノードネットワークに関するリンクです。
+
+
+=== APIゲートウェイ
+
+* http://api-01.us-west-2.nemtech.network:3000[http://api-01.us-west-2.nemtech.network:3000]
+
+
+=== エクスプローラ
+
+* http://explorer.nemtech.network/[Nem Catapult Block Explorer]
+
+
+=== フォーセット
+
+* http://faucet.nemtech.network/[NEM2 Faucet]
+
+
+=== ウォレット
+
+* https://github.com/nemfoundation/nem2-desktop-wallet/releases[nemfoundation/nem2-desktop-wallet]
+

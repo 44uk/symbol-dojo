@@ -14,10 +14,21 @@
   },
   "author": "Yoshiyuki Ieyama",
   "license": "MIT",
+  "scripts": {
+    "prettier": "prettier --write '**/*.{ts,js,json,md,html}'"
+  },
   "dependencies": {
     "js-sha3": "^0.8.0",
-    "nem2-sdk": "0.13.0",
+    "nem2-sdk": "0.15.0",
     "ripemd160": "^2.0.2",
-    "rxjs": "^6.5.2"
+    "rxjs": "^6.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "prettier": "^1.19.1"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false
   }
 }

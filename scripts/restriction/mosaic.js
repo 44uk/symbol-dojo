@@ -1,5 +1,5 @@
 /**
- * $ node filter/mosaic.js MOSAIC_HEX block add
+ * $ ts-node filter/mosaic.js MOSAIC_HEX block add
  */
 const {
   Account,
@@ -10,12 +10,12 @@ const {
   AccountPropertyTransaction,
   AccountPropertyModification,
   Deadline
-} = require('nem2-sdk');
+} = require('symbol-sdk');
 const util = require('../util');
 
-const url = process.env.API_URL || 'http://localhost:3000';
+const url = process.env.GATEWAT_URL || 'http://localhost:3000';
 const initiator = Account.createFromPrivateKey(
-  process.env.PRIVATE_KEY,
+  process.env.INITIATOR_KEYEY,
   NetworkType.MIJIN_TEST
 );
 

@@ -1,25 +1,24 @@
-# マルチシグアカウント
+== マルチシグアカウント
 
 マルチシグアカウントとは、マルチシグアカウントからのトランザクションに関して、複数の連署者というトランザクションの発行に承認能力を持つアカウントを追加する機能です。
 
-- [マルチシグアカウント — NEM Developer Center](https://nemtech.github.io/ja/concepts/multisig-account.html#multisig-account)
+* https://nemtech.github.io/ja/concepts/multisig-account.html#multisig-account[マルチシグアカウント
+— NEM Developer Center]
 
-
-## マルチシグアカウントの用途
+=== マルチシグアカウントの用途
 
 マルチシグアカウントとなったアカウントはそれ自信からトランザクションを発行することができなくなり、トランザクション発信は連署者より行うことになります。
 
 マルチシグアカウントの連署者は後から追加・削減することができます。
 
-- 共有アカウントからのモザイク送信の承認・否認ロジック
-- アカウントの譲渡
+* 共有アカウントからのモザイク送信の承認・否認ロジック
+* アカウントの譲渡
 
 アカウントの譲渡とは、連署者を付け替えることでマルチシグアカウントの所有者を移し替えるテクニックです。
 
+=== マルチシグアカウントへの変換
 
-## マルチシグアカウントへの変換
-
-`multisig/convert_account_into_multisig.js`を実行してください。
+`+multisig/convert_account_into_multisig.js+`を実行してください。
 
 このスクリプトはアカウントを3つ生成し、そのうち1つをマルチシグアカウントに、
 
@@ -27,14 +26,14 @@
 
 ここで設定されたマルチシグアカウントは後で利用するので、
 
-ターミナルの出力を保存したり、`tee`コマンドなどを利用して生成されたアカウントをメモしておいてください。
+ターミナルの出力を保存したり、`+tee+`コマンドなどを利用して生成されたアカウントをメモしておいてください。
 
 マルチシグアカウントの連署者に指定されたアカウントはその要求に署名する必要があります。
 
 このスクリプトでは便宜上アカウントを生成していて秘密鍵がわかっているため、アグリゲートコンプリートで処理します。
 
-
-```shell
+[source,shell]
+----
 $ node multisig/convert_account_into_multisig.js | tee multisig.txt
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
@@ -78,11 +77,12 @@ Signer:   DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0
 
 [CONFIRMED] SD4NZO...
 {"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4066838952,23],"signature":"904E403AC4A416D1FBAD8D1836B2E2C2EDA751AB996B2B29CF6CE798323725B3A763CDAFCCEF19E6A287CAEAA8875D332B2FF65B35F52155BDAC013ABFE1A900","signer":"DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0","transactions":[{"transaction":{"type":16725,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4066838952,23],"signature":"904E403AC4A416D1FBAD8D1836B2E2C2EDA751AB996B2B29CF6CE798323725B3A763CDAFCCEF19E6A287CAEAA8875D332B2FF65B35F52155BDAC013ABFE1A900","signer":"DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"C52B9F61BEF6A3D4B34A0F1B9DE16C30EB690449528A81674F322128E93DE11D","type":0},{"cosignatoryPublicKey":"1427F1A497AE3948A578EA02AB2B13F308B3C9A5BB256FE0D23C10E4BA0B3966","type":0},{"cosignatoryPublicKey":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","type":0}]}}],"cosignatures":[{"signature":"1508158AA7D4DBC905D5DC2CB959A52218B967C720B5CED569B866CCFB8733EB84A8056C024179F585C76D2BA23AB79201284C2CA17B27EED52FFD6B3680F800","signer":{"publicKey":"C52B9F61BEF6A3D4B34A0F1B9DE16C30EB690449528A81674F322128E93DE11D","address":{"address":"SCYCYQXUV3DZENGPQIANCQJ5HO6VPIR7JUBZCZ6C","networkType":144}}},{"signature":"F585B55D3D6DA98646C7E5916F2F8CDA95F9F0D8EFD8E8A27A8E569B7D7899DDCBE636166FA8653F5AA5B31323A339AEAC8F6F12A5D4F86E6C893F148740DB0D","signer":{"publicKey":"1427F1A497AE3948A578EA02AB2B13F308B3C9A5BB256FE0D23C10E4BA0B3966","address":{"address":"SDJT56GJNCWG74QL3GDGRMKM2IG7QD7NBLI7XEBK","networkType":144}}},{"signature":"E5BB7A1FF089C311A2E1E21B90BDD1CF6C1BCE10E80474BDD264B82A7BD105D38F5C9A3FFB461829E20DFEE7BFFC5033DE27D8B84339593FD82D2FA781DB330B","signer":{"publicKey":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","address":{"address":"SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4","networkType":144}}}]}}
-```
+----
 
-トランザクションが承認されたら`Multisig Account`のURLにアクセスしてみましょう。
+トランザクションが承認されたら`+Multisig Account+`のURLにアクセスしてみましょう。
 
-```json
+[source,json]
+----
 {
   "multisig": {
     "account": "DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0",
@@ -97,25 +97,24 @@ Signer:   DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0
     "multisigAccounts": []
   }
 }
-```
+----
 
-`cosignatories`の配列に連署者の公開鍵が羅列されていることを確認してみてください。
+`+cosignatories+`の配列に連署者の公開鍵が羅列されていることを確認してみてください。
 
+==== コード解説
 
-### コード解説
+複数のアカウントを`+nem2-cli+`で準備するのは時間がかかるので、便宜上コード中でアカウントを生成しています。
 
-複数のアカウントを`nem2-cli`で準備するのは時間がかかるので、便宜上コード中でアカウントを生成しています。
+アカウントを3つ作って、1つ目をマルチシグアカウントへ、後の2つと`+alice+`を連署者として設定します。
 
-アカウントを3つ作って、1つ目をマルチシグアカウントへ、後の2つと`alice`を連署者として設定します。
-
-生成したアカウントの秘密鍵はコンソールに表示しているだけなので、適宜リダイレクトや`tee`コマンドでテキストに保存してください。
+生成したアカウントの秘密鍵はコンソールに表示しているだけなので、適宜リダイレクトや`+tee+`コマンドでテキストに保存してください。
 
 なお、現実のコードにおいては、連署者として追加するための公開鍵が必要です。
 
 さらに、アグリゲートボンドトランザクションによって連署者となるための署名が必要になります。
 
-
-```javascript
+[source,javascript]
+----
 // 連署者とするアカウントの公開アカウントの集合を作る
 const cosignerPublicAccounts = cosigners.map((account, idx) => {
   showAccountInfo(account, `Cosigner Account${idx+1}:`)
@@ -158,15 +157,15 @@ util.listener(url, toBeMultisig.address, {
   },
   onConfirmed: (_, listener) => listener.close()
 });
-```
+----
 
-各公開鍵とそれを追加・削除を表す値(今回は追加)で`MultisigCosignatoryModification`オブジェクトを作成します。
+各公開鍵とそれを追加・削除を表す値(今回は追加)で`+MultisigCosignatoryModification+`オブジェクトを作成します。
 
-その集合を使って`ModifyMultisigAccountTransaction`オブジェクトを作成し、署名して発信します。
+その集合を使って`+ModifyMultisigAccountTransaction+`オブジェクトを作成し、署名して発信します。
 
-`minApprovalDelta`はトランザクションを承認するために必要な最小承認数です。
+`+minApprovalDelta+`はトランザクションを承認するために必要な最小承認数です。
 
-`minRemovalDelta`は連署者を削除するために必要な最小承認数です。
+`+minRemovalDelta+`は連署者を削除するために必要な最小承認数です。
 
 それぞれ増加・減少数を指定する必要があります。
 
@@ -176,34 +175,34 @@ util.listener(url, toBeMultisig.address, {
 
 次に、このトランザクションをアグリゲートトランザクションでラップします。
 
-現実には連署者の秘密鍵がわかることは無いでしょうから、通常は`AggregateTransaction.createBonded`で連署者に署名を求める必要があります。
+現実には連署者の秘密鍵がわかることは無いでしょうから、通常は`+AggregateTransaction.createBonded+`で連署者に署名を求める必要があります。
 
-`createdBonded`を用いたサンプルは`convert_account_into_multisig.bonded.js`として用意してあるので、コードの違いを確認してみてください。
+`+createdBonded+`を用いたサンプルは`+convert_account_into_multisig.bonded.js+`として用意してあるので、コードの違いを確認してみてください。
 
 こちらのコードも便宜上同じコードの中で各連署アカウントが署名をしていますが、実際にはそれぞれのアカウントが署名をするはずなので、処理の流れの参考にしてみてください。
 
 このコードは引数にマルチシグアカウントに変換するアカウントの秘密鍵を渡します。
 
-アカウントがアグリゲートボンドトランザクションを発信する必要があるため、`10 cat.currency`以上を保有させておく必要があります。
+アカウントがアグリゲートボンドトランザクションを発信する必要があるため、`+10 nem.xem+`以上を保有させておく必要があります。
 
-`node multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__`として実行してみてください。
+`+node multisig/convert_account_into_multisig.bonded.js __TO_BE_MULTIGIS_PRIVATE_KEY__+`として実行してみてください。
 
-
-## マルチシグアカウントからの送信
+=== マルチシグアカウントからの送信
 
 マルチシグ化したアカウントはそのアカウントの秘密鍵ではトランザクションを発信することができなくなります。
 
 マルチシグアカウントからトランザクションを発信する場合は連署者のアカウントからアグリゲートトランザクションを発信します。
 
-`multisig/initiate_from_cosigner.js`を実行してください。
+`+multisig/initiate_from_cosigner.js+`を実行してください。
 
 このスクリプトは第一引数に連署者の秘密鍵、第二引数マルチシグアカウントの公開鍵、第三引数に受信者アドレスを渡します。
 
-第四引数として送信する`cat.currency`量を設定できますが、マルチシグアカウントに残高をもたせる必要があるので、ひとまずスキップして、メッセージだけを送るようにします。
+第四引数として送信する`+nem.xem+`量を設定できますが、マルチシグアカウントに残高をもたせる必要があるので、ひとまずスキップして、メッセージだけを送るようにします。
 
-ここでは前の項で作った、連署者として`Cosigner Account1`の秘密鍵を、マルチシグアカウントの公開鍵を、受信者には`Cosigner Account2`のアドレスを指定しました。
+ここでは前の項で作った、連署者として`+Cosigner Account1+`の秘密鍵を、マルチシグアカウントの公開鍵を、受信者には`+Cosigner Account2+`のアドレスを指定しました。
 
-```shell
+[source,shell]
+----
 $ node multisig/initiate_from_cosigner.js 3E1252C565E3ACD98748DF7B6FD819BFB69A91593C4FBFBC78F6F88362336A42 DEF68836CDCF8FA2CEF15F6AE26C3B3F3C834F5C07B1F8E516957C45E39EDBD0 SDJT56GJNCWG74QL3GDGRMKM2IG7QD7NBLI7XEBK
 Initiator:  SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:   http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
@@ -253,22 +252,22 @@ Signer:   C52B9F61BEF6A3D4B34A0F1B9DE16C30EB690449528A81674F322128E93DE11D
 Endpoint: http://localhost:3000/transaction/EC5908B00D732FE2328014DEF1B8E9EC82D437B49CE12144F80DC43BCCC594D2
 Hash:     EC5908B00D732FE2328014DEF1B8E9EC82D437B49CE12144F80DC43BCCC594D2
 Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
-```
+----
 
 受信者のアドレスへの転送トランザクションを作り、アグリゲートトランザクションの公開アカウントとしてマルチシグアカウントを渡します。
 
-アグリゲートボンドトランザクションなので`LockFunds`トランザクションを発行します。
+アグリゲートボンドトランザクションなので`+LockFunds+`トランザクションを発行します。
 
-`LockFunds`が承認されたらアグリゲートボンドトランザクションを発行します。
+`+LockFunds+`が承認されたらアグリゲートボンドトランザクションを発行します。
 
 アグリゲートボンドトランザクションが承認されたら、別の連署者がそれに署名をすることで2名の署名が揃い、転送トランザクションが承認されます。
 
-最初にトランザクションへ署名したのは`alice`なので、引数として渡した連署者の秘密鍵による署名が行われると2つの署名が揃います。
+最初にトランザクションへ署名したのは`+alice+`なので、引数として渡した連署者の秘密鍵による署名が行われると2つの署名が揃います。
 
+==== コード解説
 
-### コード解説
-
-```javascript
+[source,javascript]
+----
 // マルチシグトランザクションはアグリゲートボンドトランザクションとして行う
 const multisigTx = AggregateTransaction.createBonded(
   Deadline.create(),
@@ -276,11 +275,12 @@ const multisigTx = AggregateTransaction.createBonded(
   NetworkType.MIJIN_TEST
 );
 const signedMultisigTx = initiater.sign(multisigTx, process.env.GENERATION_HASH);
-```
+----
 
 マルチシグトランザクションを発行するにはアグリゲートボンドトランザクションを使います。
 
-```javascript
+[source,javascript]
+----
 util.listener(url, initiater.address, {
   onOpen: () => {
     const lockFundsTx = LockFundsTransaction.create(
@@ -304,22 +304,22 @@ util.listener(url, initiater.address, {
     util.announceAggregateBondedCosignature(url, signedCosignatureTx)
   }
 });
-```
+----
 
 本来であれば、連署者は自分に届いた署名待ちのトランザクション一覧を取得し署名をするべきです。
 
 ここでは便宜上、アグリゲートトランザクションが承認されたタイミングで連署者に署名をさせています。
 
-以降はアグリゲートボンドトランザクションのための`LockFunds`トランザクションの処理を行っています。
+以降はアグリゲートボンドトランザクションのための`+LockFunds+`トランザクションの処理を行っています。
 
+=== 1-of-m 構成の場合
 
-## 1-of-m 構成の場合
+`+1-of-m+`構成(最小承認数が1)である場合、トランザクションを送ろうとする連署者だけの署名で十分なので、アグリゲートコンプリートトランザクションとして発行できます。
 
-`1-of-m`構成(最小承認数が1)である場合、トランザクションを送ろうとする連署者だけの署名で十分なので、アグリゲートコンプリートトランザクションとして発行できます。
+`+multisig/convert_account_into_multisig_shared.js+`は`+1-of-2+`のマルチシグアカウントを構築します。
 
-`multisig/convert_account_into_multisig_shared.js`は`1-of-2`のマルチシグアカウントを構築します。
-
-```shell
+[source,shell]
+----
 $ node multisig/convert_account_into_multisig_shared.js
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
@@ -356,11 +356,12 @@ Signer:   CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833
 
 [CONFIRMED] SAAU3C...
 {"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071132140,23],"signature":"594F9B05FC989FADA031D519CF10B997AAEDDC3147E4C7ABA66D457CE70E96FC2B4EA74F5F18A76B6626CEE289326F68202184C36124C7F7C400AD0C54B25D0C","signer":"CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833","transactions":[{"transaction":{"type":16725,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071132140,23],"signature":"594F9B05FC989FADA031D519CF10B997AAEDDC3147E4C7ABA66D457CE70E96FC2B4EA74F5F18A76B6626CEE289326F68202184C36124C7F7C400AD0C54B25D0C","signer":"CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833","minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"5363E0EFA521A766E8B95641ABDA106AB2009D197CAF30402870117460DA1293","type":0},{"cosignatoryPublicKey":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","type":0}]}}],"cosignatures":[{"signature":"F28D234E96863EB58222CA486522C63691083FA9A7662D50714CD2B1F3AD2360DC4778E2799779A1AD1F20E0B6AED75F15DC92CE48213888E9EC4FBB78C1C401","signer":{"publicKey":"5363E0EFA521A766E8B95641ABDA106AB2009D197CAF30402870117460DA1293","address":{"address":"SAIJF6GT5YBNRPT65HOKZ2C2KGJTWY63VIUSH7JW","networkType":144}}},{"signature":"FBBAF194CD43E4958D9719A9B82E8DEDD0AF124170F70B97E16BDB5EE8DB4C838CD4A08919BA597835BB09D6D386F72AFBC8306867C14A535AAD7F9282DCAB02","signer":{"publicKey":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","address":{"address":"SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4","networkType":144}}}]}}
-```
+----
 
-`multisig/initiate_from_cosigner_without_cosigner.js`はアグリゲートコンプリートで転送するスクリプトです。
+`+multisig/initiate_from_cosigner_without_cosigner.js+`はアグリゲートコンプリートで転送するスクリプトです。
 
-```shell
+[source,shell]
+----
 $ node multisig/initiate_from_cosigner_without_cosigner.js CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833 SAIJF6GT5YBNRPT65HOKZ2C2KGJTWY63VIUSH7JW
 Initiator:  SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:   http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
@@ -381,31 +382,30 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
 [CONFIRMED] SAFPLK...
 {"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071326628,23],"signature":"77628011B996CA20592329F21D6B71AFC7FF8F613238EC77374E3A9C3586A458E2BD55C95AE3B39F843606594C0560A05C074CD4DA60F24215DF086953096B07","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","transactions":[{"transaction":{"type":16724,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071326628,23],"signature":"77628011B996CA20592329F21D6B71AFC7FF8F613238EC77374E3A9C3586A458E2BD55C95AE3B39F843606594C0560A05C074CD4DA60F24215DF086953096B07","signer":"CB8CE042D598717E70A36113C3B016CF5D5E722012432E19FB9BB84E951AA833","recipient":{"address":"SAIJF6GT5YBNRPT65HOKZ2C2KGJTWY63VIUSH7JW","networkType":144},"mosaics":[{"amount":[0,0],"id":[3294802500,2243684972]}],"message":{"type":0,"payload":"Transaction from multisig account signed by cosigner."}}}],"cosignatures":[]}}
-```
+----
 
 この2つのコードを使って、それぞれの内容と動作を確認してみてください。
 
+=== マルチレベルマルチシグの構築
 
-## マルチレベルマルチシグの構築
-
-`Symbol`ではマルチシグアカウントを別のマルチシグアカウントの連署者として追加できるようになりました。
+`+Symbol+`ではマルチシグアカウントを別のマルチシグアカウントの連署者として追加できるようになりました。
 
 これにより、マルチシグ承認を階層化できるようになりました。
 
-- [マルチレベルマルチシグアカウントの作成 \(MLMA\) — NEM Developer Center](https://nemtech.github.io/ja/guides/account/creating-a-multi-level-multisig-account.html)
+* https://nemtech.github.io/ja/guides/account/creating-a-multi-level-multisig-account.html[マルチレベルマルチシグアカウントの作成
+(MLMA) — NEM Developer Center]
 
 MLMSを構築する際に特別な方法は必要とせず、単にマルチシグ連署者としてマルチシグアカウントを指定すればよいだけです。
 
+==== MLMSの作成
 
-### MLMSの作成
-
-`multisig/setup_mlms.js`を実行してください。
+`+multisig/setup_mlms.js+`を実行してください。
 
 このスクリプトはアカウントを7つ生成し、そのうち1つをトップのマルチシグアカウントに、
 
 2つを2階層目のアカウントに、最後に2階層目のアカウントに2つづつの連署アカウントを設定したマルチレベルマルチシグを構築します。
 
-```
+....
 - Root
  |- Lv2-A
    |- Lv3-a
@@ -413,11 +413,12 @@ MLMSを構築する際に特別な方法は必要とせず、単にマルチシ�
  |- Lv2-B
    |- Lv3-c
    `- Lv3-d
-```
+....
 
 図にするとこのような状態になります。
 
-```shell
+[source,shell]
+----
 $ node multisig/setup_mlms.js
 Initiator: SAFPLK-SQJTYG-TWKNJ6-B66LJV-3VRBMU-SBQH7Y-6ZH4
 Endpoint:  http://localhost:3000/account/SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4
@@ -489,20 +490,20 @@ Signer:   13B551694C3B1711EF3196F03B183CE008A8044E1EA959479EEF79DEAB60E9F1
 
 [CONFIRMED] SCJ4BP...
 {"transaction":{"type":16705,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071576035,23],"signature":"658498A663B969EF7404F59356E72E214853E3A14B1E3F993D49DFC8D692FE529B051F4F314648DE533243B0CB4E810753AB62F515002A12367D40044A17D707","signer":"13B551694C3B1711EF3196F03B183CE008A8044E1EA959479EEF79DEAB60E9F1","transactions":[{"transaction":{"type":16725,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071576035,23],"signature":"658498A663B969EF7404F59356E72E214853E3A14B1E3F993D49DFC8D692FE529B051F4F314648DE533243B0CB4E810753AB62F515002A12367D40044A17D707","signer":"AE6DFC71121FEE3742680044F7EF20C3E4D8B04CEDF7B185EC7028B18CAECFE1","minApprovalDelta":1,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"346508FD4FC56A4EA3295D6D55444D03E01F0E730B78E14D6D995C7CBA6C2E88","type":0},{"cosignatoryPublicKey":"80732D35D9091D877286B0553DAB42BF80404FDC940AE64621DE79C74C47BC9C","type":0}]}},{"transaction":{"type":16725,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071576035,23],"signature":"658498A663B969EF7404F59356E72E214853E3A14B1E3F993D49DFC8D692FE529B051F4F314648DE533243B0CB4E810753AB62F515002A12367D40044A17D707","signer":"7E7588655E4D761C7A2FC6BF2C525650F511710B71898EC613C62A02B5EF5046","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"CBFD82E46CA3C001C803F4F1EA0388240C62D2FDF020CBC8EB8F3AE9E6197362","type":0},{"cosignatoryPublicKey":"2D381DE2B48091624A16E2D414004909AD6C97C24D28066E7B908857B4DF1EAE","type":0}]}},{"transaction":{"type":16725,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4071576035,23],"signature":"658498A663B969EF7404F59356E72E214853E3A14B1E3F993D49DFC8D692FE529B051F4F314648DE533243B0CB4E810753AB62F515002A12367D40044A17D707","signer":"13B551694C3B1711EF3196F03B183CE008A8044E1EA959479EEF79DEAB60E9F1","minApprovalDelta":2,"minRemovalDelta":2,"modifications":[{"cosignatoryPublicKey":"AE6DFC71121FEE3742680044F7EF20C3E4D8B04CEDF7B185EC7028B18CAECFE1","type":0},{"cosignatoryPublicKey":"7E7588655E4D761C7A2FC6BF2C525650F511710B71898EC613C62A02B5EF5046","type":0}]}}],"cosignatures":[{"signature":"0A77225BDC8DB73C83EDA14606882DB37F78A6FDA72FE7E0F16AE5201D846AB1334E478C1E84EACE459953E47D2A3BFE260172B0E0F61F3403156E58A109A602","signer":{"publicKey":"AE6DFC71121FEE3742680044F7EF20C3E4D8B04CEDF7B185EC7028B18CAECFE1","address":{"address":"SB7JQGCJGN3NYG2BAH2CICWD3662757WEEWFMXGE","networkType":144}}},{"signature":"76EFC4AB037C351F2848C39251EBF0DAB2BA8B51AC58203322D87EE5F323331E37BC6068A29FDB75009F67D162863694C04B2234D5F40962FD31CEF3C294FA0E","signer":{"publicKey":"346508FD4FC56A4EA3295D6D55444D03E01F0E730B78E14D6D995C7CBA6C2E88","address":{"address":"SCUCFHGVZ7EABOPJNVF7VYX5HVT3WVURTTYLL5JP","networkType":144}}},{"signature":"332BBEA81F9079BE9F1E6450E542E1D4DAFDC644E4BA3AAFCF3C78378FBEA9AB43E588692104FF05419EC6F7DF2D0D41D29655F4630D25A33BF61713E3D51E0B","signer":{"publicKey":"80732D35D9091D877286B0553DAB42BF80404FDC940AE64621DE79C74C47BC9C","address":{"address":"SDRQ23SQVW56J57Z5LLEPSTQET72XLUQ5EUI3GN7","networkType":144}}},{"signature":"113D66440F623C4C9A5C83C100F66A04E44AE03A131A9DEF6FF1FE451E07DF3C9342CDF81ACDFBB37BE0C7CE8D5B3968EE26AB73B56A41A5624C05F5059F600F","signer":{"publicKey":"7E7588655E4D761C7A2FC6BF2C525650F511710B71898EC613C62A02B5EF5046","address":{"address":"SDGOLY7LMQEMQK5OBLZQV6FDUT2HPOPFAAUKM7MT","networkType":144}}},{"signature":"E47281FDFC8CD3D8082679AB7064500720B0901FB28135A9D30A3A4F7831EB4122AE1863C48ABE3FB8A76CBF92A63840982A674BB180C68A015D0B394FBCE801","signer":{"publicKey":"CBFD82E46CA3C001C803F4F1EA0388240C62D2FDF020CBC8EB8F3AE9E6197362","address":{"address":"SDBTFFBO5I3TS4XDTFBKD7JWOY63O7VPQHUM77QR","networkType":144}}},{"signature":"894319A2CAB414EF966D4278A9D2201E4641F5BA5D256EE9B1E58AED422131D38A1CF725E5606CD95E30E588D2D42F210056B2532640D15869B0BAEB26BC2703","signer":{"publicKey":"2D381DE2B48091624A16E2D414004909AD6C97C24D28066E7B908857B4DF1EAE","address":{"address":"SDDDV7VC2XSAT3PGVIPEZKZXO6BO2AH4WDKCQACR","networkType":144}}}]}}
-```
+----
 
 トランザクションが承認されたらURLにアクセスしてみましょう。
 
-
-#### コード解説
+===== コード解説
 
 マルチシグアカウントに別のマルチシグアカウントを連署者を追加することで構築することができます。
 
-このコードでも、便宜上コード内でアカウントを生成していて、署名も済ませてしまっていますが、現実には`AggregateTransaction.createBonded`を用いて、署名要求を送る方法を使います。
+このコードでも、便宜上コード内でアカウントを生成していて、署名も済ませてしまっていますが、現実には`+AggregateTransaction.createBonded+`を用いて、署名要求を送る方法を使います。
 
-マルチシグレベルマルチシグの階層構造は`/account/{address}/multisig/graph`のAPIにアクセスすることで取得できます。
+マルチシグレベルマルチシグの階層構造は`+/account/{address}/multisig/graph+`のAPIにアクセスすることで取得できます。
 
-```json
+[source,json]
+----
 [
   {
     "level": 0,
@@ -611,6 +612,6 @@ Signer:   13B551694C3B1711EF3196F03B183CE008A8044E1EA959479EEF79DEAB60E9F1
     ]
   }
 ]
-```
+----
 
 各レベルごとの構造でマルチシグの情報が表示されます。

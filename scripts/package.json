@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "js-sha3": "^0.8.0",
-    "nem2-sdk": "0.15.0",
+    "nem2-sdk": "0.16.0",
     "ripemd160": "^2.0.2",
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "@types/node": "^12.12.14",
+    "@types/node": "^12.12.21",
     "prettier": "^1.19.1"
   },
   "prettier": {

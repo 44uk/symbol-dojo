@@ -8,20 +8,20 @@ import {
   AccountHttp,
   MosaicHttp,
   MosaicService
-} from 'nem2-sdk'
+} from "nem2-sdk"
 import {
   mergeMap,
   toArray
-} from 'rxjs/operators'
-import { env } from '../env'
+} from "rxjs/operators"
+import { env } from "../util/env"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 
 let address: Address
 if(env.PRIVATE_KEY) {
   const initiator = Account.createFromPrivateKey(
     env.PRIVATE_KEY,
-    NetworkType.MIJIN_TEST
+    env.NETWORK_TYPE
   )
   address = initiator.address
 } else {
@@ -39,6 +39,6 @@ mosaicService.mosaicsAmountViewFromAddress(address)
     toArray()
   )
   .subscribe(mosaicAmountViews => {
-    console.log('%o', mosaicAmountViews)
+    console.log("%o", mosaicAmountViews)
   })
 

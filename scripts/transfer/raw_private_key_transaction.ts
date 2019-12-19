@@ -9,26 +9,26 @@ import {
   TransferTransaction,
   Deadline,
   NetworkType
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
+import "../util/NetworkCurrencyMosaic"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 
 const initiator = Account.createFromPrivateKey(
   process.argv[2],
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const recipient = process.argv[3] ?
   Address.createFromRawAddress(process.argv[3]):
   initiator.address
 
-
-console.log('Initiator: %s', initiator.address.pretty())
-console.log('Endpoint:  %s/account/%s', url, initiator.address.plain())
-console.log('Recipient: %s', recipient.pretty())
-console.log('Endpoint:  %s/account/%s', url, recipient.plain())
-console.log('')
+console.log("Initiator: %s", initiator.address.pretty())
+console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
+console.log("Recipient: %s", recipient.pretty())
+console.log("Endpoint:  %s/account/%s", url, recipient.plain())
+console.log("")
 
 const mosaics = [NetworkCurrencyMosaic.createRelative(0)]
 const transferTx = TransferTransaction.create(
@@ -36,7 +36,7 @@ const transferTx = TransferTransaction.create(
   recipient,
   mosaics,
   EmptyMessage,
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 
 util.listener(url, initiator.address, {

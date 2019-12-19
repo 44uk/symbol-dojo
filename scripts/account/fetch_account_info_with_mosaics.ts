@@ -8,21 +8,21 @@ import {
   AccountHttp,
   MosaicHttp,
   MosaicService
-} from 'nem2-sdk'
+} from "nem2-sdk"
 import {
   mergeMap,
   map,
   toArray
-} from 'rxjs/operators'
-import { env } from '../env'
+} from "rxjs/operators"
+import { env } from "../util/env"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 
 let address: Address
 if(env.PRIVATE_KEY) {
   const initiator = Account.createFromPrivateKey(
     env.PRIVATE_KEY,
-    NetworkType.MIJIN_TEST
+    env.NETWORK_TYPE
   )
   address = initiator.address
 } else {
@@ -46,8 +46,8 @@ accountHttp.getAccountInfo(address)
   )
   .subscribe(accountInfoWithMosaicInfoView => {
     // getAccountInfoの情報
-    console.log('%o', accountInfoWithMosaicInfoView.account)
+    console.log("%o", accountInfoWithMosaicInfoView.account)
     // mosaicsAmountViewFromAddressの情報
-    console.log('%o', accountInfoWithMosaicInfoView.mosaics)
+    console.log("%o", accountInfoWithMosaicInfoView.mosaics)
   })
 

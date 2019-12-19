@@ -3,57 +3,64 @@
  */
 import {
   Account,
-  NetworkType,
-  MultisigCosignatoryModification,
-  MultisigCosignatoryModificationType,
-  ModifyMultisigAccountTransaction,
   NetworkCurrencyMosaic,
   TransactionType,
   AggregateTransaction,
+  MultisigAccountModificationTransaction,
   CosignatureTransaction,
-  Deadline
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+  Deadline,
+  HashLockTransaction,
+  UInt64,
+  TransferTransaction,
+  EmptyMessage
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
+import "../util/NetworkCurrencyMosaic"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
   env.PRIVATE_KEY,
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 
 // 引数の秘密鍵のアカウントをマルチシグ候補にする
-const toBeMultisig = Account.createFromPrivateKey(
-  process.argv[2],
-  NetworkType.MIJIN_TEST
-)
+// const toBeMultisig = Account.createFromPrivateKey(
+//   process.argv[2],
+//   env.NETWORK_TYPE
+// )
 
-const minApprovalDelta = 2 // 2人の承認が必要
+const minApprovalDelta = 1 // トランザクションの承認には1人の署名が必要
 const minRemovalDelta = 2 // 連署者を外すには2人に承認が必要
 
-console.log('Initiator: %s', initiator.address.pretty())
-console.log('Endpoint:  %s/account/%s', url, initiator.address.plain())
-console.log('')
+console.log("Initiator: %s", initiator.address.pretty())
+console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
+console.log("")
 
-const showAccountInfo = (account, label = null) => {
+const showAccountInfo = (account: Account, label?: string) => {
   label && console.log(label)
-  console.log('Private:  %s', account.privateKey)
-  console.log('Public:   %s', account.publicKey)
-  console.log('Address:  %s', account.address.pretty())
-  console.log('Endpoint: %s/account/%s', url, account.address.plain())
-  console.log('Endpoint: %s/account/%s/multisig', url, account.address.plain())
-  console.log('')
+  console.log("Private:  %s", account.privateKey)
+  console.log("Public:   %s", account.publicKey)
+  console.log("Address:  %s", account.address.pretty())
+  console.log("Endpoint: %s/account/%s", url, account.address.plain())
+  console.log("Endpoint: %s/account/%s/multisig", url, account.address.plain())
+  console.log("")
 }
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
-const cosigners = [...Array(2)].map((_, idx) => {
-  return Account.generateNewAccount(NetworkType.MIJIN_TEST)
+const accounts = [...Array(2)].map((_, idx) => {
+  return Account.generateNewAccount(env.NETWORK_TYPE)
 })
+
+// 1つ目のアカウントをマルチシグ化候補にする
+const toBeMultisig = accounts[0]
+// それ以降は連署者候補とする
+const cosigners = accounts.slice(1)
 // 環境変数にセットしているアカウントも連署者として追加する
 cosigners.push(initiator)
 
 // マルチシグアカウントとするアカウント情報を表示
-showAccountInfo(toBeMultisig, 'Multisig Account')
+showAccountInfo(toBeMultisig, "Multisig Account")
 
 // 連署者とするアカウントの公開アカウントの集合を作る
 const cosignerPublicAccounts = cosigners.map((account, idx) => {
@@ -61,60 +68,81 @@ const cosignerPublicAccounts = cosigners.map((account, idx) => {
   return account.publicAccount
 })
 
-// 連署者の追加定義集合を作る
-const cosignatoryModifications = cosignerPublicAccounts.map(publicAccount => {
-  return new MultisigCosignatoryModification(
-    MultisigCosignatoryModificationType.Add,
-    publicAccount
-  )
-})
-
-const convertIntoMultisigTx = ModifyMultisigAccountTransaction.create(
+const convertIntoMultisigTx = MultisigAccountModificationTransaction.create(
   Deadline.create(),
   minApprovalDelta,
   minRemovalDelta,
-  cosignatoryModifications,
-  NetworkType.MIJIN_TEST
+  cosignerPublicAccounts,
+  [],
+  env.NETWORK_TYPE,
+  UInt64.fromUint(500000)
 )
+
+// `Root` となるアカウントへマルチシグ化用の手数料分を渡しておく
+const transferTx = TransferTransaction.create(
+  Deadline.create(),
+  toBeMultisig.address,
+  [NetworkCurrencyMosaic.createRelative(1000)],
+  EmptyMessage,
+  env.NETWORK_TYPE,
+  UInt64.fromUint(500000)
+)
+const signedTransferTx = initiator.sign(transferTx, env.GENERATION_HASH)
 
 // 連署アカウントになることを承認するために署名が要求される。
 const aggregateTx = AggregateTransaction.createBonded(
   Deadline.create(),
   [ convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount) ],
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE,
+  [],
+  UInt64.fromUint(500000)
 )
+aggregateTx.setMaxFee(500)
 
 const signedTx = toBeMultisig.sign(aggregateTx, env.GENERATION_HASH)
 
-cosigners.forEach(cosigner => {
-  util.listener(url, cosigner.address)
-})
+// cosigners.forEach(cosigner => {
+//   util.listener(url, cosigner.address)
+// })
 
-util.listener(url, toBeMultisig.address, {
+util.listener(url, initiator.address, {
   onOpen: () => {
-    const hashLockTx = HashLockTransaction.create(
-      Deadline.create(),
-      NetworkCurrencyMosaic.createRelative(10),
-      UInt64.fromUint(480),
-      signedTx,
-      NetworkType.MIJIN_TEST
-    )
-    const signedHashLockTx = toBeMultisig.sign(hashLockTx, env.GENERATION_HASH)
-    util.announce(url, signedHashLockTx)
+    util.announce(url, signedTransferTx)
   },
-  onConfirmed: (tx, listener) => {
-    if(tx.type === TransactionType.LOCK) {
-      util.announceAggregateBonded(url, signedTx)
-    } else {
-      listener.close()
-    }
-  },
-  onAggregateBondedAdded: (aggTx) => {
-    // 各連署アカウントに署名要求を署名させる
-    const cosignatureTx = CosignatureTransaction.create(aggTx)
-    cosigners.forEach(cosigner => {
-      const signedCosignatureTx = cosigner.signCosignatureTransaction(cosignatureTx)
-      util.announceAggregateBondedCosignature(url, signedCosignatureTx)
+  onConfirmed: (listener) => {
+    listener.close()
+
+    util.listener(url, toBeMultisig.address, {
+      onOpen: () => {
+        const hashLockTx = HashLockTransaction.create(
+          Deadline.create(),
+          NetworkCurrencyMosaic.createRelative(10),
+          UInt64.fromUint(480),
+          signedTx,
+          env.NETWORK_TYPE,
+          UInt64.fromUint(500000)
+        )
+        const signedHashLockTx = toBeMultisig.sign(hashLockTx, env.GENERATION_HASH)
+        console.log("HashLock announced!")
+        util.announce(url, signedHashLockTx)
+      },
+      onConfirmed: (listener, tx) => {
+        if(tx.type === TransactionType.LOCK) {
+          console.log("HashLock confirmed!")
+          util.announceAggregateBonded(url, signedTx)
+        } else {
+          listener.close()
+        }
+      },
+      onAggregateBondedAdded: (_, aggTx) => {
+        // 各連署アカウントに署名要求を署名させる
+        const cosignatureTx = CosignatureTransaction.create(aggTx)
+        console.log("AggregateBonded added!")
+        cosigners.forEach(cosigner => {
+          const signedCosignatureTx = cosigner.signCosignatureTransaction(cosignatureTx)
+          util.announceAggregateBondedCosignature(url, signedCosignatureTx)
+        })
+      }
     })
   }
 })

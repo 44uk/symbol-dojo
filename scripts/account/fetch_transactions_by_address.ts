@@ -4,18 +4,18 @@
 import {
   Address,
   AccountHttp,
-} from 'nem2-sdk'
+} from "nem2-sdk"
 import {
   of,
   forkJoin
-} from 'rxjs'
+} from "rxjs"
 import {
   map,
   mergeMap
-} from 'rxjs/operators'
-import { env } from '../env'
+} from "rxjs/operators"
+import { env } from "../util/env"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 const address = Address.createFromRawAddress(process.argv[2])
 const accountHttp = new AccountHttp(url)
 

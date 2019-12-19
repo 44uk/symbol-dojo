@@ -10,29 +10,29 @@ import {
   Order,
   PublicAccount,
   AccountHttp
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
 import {
   mergeMap,
   filter,
   map
-} from 'rxjs/operators'
+} from "rxjs/operators"
 import {
 
-} from 'rxjs'
+} from "rxjs"
 
 if(env.PRIVATE_KEY === undefined) {
-  throw new Error('You need to be set env variable PRIVATE_KEY')
+  throw new Error("You need to be set env variable PRIVATE_KEY")
 }
 if(env.GENERATION_HASH === undefined) {
-  throw new Error('You need to be set env variable GENERATION_HASH')
+  throw new Error("You need to be set env variable GENERATION_HASH")
 }
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
   env.PRIVATE_KEY,
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const plainMessage = process.argv[3]
 
@@ -47,16 +47,16 @@ accountHttp.incomingTransactions(initiator.address, new QueryParams(100, undefin
   .subscribe(
     incomingWithMessage => {
       console.log(incomingWithMessage.message)
-      const publicAccount = PublicAccount.createFromPublicKey('1654BF53393174FA8A5DD5312C17CC61830343594CA776A7CD1822A21F161C81', nem.NetworkType.MIJIN_TEST)
+      const publicAccount = PublicAccount.createFromPublicKey("1654BF53393174FA8A5DD5312C17CC61830343594CA776A7CD1822A21F161C81", nem.env.NETWORK_TYPE)
       console.log(publicAccount.address)
-      const decodedMessage = initiator.decryptMessage(incomingWithMessage.message, publicAccount, NetworkType.MIJIN_TEST)
+      const decodedMessage = initiator.decryptMessage(incomingWithMessage.message, publicAccount, env.NETWORK_TYPE)
       console.log(decodedMessage)
     }
   )
 
 
 // const encrypted = nem.EncryptedMessage.createFromDTO(
-//   '36A4AC5810B10793BA0992C5D7CDBA6EB07AB7E110ACCEE2AFFE8B68EF022B737CDBBDCEC02A8220DDEF928E283901B5CB5F81119FCB6DA7444D2FA996327C37'
+//   "36A4AC5810B10793BA0992C5D7CDBA6EB07AB7E110ACCEE2AFFE8B68EF022B737CDBBDCEC02A8220DDEF928E283901B5CB5F81119FCB6DA7444D2FA996327C37"
 // )
 // const plainMessage = account.decryptMessage(encrypted, publicAccount)
 // console.log(plainMessage)

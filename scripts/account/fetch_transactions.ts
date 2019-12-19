@@ -7,17 +7,17 @@ import {
   AccountHttp,
   QueryParams,
   Order
-} from 'nem2-sdk'
+} from "nem2-sdk"
 import {
   forkJoin
-} from 'rxjs'
+} from "rxjs"
 import {
   map
-} from 'rxjs/operators'
-import { env } from '../env'
+} from "rxjs/operators"
+import { env } from "../util/env"
 
-const url = env.API_URL || 'http://localhost:3000'
-const publicAccount = PublicAccount.createFromPublicKey(process.argv[2], NetworkType.MIJIN_TEST)
+const url = env.API_URL
+const publicAccount = PublicAccount.createFromPublicKey(process.argv[2], env.NETWORK_TYPE)
 const accountHttp = new AccountHttp(url)
 
 const queryParams = new QueryParams(10, undefined, Order.ASC)

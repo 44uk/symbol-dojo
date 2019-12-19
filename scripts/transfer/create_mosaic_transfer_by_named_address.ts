@@ -9,30 +9,31 @@ import {
   PlainMessage,
   TransferTransaction,
   Deadline,
-  NetworkType
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+  UInt64
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
+import "../util/NetworkCurrencyMosaic"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
   env.PRIVATE_KEY,
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const nsHttp = new NamespaceHttp(url)
 
 // アドレスオブジェクトの代わりにリンクされているネームスペースIDオブジェクトを使う
 const nsId = new NamespaceId(process.argv[2])
-const amount = parseInt(process.argv[3] || '0')
+const amount = parseInt(process.argv[3]) || 0
 
 nsHttp.getLinkedAddress(nsId).subscribe(
   address => {
-    console.log('Initiator: %s', initiator.address.pretty())
-    console.log('Endpoint:  %s/account/%s', url, initiator.address.plain())
-    console.log('Namespace: %s', nsId.fullName)
-    console.log('Recipient: %s', address.pretty())
-    console.log('Endpoint:  %s/account/%s', url, address.plain())
-    console.log('')
+    console.log("Initiator: %s", initiator.address.pretty())
+    console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
+    console.log("Namespace: %s", nsId.fullName)
+    console.log("Recipient: %s", address.pretty())
+    console.log("Endpoint:  %s/account/%s", url, address.plain())
+    console.log("")
 
     // recipientには直接NamespaceIdオブジェクトを渡せます。
     // 一度アドレスを引いているのは宛先アドレスを表示するためです。
@@ -41,16 +42,18 @@ nsHttp.getLinkedAddress(nsId).subscribe(
       nsId,
       [NetworkCurrencyMosaic.createRelative(amount)],
       PlainMessage.create(`Send to ${address.pretty()} by ${nsId.fullName}`),
-      NetworkType.MIJIN_TEST
+      env.NETWORK_TYPE,
+      UInt64.fromUint(50000)
     )
+
+    const signedTx = initiator.sign(transferTx, env.GENERATION_HASH)
 
     util.listener(url, initiator.address, {
       onOpen: () => {
-        const signedTx = initiator.sign(transferTx, env.GENERATION_HASH)
         util.announce(url, signedTx)
       },
       onConfirmed: (listener) => listener.close()
     })
   },
-  err => console.error('Error: ', err)
+  error => console.error("Error: ", error)
 )

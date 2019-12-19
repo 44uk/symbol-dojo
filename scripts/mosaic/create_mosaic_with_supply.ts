@@ -13,11 +13,11 @@ import {
   AggregateTransaction,
   UInt64,
   Deadline
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
   env.PRIVATE_KEY,
   env.NETWORK_TYPE
@@ -33,14 +33,14 @@ const flags = MosaicFlags.create(
   true  // Restrictable
 )
 
-console.log('Initiator: %s', initiator.address.pretty())
-console.log('Endpoint:  %s/account/%s', url, initiator.address.plain())
-console.log('Nonce:     %s', nonce)
-console.log('MosaicHex: %s', mosId.toHex())
-console.log('Blocks:    %s', blocks === 0 ? blocks : 'Infinity')
-console.log('Supply:    %s', absSupply)
-console.log('Endpoint:  %s/mosaic/%s', url, mosId.toHex())
-console.log('')
+console.log("Initiator: %s", initiator.address.pretty())
+console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
+console.log("Nonce:     %s", nonce)
+console.log("MosaicHex: %s", mosId.toHex())
+console.log("Blocks:    %s", blocks === 0 ? blocks : "Infinity")
+console.log("Supply:    %s", absSupply)
+console.log("Endpoint:  %s/mosaic/%s", url, mosId.toHex())
+console.log("")
 
 const definitionTx = MosaicDefinitionTransaction.create(
   Deadline.create(),
@@ -62,10 +62,8 @@ const supplyTx = MosaicSupplyChangeTransaction.create(
 
 const aggregateTx = AggregateTransaction.createComplete(
   Deadline.create(),
-  [
-    definitionTx.toAggregate(initiator.publicAccount),
-    supplyTx.toAggregate(initiator.publicAccount)
-  ],
+  [ definitionTx.toAggregate(initiator.publicAccount),
+    supplyTx.toAggregate(initiator.publicAccount) ],
   env.NETWORK_TYPE,
   [],
   UInt64.fromUint(5000000)

@@ -14,50 +14,51 @@ import {
   CosignatureTransaction,
   UInt64,
   Deadline
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
+import "../util/NetworkCurrencyMosaic"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
   env.PRIVATE_KEY,
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const cosignator = Account.createFromPrivateKey(
   process.argv[2],
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const multisig = PublicAccount.createFromPublicKey(
   process.argv[3],
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const recipient = Address.createFromRawAddress(process.argv[4])
-const amount = parseInt(process.argv[5] || '0')
+const amount = parseInt(process.argv[5]) || 0
 
-console.log('Initiator:  %s', initiator.address.pretty())
-console.log('Endpoint:   %s/account/%s', url, initiator.address.plain())
-console.log('Cosignator: %s', cosignator.address.pretty())
-console.log('Endpoint:   %s/account/%s', url, cosignator.address.plain())
-console.log('Multisig:   %s', multisig.address.pretty())
-console.log('Endpoint:   %s/account/%s', url, multisig.address.plain())
-console.log('Amount:     %d', amount)
-console.log('Recipient:  %s', recipient.pretty())
-console.log('Endpoint:   %s/account/%s', url, recipient.plain())
-console.log('')
+console.log("Initiator:  %s", initiator.address.pretty())
+console.log("Endpoint:   %s/account/%s", url, initiator.address.plain())
+console.log("Cosignator: %s", cosignator.address.pretty())
+console.log("Endpoint:   %s/account/%s", url, cosignator.address.plain())
+console.log("Multisig:   %s", multisig.address.pretty())
+console.log("Endpoint:   %s/account/%s", url, multisig.address.plain())
+console.log("Amount:     %d", amount)
+console.log("Recipient:  %s", recipient.pretty())
+console.log("Endpoint:   %s/account/%s", url, recipient.plain())
+console.log("")
 
 const transferTx = TransferTransaction.create(
   Deadline.create(),
   recipient,
   [NetworkCurrencyMosaic.createRelative(amount)],
-  new PlainMessage('Transaction from multisig account signed by cosigner.'),
-  NetworkType.MIJIN_TEST
+  PlainMessage.create("Transaction from multisig account signed by cosigner."),
+  env.NETWORK_TYPE
 )
 
 // マルチシグトランザクションはアグリゲートボンドトランザクションとして行う
 const multisigTx = AggregateTransaction.createBonded(
   Deadline.create(),
   [ transferTx.toAggregate(multisig) ],
-  NetworkType.MIJIN_TEST
+  env.NETWORK_TYPE
 )
 const signedMultisigTx = initiator.sign(multisigTx, env.GENERATION_HASH)
 
@@ -68,7 +69,7 @@ util.listener(url, initiator.address, {
       NetworkCurrencyMosaic.createRelative(10),
       UInt64.fromUint(480),
       signedMultisigTx,
-      NetworkType.MIJIN_TEST
+      env.NETWORK_TYPE
     )
     const signedLockFundsTx = initiator.sign(lockFundsTx, env.GENERATION_HASH)
     util.announce(url, signedLockFundsTx)

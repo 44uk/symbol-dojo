@@ -6,16 +6,16 @@ import {
   NetworkType,
   Address,
   AccountHttp
-} from 'nem2-sdk'
-import { env } from '../env'
+} from "nem2-sdk"
+import { env } from "../util/env"
 
-const url = env.API_URL || 'http://localhost:3000'
+const url = env.API_URL
 
 let address: Address
 if(env.PRIVATE_KEY) {
   const initiator = Account.createFromPrivateKey(
     env.PRIVATE_KEY,
-    NetworkType.MIJIN_TEST
+    env.NETWORK_TYPE
   )
   address = initiator.address
 } else {
@@ -26,6 +26,6 @@ const accountHttp = new AccountHttp(url)
 
 accountHttp.getAccountInfo(address)
   .subscribe(accountInfoView => {
-    console.log('%o', accountInfoView)
+    console.log("%o", accountInfoView)
   })
 

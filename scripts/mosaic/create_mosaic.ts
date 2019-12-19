@@ -9,9 +9,9 @@ import {
   MosaicDefinitionTransaction,
   UInt64,
   Deadline
-} from 'nem2-sdk'
-import * as util from '../util'
-import { env } from '../env'
+} from "nem2-sdk"
+import * as util from "../util/util"
+import { env } from "../util/env"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
@@ -28,13 +28,13 @@ const flags = MosaicFlags.create(
   true  // Restrictable
 )
 
-console.log('Initiator:    %s', initiator.address.pretty())
-console.log('Endpoint:     %s/account/%s', url, initiator.address.plain())
-console.log('Mosaic Nonce: %s', nonce)
-console.log('Mosaic Hex:   %s', mosId.toHex())
-console.log('Blocks:       %s', blocks !== 0 ? blocks : 'Infinity ∞')
-console.log('Endpoint:     %s/mosaic/%s', url, mosId.toHex())
-console.log('')
+console.log("Initiator:    %s", initiator.address.pretty())
+console.log("Endpoint:     %s/account/%s", url, initiator.address.plain())
+console.log("Mosaic Nonce: %s", nonce)
+console.log("Mosaic Hex:   %s", mosId.toHex())
+console.log("Blocks:       %s", blocks !== 0 ? blocks : "Infinity ∞")
+console.log("Endpoint:     %s/mosaic/%s", url, mosId.toHex())
+console.log("")
 
 const definitionTx = MosaicDefinitionTransaction.create(
   Deadline.create(),
@@ -43,7 +43,8 @@ const definitionTx = MosaicDefinitionTransaction.create(
   flags,
   0,
   UInt64.fromUint(blocks),
-  env.NETWORK_TYPE
+  env.NETWORK_TYPE,
+  UInt64.fromUint(50000)
 )
 
 const signedTx = initiator.sign(definitionTx, env.GENERATION_HASH)

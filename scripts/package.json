@@ -2,15 +2,20 @@
   "private": true,
   "name": "examples",
   "version": "0.0.1",
-  "description": "nem2-dojo example scripts",
+  "description": "symbol-dojo - example scripts for learning symbol.",
   "keywords": [
     "nem",
     "nem2",
-    "catapult"
+    "catapult",
+    "symbol"
   ],
+  "engines": {
+    "node": ">=12",
+    "npm": ">=6"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/44uk/nem2-dojo.git"
+    "url": "https://github.com/44uk/symbol-dojo.git"
   },
   "author": "Yoshiyuki Ieyama",
   "license": "MIT",
@@ -18,14 +23,15 @@
     "prettier": "prettier --write '**/*.{ts,js,json,md,html}'"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
+    "hi-base32": "^0.5.0",
     "js-sha3": "^0.8.0",
-    "nem2-sdk": "0.16.0",
-    "ripemd160": "^2.0.2",
-    "rxjs": "^6.5.3"
+    "rxjs": "^6.6.3",
+    "symbol-sdk": "0.21.0"
   },
   "devDependencies": {
-    "@types/node": "^12.12.21",
-    "prettier": "^1.19.1"
+    "@types/node": "^14.14.9",
+    "prettier": "^2.2.0"
   },
   "prettier": {
     "singleQuote": true,

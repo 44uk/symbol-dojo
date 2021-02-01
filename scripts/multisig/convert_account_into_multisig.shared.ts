@@ -1,5 +1,5 @@
 /**
- * $ node multisig/convert_account_into_multisig_shared.js
+ * $ ts-node multisig/convert_account_into_multisig_shared.ts
  */
 import {
   Account,
@@ -10,32 +10,32 @@ import {
   TransferTransaction,
   NetworkCurrencyMosaic,
   EmptyMessage
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 import "../util/NetworkCurrencyMosaic"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 
 const minApprovalDelta = 1 // トランザクションの承認には1人の署名が必要
 const minRemovalDelta = 2 // 連署者を外す場合は2人の署名が必要
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("")
 
 const showAccountInfo = (account: Account, label?: string) => {
-  label && console.log(label)
-  console.log("Private:  %s", account.privateKey)
-  console.log("Public:   %s", account.publicKey)
-  console.log("Address:  %s", account.address.pretty())
-  console.log("Endpoint: %s/account/%s", url, account.address.plain())
-  console.log("Endpoint: %s/account/%s/multisig", url, account.address.plain())
-  console.log("")
+  label && consola.info(label)
+  consola.info("Private:  %s", account.privateKey)
+  consola.info("Public:   %s", account.publicKey)
+  consola.info("Address:  %s", account.address.pretty())
+  consola.info("Endpoint: %s/account/%s", url, account.address.plain())
+  consola.info("Endpoint: %s/account/%s/multisig", url, account.address.plain())
+  consola.info("")
 }
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。
@@ -66,26 +66,15 @@ const convertIntoMultisigTx = MultisigAccountModificationTransaction.create(
   cosignerPublicAccounts,
   [],
   env.NETWORK_TYPE,
-  UInt64.fromUint(5000000)
-)
-
-// `Root` となるアカウントへマルチシグ化用の手数料分を渡しておく
-const transferTx = TransferTransaction.create(
-  Deadline.create(),
-  toBeMultisig.address,
-  [NetworkCurrencyMosaic.createRelative(1000)],
-  EmptyMessage,
-  env.NETWORK_TYPE,
   UInt64.fromUint(500000)
 )
-const signedTransferTx = initiator.sign(transferTx, env.GENERATION_HASH)
 
 const aggregateTx = AggregateTransaction.createComplete(
   Deadline.create(),
   [ convertIntoMultisigTx.toAggregate(toBeMultisig.publicAccount) ],
   env.NETWORK_TYPE,
   [],
-  UInt64.fromUint(500000)
+  UInt64.fromUint(50000)
 )
 aggregateTx.setMaxFee(500)
 
@@ -95,6 +84,17 @@ const signedTx = toBeMultisig.signTransactionWithCosignatories(
   cosigners,
   env.GENERATION_HASH
 )
+
+// マルチシグ化するアカウントに手数料分を渡しておく
+const transferTx = TransferTransaction.create(
+  Deadline.create(),
+  toBeMultisig.address,
+  [NetworkCurrencyMosaic.createRelative(500)],
+  EmptyMessage,
+  env.NETWORK_TYPE,
+  UInt64.fromUint(500000)
+)
+const signedTransferTx = initiator.sign(transferTx, env.GENERATION_HASH)
 
 util.listener(url, initiator.address, {
   onOpen: () => {

@@ -84,7 +84,7 @@ connection open
 
 [source,shell]
 ----
-$ nem2-cli transaction transfer -r SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4 -c @cat.currency::1000000 --profile bob
+$ nem2-cli transaction transfer -r SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4 -c @nem.xem::1000000 --profile bob
 Transaction announced correctly
 Hash:    FFFFC03994FA1DF7583FC8500DC1DECCD51901F264ADD136E3EBE822BB58D9A4
 Signer:  97980E89374802B5A0DD63D32A3897496431486E9DB210B00B43A9B41D08550B
@@ -124,7 +124,7 @@ $ node restriction/address.js SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 block rem
 
 このスクリプトは第一引数にモザイクIDを指定し、第二引数には`+block+`または`+allow+`、第三引数に`+add+`または`+remove+`を指定します。
 
-ここでは`+alice+`のアカウントに`+3f859f237d36c3ae (cat.currency)+`モザイクをブロック対象に追加してみます。
+ここでは`+alice+`のアカウントに`+3f859f237d36c3ae (nem.xem)+`モザイクをブロック対象に追加してみます。
 
 [source,shell]
 ----
@@ -150,11 +150,11 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 {"transaction":{"type":16976,"networkType":144,"version":36865,"maxFee":[0,0],"deadline":[4076304657,23],"signature":"8077CEF0701215D2CE6B5887C9DFFA4D11420DEEE7DE408B3FE5414C9C35855B480CDB0B97E158AB2741A2F461D5AAAC8BAA250EE3588AAE6BDC8B1CC6AE920A","signer":"A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0","propertyType":130,"modifications":[{"value":[2100741038,1065721635]}]}}
 ----
 
-先程同様に`+bob+`のアドレスから`+alice+`へ`+cat.currency+`を含めたトランザクションを送ってみてください。
+先程同様に`+bob+`のアドレスから`+alice+`へ`+nem.xem+`を含めたトランザクションを送ってみてください。
 
 [source,shell]
 ----
-$ nem2-cli transaction transfer -r SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4 -c @cat.currency::1000000 --profile bob
+$ nem2-cli transaction transfer -r SAFPLKSQJTYGTWKNJ6B66LJV3VRBMUSBQH7Y6ZH4 -c @nem.xem::1000000 --profile bob
 Transaction announced correctly
 Hash:    F726C13B1C2C2D15634D6EF9DDA08FBF67336E589C97A2C37FE9D972FE4DD152
 Signer:  97980E89374802B5A0DD63D32A3897496431486E9DB210B00B43A9B41D08550B
@@ -211,7 +211,7 @@ Signer:   A29FE98485D2841C7C68A2B521156EE5D0170FF6AFF2ED3BF4E908500EC083B0
 
 [source,shell]
 ----
-$ nem2-cli transaction transfer -r SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 -c @cat.currency::10000000 -m "Hello, Bob" --profile alice
+$ nem2-cli transaction transfer -r SCJ3XMWIITJT5DIFZYKQ27VDIYYKAVXIAAMJW6K2 -c @nem.xem::10000000 -m "Hello, Bob" --profile alice
 ----
 
 このトランザクションが制限にブロックされ、ターミナルにエラーが表示されます。

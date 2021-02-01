@@ -1,62 +1,35 @@
 /**
- * $ node transfer/create_deencrypt_message_transfer.js
+ * $ ts-node transfer/create_deencrypt_message_transfer.ts ENCRYPTED_MESSAGE
  */
 import {
   Account,
-  NetworkType,
-  TransferTransaction,
-  Deadline,
-  QueryParams,
-  Order,
-  PublicAccount,
-  AccountHttp
-} from "nem2-sdk"
-import * as util from "../util/util"
+  EncryptedMessage,
+} from "symbol-sdk"
 import { env } from "../util/env"
-import {
-  mergeMap,
-  filter,
-  map
-} from "rxjs/operators"
-import {
-
-} from "rxjs"
-
-if(env.PRIVATE_KEY === undefined) {
-  throw new Error("You need to be set env variable PRIVATE_KEY")
-}
-if(env.GENERATION_HASH === undefined) {
-  throw new Error("You need to be set env variable GENERATION_HASH")
-}
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
-const plainMessage = process.argv[3]
+const encryptedPayload = process.argv[2]
+const encryptedMessage = EncryptedMessage.createFromPayload(encryptedPayload)
+const plainMessage = initiator.decryptMessage(encryptedMessage, initiator.publicAccount, env.NETWORK_TYPE)
 
-const accountHttp = new AccountHttp(url)
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Payload:   %s", encryptedPayload)
+consola.info("Plain  :   %s", plainMessage.payload)
+consola.info("")
 
-accountHttp.incomingTransactions(initiator.address, new QueryParams(100, undefined, Order.DESC))
-  .pipe(
-    mergeMap(_ => _),
-    filter(tx => tx instanceof TransferTransaction && tx.message.payload.length > 0),
-    map(_ => _ as TransferTransaction)
-  )
-  .subscribe(
-    incomingWithMessage => {
-      console.log(incomingWithMessage.message)
-      const publicAccount = PublicAccount.createFromPublicKey("1654BF53393174FA8A5DD5312C17CC61830343594CA776A7CD1822A21F161C81", nem.env.NETWORK_TYPE)
-      console.log(publicAccount.address)
-      const decodedMessage = initiator.decryptMessage(incomingWithMessage.message, publicAccount, env.NETWORK_TYPE)
-      console.log(decodedMessage)
-    }
-  )
-
+//       consola.info(incomingWithMessage.message)
+//       const publicAccount = PublicAccount.createFromPublicKey("1654BF53393174FA8A5DD5312C17CC61830343594CA776A7CD1822A21F161C81", nem.env.NETWORK_TYPE)
+//       consola.info(publicAccount.address)
+//       const decodedMessage = initiator.decryptMessage(incomingWithMessage.message, publicAccount, env.NETWORK_TYPE)
+//       consola.info(decodedMessage)
 
 // const encrypted = nem.EncryptedMessage.createFromDTO(
 //   "36A4AC5810B10793BA0992C5D7CDBA6EB07AB7E110ACCEE2AFFE8B68EF022B737CDBBDCEC02A8220DDEF928E283901B5CB5F81119FCB6DA7444D2FA996327C37"
 // )
 // const plainMessage = account.decryptMessage(encrypted, publicAccount)
-// console.log(plainMessage)
+// consola.info(plainMessage)

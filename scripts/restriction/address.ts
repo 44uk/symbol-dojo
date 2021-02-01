@@ -1,5 +1,5 @@
 /**
- * $ node filter/address.js SDPF2RAQ6CUSOHCJD5U7YWRYF7Y3GRXNKTBL5C2V block add
+ * $ ts-node filter/address.ts SDPF2RAQ6CUSOHCJD5U7YWRYF7Y3GRXNKTBL5C2V block add
  */
 import {
   Account,
@@ -10,13 +10,13 @@ import {
   AccountPropertyModification,
   AccountPropertyTransaction,
   Deadline
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEYEY,
   env.NETWORK_TYPE
 )
 
@@ -25,14 +25,14 @@ const propertyType = process.argv[3] || "block"
 const modType = process.argv[4] || "add"
 const address = Address.createFromRawAddress(rawAddress)
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Subject:   %s", address.pretty())
-console.log("Property:  %s", propertyType)
-console.log("Modify:    %s", modType)
-console.log("Endpoint:  %s/account/%s/restrictions", url, initiator.publicKey)
-console.log("Endpoint:  %s/account/%s", url, address.plain())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Subject:   %s", address.pretty())
+consola.info("Property:  %s", propertyType)
+consola.info("Modify:    %s", modType)
+consola.info("Endpoint:  %s/account/%s/restrictions", url, initiator.publicKey)
+consola.info("Endpoint:  %s/account/%s", url, address.plain())
+consola.info("")
 
 const propType = propertyType === "allow"
   ? PropertyType.AllowAddress

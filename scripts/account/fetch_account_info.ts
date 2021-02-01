@@ -1,31 +1,29 @@
 /**
- * $ node account/fetch_account_info.js ADDRESS
+ * $ ts-node account/fetch_account_info.ts
  */
+import consola from "consola"
 import {
   Account,
-  NetworkType,
-  Address,
-  AccountHttp
-} from "nem2-sdk"
+  AccountHttp,
+  RepositoryFactoryHttp,
+} from "symbol-sdk"
 import { env } from "../util/env"
 
 const url = env.API_URL
-
-let address: Address
-if(env.PRIVATE_KEY) {
-  const initiator = Account.createFromPrivateKey(
-    env.PRIVATE_KEY,
-    env.NETWORK_TYPE
-  )
-  address = initiator.address
-} else {
-  address = Address.createFromRawAddress(process.argv[2])
-}
-
+const factory = new RepositoryFactoryHttp(url, {
+  generationHash: env.GENERATION_HASH,
+  networkType: env.NETWORK_TYPE,
+  epochAdjustment: env.EPOCH_ADJUSTMENT,
+})
+const accountRepo = factory.createAccountRepository()
 const accountHttp = new AccountHttp(url)
 
-accountHttp.getAccountInfo(address)
-  .subscribe(accountInfoView => {
-    console.log("%o", accountInfoView)
-  })
+const initiator = Account.createFromPrivateKey(
+  env.INITIATOR_KEY,
+  env.NETWORK_TYPE
+)
 
+accountRepo.getAccountInfo(initiator.address)
+  .subscribe(accountInfo => {
+    consola.info("%o", accountInfo)
+  })

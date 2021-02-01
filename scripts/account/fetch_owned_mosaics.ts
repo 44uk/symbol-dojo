@@ -1,14 +1,13 @@
 /**
- * $ node account/fetch_owned_mosaics.js ADDRESS
+ * $ ts-node account/fetch_owned_mosaics.ts ADDRESS
  */
 import {
   Account,
-  NetworkType,
   Address,
   AccountHttp,
   MosaicHttp,
   MosaicService
-} from "nem2-sdk"
+} from "symbol-sdk"
 import {
   mergeMap,
   toArray
@@ -18,9 +17,9 @@ import { env } from "../util/env"
 const url = env.API_URL
 
 let address: Address
-if(env.PRIVATE_KEY) {
+if(env.INITIATOR_KEY) {
   const initiator = Account.createFromPrivateKey(
-    env.PRIVATE_KEY,
+    env.INITIATOR_KEY,
     env.NETWORK_TYPE
   )
   address = initiator.address
@@ -39,6 +38,6 @@ mosaicService.mosaicsAmountViewFromAddress(address)
     toArray()
   )
   .subscribe(mosaicAmountViews => {
-    console.log("%o", mosaicAmountViews)
+    consola.info("%o", mosaicAmountViews)
   })
 

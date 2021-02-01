@@ -1,5 +1,5 @@
 /**
- * $ node filter/mosaic.js MOSAIC_HEX block add
+ * $ ts-node filter/mosaic.ts MOSAIC_HEX block add
  */
 import {
   Account,
@@ -10,13 +10,13 @@ import {
   AccountPropertyTransaction,
   AccountPropertyModification,
   Deadline
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEYEY,
   env.NETWORK_TYPE
 )
 
@@ -25,14 +25,14 @@ const propertyType = process.argv[3] || "block"
 const modType = process.argv[4] || "add"
 const mosaicId = new MosaicId(mosaicHex)
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Subject:   %s", mosaicId.toHex())
-console.log("Property:  %s", propertyType)
-console.log("Modify:    %s", modType)
-console.log("Endpoint:  %s/account/%s/restrictions", url, initiator.publicKey)
-console.log("Endpoint:  %s/mosaic/%s", url, mosaicId.toHex())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Subject:   %s", mosaicId.toHex())
+consola.info("Property:  %s", propertyType)
+consola.info("Modify:    %s", modType)
+consola.info("Endpoint:  %s/account/%s/restrictions", url, initiator.publicKey)
+consola.info("Endpoint:  %s/mosaic/%s", url, mosaicId.toHex())
+consola.info("")
 
 const propType = propertyType === "allow"
   ? PropertyType.AllowMosaic

@@ -1,65 +1,64 @@
 /**
- * $ node namespace/register_namespace.ts test
+ * $ ts-node namespace/register_namespace.ts test
  */
 import {
   Account,
-  NetworkType,
   NamespaceId,
   NamespaceRegistrationTransaction,
   UInt64,
   Deadline
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
-  throw new Error("You need to be set env variable PRIVATE_KEY")
-}
-if(env.GENERATION_HASH === undefined) {
-  throw new Error("You need to be set env variable GENERATION_HASH")
-}
-
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEYEY,
   env.NETWORK_TYPE
 )
 
 const namespace = process.argv[2]
-const blocks = process.argv[3] ? parseInt(process.argv[3]) : 5000 // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
+const duration = parseInt(process.argv[3]) || 5000 // NOTE: 現在の仕様だと1blockにつき、1nem.xemかかる
 const nsId = new NamespaceId(namespace)
-
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Namespace: %s (%s)", nsId.fullName, nsId.toHex())
-console.log("Blocks:    %s", blocks.toLocaleString())
-console.log("Endpoint:  %s/namespace/%s", url, nsId.toHex())
-console.log("")
-
-// const [root, sub] = namespace.split(/(?<=^[^.]+)\./)
 const [parent, child] = namespace.split(/\.(?=[^\.]+$)/)
+// const [root, sub] = namespace.split(/(?<=^[^.]+)\./)
 
-let registerTx
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Namespace: %s (%s)", nsId.fullName, nsId.toHex())
+consola.info("Parent:    %s", parent)
+consola.info("Child:     %s", child || "")
+consola.info("Duration:  %s", duration.toLocaleString())
+consola.info("Endpoint:  %s/namespace/%s", url, nsId.toHex())
+consola.info("")
+
+let registerTx: NamespaceRegistrationTransaction
 if (child) {
   registerTx = NamespaceRegistrationTransaction.createSubNamespace(
     Deadline.create(),
     child,
     parent,
-    env.NETWORK_TYPE
+    env.NETWORK_TYPE,
+    UInt64.fromUint(1000000)
   )
 } else {
   registerTx = NamespaceRegistrationTransaction.createRootNamespace(
     Deadline.create(),
     parent,
-    UInt64.fromUint(blocks),
-    env.NETWORK_TYPE
+    UInt64.fromUint(duration),
+    env.NETWORK_TYPE,
+    UInt64.fromUint(1000000)
   )
 }
+// registerTx = registerTx.setMaxFee(100) as NamespaceRegistrationTransaction
 
 const signedTx = initiator.sign(registerTx, env.GENERATION_HASH)
 
 util.listener(url, initiator.address, {
+  onStatus: (listener, info) => {
+    consola.info(info)
+    listener.close()
+  },
   onOpen: () => util.announce(url, signedTx),
-  onStatus: (listener, info) => { listener.close() console.log(info) },
   onConfirmed: (listener) => listener.close()
 })

@@ -1,28 +1,21 @@
 /**
- * $ node alias/alias_account.js namespaceString address
+ * $ ts-nodeode alias/alias_account.ts namespaceString address
  */
 import {
   Account,
   Address,
   Deadline,
   AliasAction,
-  NetworkType,
   NamespaceId,
-  AddressAliasTransaction
-} from "nem2-sdk"
+  AddressAliasTransaction,
+  UInt64
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
-  throw new Error("You need to be set env variable PRIVATE_KEY")
-}
-if(env.GENERATION_HASH === undefined) {
-  throw new Error("You need to be set env variable GENERATION_HASH")
-}
-
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 
@@ -32,20 +25,21 @@ const rawAddress = process.argv[3]
 const nsId = new NamespaceId(namespace)
 const address = Address.createFromRawAddress(rawAddress)
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Namespace: %s", nsId.fullName)
-console.log("Endpoint:  %s/namespace/%s", url, nsId.toHex())
-console.log("Address:   %s", address.pretty())
-console.log("Endpoint:  %s/account/%s", url, address.plain())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Namespace: %s", nsId.fullName)
+consola.info("Endpoint:  %s/namespace/%s", url, nsId.toHex())
+consola.info("Address:   %s", address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, address.plain())
+consola.info("")
 
 const aliasTx = AddressAliasTransaction.create(
   Deadline.create(),
   AliasAction.Link,
   nsId,
   address,
-  env.NETWORK_TYPE
+  env.NETWORK_TYPE,
+  UInt64.fromUint(50000)
 )
 
 const signedTx = initiator.sign(aliasTx, env.GENERATION_HASH)

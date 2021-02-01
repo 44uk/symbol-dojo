@@ -4,9 +4,9 @@
 トランザクションの発信後にはモニタリングを開始する処理も実装しています。
 
 `transfer/create_mosaic_transfer.js` を実行します。
-このスクリプトは第一引数に宛先アドレスを第二引数に送信するモザイク（ `cat.currency` ）の相対量を指定します。
+このスクリプトは第一引数に宛先アドレスを第二引数に送信するモザイク（ `nem.xem` ）の相対量を指定します。
 
-ここでは `bob` のアドレスへ `100 cat.currency` 送ります。
+ここでは `bob` のアドレスへ `100 nem.xem` 送ります。
 
 [source,shell]
 ----
@@ -51,7 +51,7 @@ Mosaics
 154ee4e837704ed3:	100
 ----
 
-`100 cat.currency` が到着していることが確認できました。
+`100 nem.xem` が到着していることが確認できました。
 
 
 === コード解説
@@ -101,7 +101,7 @@ console.log('Endpoint:  %s/account/%s', url, recipient.plain());
 [source,typescript]
 ----
 // 送信するモザイク配列
-// ここでは`NetworkCurrencyMosaic`すなわち`cat.currency`モザイクオブジェクトを準備
+// ここでは`NetworkCurrencyMosaic`すなわち`nem.xem`モザイクオブジェクトを準備
 // モザイクIDで作る場合は以下のようにする。
 // 可分性がわからないので送信量は絶対値で指定する必要がある。
 // new Mosaic(new MosaicId('7d09bf306c0b2e38'), UInt64.fromUint(absoluteAmount)
@@ -112,7 +112,7 @@ const mosaics = [NetworkCurrencyMosaic.createRelative(amount)];
 配列には `NetworkCurrencyMosaic` を入れています。
 複数のモザイクを送る場合は配列にモザイクオブジェクトを追加します。
 
-`NetworkCurrencyMosaic` とは基軸通貨である `cat.currency` に特化したクラスです。
+`NetworkCurrencyMosaic` とは基軸通貨である `nem.xem` に特化したクラスです。
 `createRelative` メソッドは可分性 `6` を考慮してくれます。
 
 特定のモザイクを16進数のモザイクIDで送信する場合はコメントにあるコード例を使います。

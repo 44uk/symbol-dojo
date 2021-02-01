@@ -1,13 +1,13 @@
 /**
- * $ node account/fetch_transactions.js PUBLIC_KEY
+ * $ ts-node account/fetch_transactions.ts ADDRESS
  */
 import {
-  PublicAccount,
-  NetworkType,
   AccountHttp,
+  Address,
   QueryParams,
-  Order
-} from "nem2-sdk"
+  Order,
+  TransactionType
+} from "symbol-sdk"
 import {
   forkJoin
 } from "rxjs"
@@ -17,20 +17,24 @@ import {
 import { env } from "../util/env"
 
 const url = env.API_URL
-const publicAccount = PublicAccount.createFromPublicKey(process.argv[2], env.NETWORK_TYPE)
+const address = Address.createFromRawAddress(process.argv[2])
 const accountHttp = new AccountHttp(url)
-
-const queryParams = new QueryParams(10, undefined, Order.ASC)
+const params = new QueryParams(
+  20, // 取得件数 10 - 100 の指定が可能
+  undefined, // 取得開始ID 取得するトランザクションの基準を指定
+  Order.DESC, // 取得したトランザクションのID順序
+  // TransactionType.TRANSFER // トランザクションタイプで絞り込む
+)
 
 forkJoin([
-  accountHttp.incomingTransactions(publicAccount.address, queryParams),
-  accountHttp.outgoingTransactions(publicAccount.address),
-  accountHttp.unconfirmedTransactions(publicAccount.address)
+  accountHttp.getAccountUnconfirmedTransactions(address, params),
+  accountHttp.getAccountIncomingTransactions(address, params),
+  accountHttp.getAccountOutgoingTransactions(address, params)
 ]).pipe(
   map(results => {
-    const [ incomings, outgoings, unconfirmed ] = results
-    return { incomings, outgoings, unconfirmed }
+    const [ unconfirmed, incomings, outgoings ] = results
+    return { unconfirmed, incomings, outgoings }
   })
 ).subscribe(
-  data => console.log(data)
+  resp => consola.info(resp)
 )

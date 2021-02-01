@@ -1,46 +1,38 @@
 /**
- * $ node namespace/register_namespace_atomically.ts aaa.bbb.ccc
+ * $ ts-node namespace/register_namespace_atomically.ts aaa.bbb.ccc
  */
 import {
   Account,
-  NetworkType,
   NamespaceId,
   NamespaceRegistrationTransaction,
   AggregateTransaction,
   UInt64,
   Deadline,
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
-  throw new Error("You need to be set env variable PRIVATE_KEY")
-}
-if(env.GENERATION_HASH === undefined) {
-  throw new Error("You need to be set env variable GENERATION_HASH")
-}
-
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEYEY,
   env.NETWORK_TYPE
 )
 
 const namespace = process.argv[2]
-const blocks = process.argv[3] ? parseInt(process.argv[3]) : 5000 // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
+const duration = parseInt(process.argv[3]) || 5000 // NOTE: 現在の仕様だと1blockにつき、1nem.xemかかる
 const parts = namespace.split(".")
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Blocks:    %s", blocks.toLocaleString())
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Duration:  %s", duration.toLocaleString())
 parts.reduce<string[]>((accum, part) => {
   accum.push(part)
   const ns = new NamespaceId(accum.join("."))
-  console.log("Namespace: %s (%s)", ns.fullName, ns.toHex())
-  console.log("Endpoint:  %s/namespace/%s", url, ns.toHex())
+  consola.info("Namespace: %s (%s)", ns.fullName, ns.toHex())
+  consola.info("Endpoint:  %s/namespace/%s", url, ns.toHex())
   return accum
 }, [])
-console.log("")
+consola.info("")
 
 // 各レベルの登録トランザクションを生成
 const txes = parts.reduce<NamespaceRegistrationTransaction[]>((accum, part, idx, array) => {
@@ -50,15 +42,17 @@ const txes = parts.reduce<NamespaceRegistrationTransaction[]>((accum, part, idx,
     registerTx = NamespaceRegistrationTransaction.createRootNamespace(
       Deadline.create(),
       part,
-      UInt64.fromUint(blocks),
-      env.NETWORK_TYPE
+      UInt64.fromUint(duration),
+      env.NETWORK_TYPE,
+      UInt64.fromUint(1000000)
     )
   } else {
     registerTx = NamespaceRegistrationTransaction.createSubNamespace(
       Deadline.create(),
       part,
       parent,
-      env.NETWORK_TYPE
+      env.NETWORK_TYPE,
+      UInt64.fromUint(1000000)
     )
   }
   accum.push(registerTx)
@@ -73,13 +67,17 @@ const aggregateTx = AggregateTransaction.createComplete(
   // [CAUTION] 子から作ろうとするとエラーになる
   // txes.map(tx => tx.toAggregate(initiator.publicAccount)).reverse(),
   env.NETWORK_TYPE,
-  []
+  [],
+  UInt64.fromUint(1000000)
 )
 
 const signedTx = initiator.sign(aggregateTx, env.GENERATION_HASH)
 
 util.listener(url, initiator.address, {
+  onStatus: (listener, info) => {
+    consola.info(info)
+    listener.close()
+  },
   onOpen: () => util.announce(url, signedTx),
-  onStatus: (listener, info) => { listener.close() console.log(info) },
   onConfirmed: (listener) => listener.close()
 })

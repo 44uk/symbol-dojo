@@ -1,5 +1,5 @@
 /**
- * $ node secretlock/lock_and_proof.js RECI{IEMT_ADDRESS PROOF
+ * $ ts-node secretlock/lock_and_proof.js RECI{IEMT_ADDRESS PROOF
  */
 const sha3_256 = require('js-sha3').sha3_256;
 const crypto = require('crypto');
@@ -15,12 +15,12 @@ const {
   TransactionType,
   SecretLockTransaction,
   SecretProofTransaction
-} = require('nem2-sdk');
+} = require('symbol-sdk');
 const util = require('../util');
 
 const url = process.env.API_URL || 'http://localhost:3000';
 const initiator = Account.createFromPrivateKey(
-  process.env.PRIVATE_KEY,
+  process.env.INITIATOR_KEY,
   NetworkType.MIJIN_TEST
 );
 const recipient = Address.createFromRawAddress(process.argv[2])

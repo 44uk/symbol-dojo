@@ -1,4 +1,4 @@
-== catapult-service-bootstrapのトラブルシュート
+== symbol-service-bootstrapのトラブルシュート
 
 Dockerのノード群が正しく起動しない場合の問題解決へのヒントをまとめました。
 

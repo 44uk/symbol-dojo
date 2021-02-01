@@ -1,37 +1,37 @@
 /**
- * $ node multisig/convert_account_into_multisig.js
+ * $ ts-node multisig/convert_account_into_multisig.ts
  */
 import {
   Account,
   MultisigCosignatoryModification,
   AggregateTransaction,
   Deadline,
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 import "../util/NetworkCurrencyMosaic"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 
 const minApprovalDelta = 2 // 2人の承認が必要
 const minRemovalDelta = 2 // 連署者を外すには2人に承認が必要
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("")
 
 const showAccountInfo = (account: Account, label = "") => {
-  label && console.log(label)
-  console.log("Private:  %s", account.privateKey)
-  console.log("Public:   %s", account.publicKey)
-  console.log("Address:  %s", account.address.pretty())
-  console.log("Endpoint: %s/account/%s", url, account.address.plain())
-  console.log("Endpoint: %s/account/%s/multisig", url, account.address.plain())
-  console.log("")
+  label && consola.info(label)
+  consola.info("Private:  %s", account.privateKey)
+  consola.info("Public:   %s", account.publicKey)
+  consola.info("Address:  %s", account.address.pretty())
+  consola.info("Endpoint: %s/account/%s", url, account.address.plain())
+  consola.info("Endpoint: %s/account/%s/multisig", url, account.address.plain())
+  consola.info("")
 }
 
 // 便宜上連署者として新しいアカウントを生成してマルチシグを構築します。

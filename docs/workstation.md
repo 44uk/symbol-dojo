@@ -16,7 +16,7 @@ APIエンドポイントはデフォルト設定で`http://localhost:3000`です
 任意の場所にアーカイブを展開してください。(`git`が利用できる場合はクローンしてもよいです)
 
 - https://github.com/tech-bureau/catapult-service-bootstrap/archive/0.5.0.1.zip
-- [tech\-bureau/catapult\-service\-bootstrap: Starter project to get developers up and running with a running Catapult Service](https://github.com/tech-bureau/catapult-service-bootstrap)
+- [tech\-bureau/catapult\-service\-bootstrap: Starter project to get developers up and running with a running Symbol Service](https://github.com/tech-bureau/catapult-service-bootstrap)
 
 ```shell
 $ git clone https://github.com/tech-bureau/catapult-service-bootstrap.git -b 0.5.0.1

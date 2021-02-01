@@ -1,27 +1,32 @@
 /**
- * $ node account/fetch_account_info_with_mosaics.js ADDRESS
+ * $ ts-node account/fetch_account_info_with_mosaics.ts ADDRESS
  */
+import consola from "consola"
 import {
   Account,
-  NetworkType,
   Address,
-  AccountHttp,
-  MosaicHttp,
-  MosaicService
-} from "nem2-sdk"
-import {
-  mergeMap,
-  map,
-  toArray
-} from "rxjs/operators"
+  MosaicService,
+  RepositoryFactoryHttp,
+} from "symbol-sdk"
 import { env } from "../util/env"
+import { forkJoin } from "rxjs"
 
 const url = env.API_URL
+const factory = new RepositoryFactoryHttp(url, {
+  generationHash: env.GENERATION_HASH,
+  networkType: env.NETWORK_TYPE,
+  epochAdjustment: env.EPOCH_ADJUSTMENT,
+})
+const accountRepo = factory.createAccountRepository()
+const mosaicService = new MosaicService(
+  accountRepo,
+  factory.createMosaicRepository()
+)
 
 let address: Address
-if(env.PRIVATE_KEY) {
+if(env.INITIATOR_KEY) {
   const initiator = Account.createFromPrivateKey(
-    env.PRIVATE_KEY,
+    env.INITIATOR_KEY,
     env.NETWORK_TYPE
   )
   address = initiator.address
@@ -29,25 +34,10 @@ if(env.PRIVATE_KEY) {
   address = Address.createFromRawAddress(process.argv[2])
 }
 
-const accountHttp = new AccountHttp(url)
-const mosaicHttp = new MosaicHttp(url)
-const mosaicService = new MosaicService(accountHttp, mosaicHttp)
-
-// アカウント情報と保有モザイク情報を組み合わせる
-accountHttp.getAccountInfo(address)
-  .pipe(
-    mergeMap(account => mosaicService.mosaicsAmountViewFromAddress(account.address)
-      .pipe(
-        mergeMap(_ => _),
-        toArray(),
-        map(mosaics => ({ account, mosaics }))
-      ),
-    )
-  )
-  .subscribe(accountInfoWithMosaicInfoView => {
-    // getAccountInfoの情報
-    console.log("%o", accountInfoWithMosaicInfoView.account)
-    // mosaicsAmountViewFromAddressの情報
-    console.log("%o", accountInfoWithMosaicInfoView.mosaics)
+forkJoin({
+  account: accountRepo.getAccountInfo(address),
+  mosaics: mosaicService.mosaicsAmountViewFromAddress(address),
+})
+  .subscribe(resp => {
+    consola.info({ resp })
   })
-

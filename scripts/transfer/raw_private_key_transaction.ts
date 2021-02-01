@@ -1,5 +1,5 @@
 /**
- * $ node transfer/raw_private_key_transaction.js PRIVATE_KEY RECIPIENT
+ * $ ts-node transfer/raw_private_key_transaction.ts PRIVATE_KEY RECIPIENT
  */
 import {
   Account,
@@ -9,7 +9,7 @@ import {
   TransferTransaction,
   Deadline,
   NetworkType
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 import "../util/NetworkCurrencyMosaic"

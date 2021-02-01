@@ -1,9 +1,8 @@
 /**
- * $ node mosaic/create_named_mosaic.js aaa.bbb.ccc 5000
+ * $ ts-node mosaic/create_named_mosaic.ts aaa.bbb.ccc 5000
  */
 import {
   Account,
-  NetworkType,
   MosaicNonce,
   MosaicId,
   NamespaceId,
@@ -17,31 +16,31 @@ import {
   UInt64,
   Deadline,
   AliasAction
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 
 const namespace = process.argv[2]
-const blocks = process.argv[4] ? parseInt(process.argv[4]) : 5000 // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
+const blocks = parseInt(process.argv[4]) || 0 // NOTE: 現在の仕様だと1blockにつき、1nem.xemかかる
 const parts = namespace.split(".")
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Blocks:    %s", blocks)
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Blocks:    %s", blocks)
 parts.reduce<string[]>((accum, part) => {
   accum.push(part)
   const ns = new NamespaceId(accum.join("."))
-  console.log("Namespace: %s (%s)", ns.fullName, ns.toHex())
-  console.log("Endpoint:  %s/namespace/%s", url, ns.toHex())
+  consola.info("Namespace: %s (%s)", ns.fullName, ns.toHex())
+  consola.info("Endpoint:  %s/namespace/%s", url, ns.toHex())
   return accum
 }, [])
-console.log("")
+consola.info("")
 
 // register namespaces
 const txes = parts.reduce<Transaction[]>((accum, part, idx, array) => {
@@ -67,7 +66,7 @@ const txes = parts.reduce<Transaction[]>((accum, part, idx, array) => {
 }, [])
 
 // create mosaic
-const absSupply = process.argv[3] ? parseInt(process.argv[3]) : 10000 * 1000000
+const absSupply = parseInt(process.argv[3]) || 10000 * 1000000
 const nonce = MosaicNonce.createRandom()
 const mosId = MosaicId.createFromNonce(nonce, initiator.publicAccount)
 const flags = MosaicFlags.create(
@@ -76,11 +75,11 @@ const flags = MosaicFlags.create(
   true  // Restrictable
 )
 
-console.log("Mosaic Nonce: %s", nonce)
-console.log("Mosaic Hex:   %s", mosId.toHex())
-console.log("Supply:       %s", absSupply)
-console.log("Endpoint:     %s/mosaic/%s", url, mosId.toHex())
-console.log("")
+consola.info("Nonce:     %s", nonce)
+consola.info("MosaicHex: %s", mosId.toHex())
+consola.info("Supply:    %s", absSupply)
+consola.info("Endpoint:  %s/mosaic/%s", url, mosId.toHex())
+consola.info("")
 
 const definitionTx = MosaicDefinitionTransaction.create(
   Deadline.create(),

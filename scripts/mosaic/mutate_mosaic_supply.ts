@@ -1,36 +1,35 @@
 /**
- * $ node mosaic/mutate_mosaic.js deadbeefcafebabe 1000000 add|remove
+ * $ ts-node mosaic/mutate_mosaic.ts deadbeefcafebabe 1000000 add|remove
  */
 import {
   Account,
   MosaicId,
-  NetworkType,
   MosaicSupplyChangeAction,
   MosaicSupplyChangeTransaction,
   Deadline,
   UInt64
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 
 const mosIdent = process.argv[2]
-const absSupply = process.argv[3] ? parseInt(process.argv[3]) : 10000 * 1000000
+const absSupply = parseInt(process.argv[3]) || 10000 * 1000000
 const action = process.argv[4] || "add"
 const mosId = new MosaicId(mosIdent)
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("MosaicHex: %s", mosId.toHex())
-console.log("Supply:    %s", absSupply)
-console.log("Action:    %s", action)
-console.log("Endpoint:  %s/mosaic/%s", url, mosId.toHex())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("MosaicHex: %s", mosId.toHex())
+consola.info("Supply:    %s", absSupply)
+consola.info("Action:    %s", action)
+consola.info("Endpoint:  %s/mosaic/%s", url, mosId.toHex())
+consola.info("")
 
 const supplyAction = action === "remove"
   ? MosaicSupplyChangeAction.Decrease

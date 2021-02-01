@@ -1,5 +1,5 @@
 /**
- * $ node account-link/link_account.ts NODE_ACCOUNT_KEY
+ * $ ts-node account-link/link_account.ts NODE_ACCOUNT_KEY
  */
 import {
   Account,
@@ -11,11 +11,11 @@ import {
   PersistentDelegationRequestTransaction,
   PersistentHarvestingDelegationMessage,
   PublicAccount,
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
+if(env.INITIATOR_KEY === undefined) {
   throw new Error("You need to be set env variable PRIVATE_KEY")
 }
 if(env.GENERATION_HASH === undefined) {
@@ -24,7 +24,7 @@ if(env.GENERATION_HASH === undefined) {
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 const remote = Account.generateNewAccount(env.NETWORK_TYPE)
@@ -35,14 +35,14 @@ const nodeAccount = PublicAccount.createFromPublicKey(
   env.NETWORK_TYPE
 )
 
-console.log("Initiator:  %s", initiator.address.pretty())
-console.log("Endpoint:   %s/account/%s", url, initiator.address.plain())
-console.log("RemoteAddr: %s", remote.address.pretty())
-console.log("RemoteKey:  %s", remote.publicKey)
-console.log("Endpoint:   %s/account/%s", url, remote.address.plain())
-console.log("NodeKey:    %s", nodeAccount.publicKey)
-console.log("Endpoint:   %s/account/%s", url, nodeAccount.address.plain())
-console.log("")
+consola.info("Initiator:  %s", initiator.address.pretty())
+consola.info("Endpoint:   %s/account/%s", url, initiator.address.plain())
+consola.info("RemoteAddr: %s", remote.address.pretty())
+consola.info("RemoteKey:  %s", remote.publicKey)
+consola.info("Endpoint:   %s/account/%s", url, remote.address.plain())
+consola.info("NodeKey:    %s", nodeAccount.publicKey)
+consola.info("Endpoint:   %s/account/%s", url, nodeAccount.address.plain())
+consola.info("")
 
 const accountLinkTx = AccountLinkTransaction.create(
   Deadline.create(),

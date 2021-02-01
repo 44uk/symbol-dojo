@@ -1,15 +1,15 @@
 /**
- * $ node account/fetch_account_info.js ADDRESS
+ * $ ts-node account/fetch_account_info.ts ADDRESS
  */
 import {
   Account,
   NetworkType,
   Address,
   MetadataHttp
-} from "nem2-sdk"
+} from "symbol-sdk"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
+if(env.INITIATOR_KEY === undefined) {
   throw new Error("You need to be set env variable PRIVATE_KEY")
 }
 if(env.GENERATION_HASH === undefined) {
@@ -18,9 +18,9 @@ if(env.GENERATION_HASH === undefined) {
 
 const url = env.API_URL
 let address: Address
-if(env.PRIVATE_KEY) {
+if(env.INITIATOR_KEY) {
   const initiator = Account.createFromPrivateKey(
-    env.PRIVATE_KEY,
+    env.INITIATOR_KEY,
     env.NETWORK_TYPE
   )
   address = initiator.address
@@ -32,6 +32,6 @@ const metaHttp = new MetadataHttp(url)
 
 metaHttp.getAccountMetadata(address)
   .subscribe(metadataEntries => {
-    console.log("%o", metadataEntries)
+    consola.info("%o", metadataEntries)
   })
 

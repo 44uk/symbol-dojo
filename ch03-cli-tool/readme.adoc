@@ -9,17 +9,33 @@
 
 ウォレットのようにアカウントにプロファイル名をつけて保存し、呼び出して使うことができます。
 
-プロファイルは `$HOME/.nem2rc.json` として次の形式で保存されます。
+プロファイルは `$HOME/.symbolrc.json` として次の形式で保存されます。
 
 [source,json]
 ----
-{"alice":{
-  "privateKey":"7EF4AAA5507C7DBDFDD30D52922DF3AC46D2384593FA2E620D19848ED7F60636",
-  "networkType":144,
-  "url":"http://localhost:3000",
-  "networkGenerationHash":"53F73344A12341618CEE455AC412A0B57D41CEC058965511C0BA016156F4BF47"
+{ "alice": {
+  "networkType": 152,
+  "simpleWallet": {
+    "name": "alice",
+    "network": 152,
+    "address": {
+      "address": "TBANOW27C4QRVVO3SN4ODBKEF3XII77K6PDUFAOB",
+      "networkType": 152
+    },
+    "creationDate": "2020-01-08T18:01:26.315",
+    "schema": "simple_v1",
+    "encryptedPrivateKey": {
+      "encryptedKey": "4ae52ee99d06b36c2530a7579e86237c90178cb4f056e683281f842644219c7e458b40a6af46e36737599991a7fe242b",
+      "iv": "C04C8DB02AE61E163026D82B9E835621"
+    }
+  },
+  "url": "http://api-harvest-20.ap-northeast-1.nemtech.network:3000",
+  "networkGenerationHash": "CC42AAD7BD45E8C276741AB2524BC30F5529AF162AD12247EF9A98D6B54A385B",
+  "default": "1"
 }}
 ----
+
+`nem2-sdk` の `SimpleWallet` オブジェクトとして保存されるため、秘密鍵は暗号化された状態です。
 
 
 === プロファイルの登録
@@ -56,7 +72,8 @@ nemesis->
 `--profile` でプロファイル名を指定します。 `nemesis` を渡します。
 各コマンド実行時に `--profile nemesis` とプロファイル名を指定することで、この設定を利用できます。
 
-NOTE: catapult-service-bootstrapはデフォルトではMIJIN_TESTとして稼働します。ネットワークはMIJIN_TEST,MIJIN,TEST_NET,MAIN_NETの４つが定義されています。NEM/Mijinの関係については公式ブログの記事を参照してください。 https://blog.nem.io/jp-outlining-the-relationship-between-nem-mijin-catapult/
+NOTE: symbol-service-bootstrap はデフォルトで MIJIN_TEST として稼働します。ネットワークは MIJIN_TEST,MIJIN,TEST_NET,MAIN_NET の４つが定義されています。NEM/Mijin の関係については公式ブログの記事を参照してください。 https://blog.nem.io/jp-outlining-the-relationship-between-nem-mijin-symbol/
+
 
 次は新たにアカウントを生成してプロファイルとして登録します。
 
@@ -140,24 +157,24 @@ Mosaics
 76d77e2e68673039:	3750
 ----
 
-`nemesis` のアカウント情報を取得した結果です。APIゲートウェイのレスポンスから確認したように `449,949,999.9 cat.currency` を保有しています。
-（ `154ee4e837704ed3` は `cat.currency` を示します。値はネットワーク立ち上げ時にランダムに生成されるので都度異なります。）
+`nemesis` のアカウント情報を取得した結果です。APIゲートウェイのレスポンスから確認したように `449,949,999.9 nem.xem` を保有しています。
+（ `154ee4e837704ed3` は `nem.xem` を示します。値はネットワーク立ち上げ時にランダムに生成されるので都度異なります。）
 
 
 === 転送トランザクションを発信
 
 モザイクを送信するトランザクションを発信します。
-`10,000 cat.currency` を `nemesis` から `alice` へ移動します。
+`10,000 nem.xem` を `nemesis` から `alice` へ移動します。
 
 [source,shell]
 ----
-$ nem2-cli transaction transfer -r SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ -c @cat.currency::10000000000 --profile nemesis
+$ nem2-cli transaction transfer -r SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ -c @nem.xem::10000000000 --profile nemesis
 Transaction announced correctly
 Hash:    539D69C798F8EFF2DB371A3D1936FE0C8A9A208634FDC80507FBBD6150EF9D1D
 Signer:  2ADD369D13AF5E3C9B628E1CA4CF7D48C0A9031EAE3BD1BDF21DC22B54DDFE02
 ----
 
-`@cat.currency::10000000000` は `cat.currency` というネームスペースが紐付けられたモザイクを意味します。
+`@nem.xem::10000000000` は `nem.xem` というネームスペースが紐付けられたモザイクを意味します。
 （ネームスペースとモザイクの関連については後の節で説明します。）
 モザイク量は可分性の `6` を加味した絶対値の `10000000000` を指定します。
 
@@ -176,7 +193,7 @@ height:	25
 ----
 
 `group: confirmed` となっていれば発信は成功し、ブロックチェーンに書き込まれています。
-宛先の `alice` に `10,000 cat.currency` 届いているかを確認します。
+宛先の `alice` に `10,000 nem.xem` 届いているかを確認します。
 
 [source,shell]
 ----
@@ -225,7 +242,7 @@ connection open
 
 [source,shell]
 ----
-$ nem2-cli transaction transfer -r SB7CEHTBPPP7NHTKBXWFU7A44T5RFF7GO5OJQWCF -c @cat.currency::409090909000000 --profile alice
+$ nem2-cli transaction transfer -r SB7CEHTBPPP7NHTKBXWFU7A44T5RFF7GO5OJQWCF -c @nem.xem::409090909000000 --profile alice
 Transaction announced correctly
 Hash:    1372967B7AE2AAE15C2EC2956F9B329DC2439C4B1F23FF77326F2C65D93231A5
 Signer:  B775E5DCDF76959B9F5769DD2E9F873A0C7E5F9C9073837AF7850057EA90B20B
@@ -284,7 +301,7 @@ $ nem2-cli monitor confirmed --profile alice
 
 [source,shell]
 ----
-$ nem2-cli transaction transfer -r SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ -c @cat.currency::1000000 -m "Alice monitors confirmed" --profile nemesis
+$ nem2-cli transaction transfer -r SDUCBSRYQTSWEGAOZWYO6AAKBSM6LVON7E5WBHVQ -c @nem.xem::1000000 -m "Alice monitors confirmed" --profile nemesis
 ----
 
 トランザクションが承認されると、モニタしていたウィンドウにトランザクションが現れます。

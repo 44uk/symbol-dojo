@@ -1,10 +1,10 @@
 import {
   NamespaceId,
   NamespaceHttp
-} from "nem2-sdk"
+} from "symbol-sdk"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
+if(env.INITIATOR_KEY === undefined) {
   throw new Error("You need to be set env variable PRIVATE_KEY")
 }
 if(env.GENERATION_HASH === undefined) {
@@ -17,16 +17,15 @@ const namespace = process.argv[2]
 const nsId = new NamespaceId(namespace)
 const nsHttp = new NamespaceHttp(url)
 
-console.log("Namespace: %s (%s)", nsId.fullName, nsId.toHex())
-console.log("Endpoint:  %s/namespace/%s", url, nsId.toHex())
-console.log("")
+consola.info("Namespace: %s (%s)", nsId.fullName, nsId.toHex())
+consola.info("Endpoint:  %s/namespace/%s", url, nsId.toHex())
+consola.info("")
 
 nsHttp.getLinkedAddress(nsId).subscribe(
-  data => {
-    const address = data
-    console.log("Namespace: %s", nsId.fullName)
-    console.log("Address:   %s", address.pretty())
-    console.log("Endpoint:  %s/account/%s", url, address.plain())
+  address => {
+    consola.info("Namespace: %s", nsId.fullName)
+    consola.info("Address:   %s", address.pretty())
+    consola.info("Endpoint:  %s/account/%s", url, address.plain())
   },
-  error => console.error("Error: ", error)
+  error => consola.error("Error: ", error)
 )

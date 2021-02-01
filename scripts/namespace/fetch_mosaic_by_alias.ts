@@ -1,10 +1,10 @@
 import {
   NamespaceId,
   NamespaceHttp
-} from "nem2-sdk"
+} from "symbol-sdk"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
+if(env.INITIATOR_KEY === undefined) {
   throw new Error("You need to be set env variable PRIVATE_KEY")
 }
 if(env.GENERATION_HASH === undefined) {
@@ -17,19 +17,18 @@ const namespace = process.argv[2]
 const nsId = new NamespaceId(namespace)
 const nsHttp = new NamespaceHttp(url)
 
-console.log("Namespace: %s (%s)", nsId.fullName, nsId.toHex())
-console.log("Endpoint:  %s/namespace/%s", url, nsId.toHex())
-console.log("")
+consola.info("Namespace: %s (%s)", nsId.fullName, nsId.toHex())
+consola.info("Endpoint:  %s/namespace/%s", url, nsId.toHex())
+consola.info("")
 
 nsHttp.getLinkedMosaicId(nsId).subscribe(
-  data => {
-    const mosId = data
-    console.log("Namespace: %s", nsId.fullName)
-    console.log("MosaicId:  %s [%s, %s]",
-      mosId.id.toHex(),
-      mosId.id.lower,
-      mosId.id.higher
+  mosaicId => {
+    consola.info("Namespace: %s", nsId.fullName)
+    consola.info("MosaicId:  %s [%s, %s]",
+      mosaicId.id.toHex(),
+      mosaicId.id.lower,
+      mosaicId.id.higher
     )
   },
-  error => console.error("Error: ", error)
+  error => consola.error("Error: ", error)
 )

@@ -1,5 +1,5 @@
 /**
- * $ node filter/entity.js type block add
+ * $ ts-node filter/entity.ts type block add
  */
 import {
   Account,
@@ -10,13 +10,13 @@ import {
   AccountPropertyTransaction,
   AccountPropertyModification,
   Deadline
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEYEY,
   env.NETWORK_TYPE
 )
 
@@ -24,13 +24,13 @@ const entType = process.argv[2] || "TRANSFER"
 const propType = process.argv[3] || "block"
 const modType = process.argv[4] || "add"
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Subject:   %s", entType)
-console.log("Property:  %s", propType)
-console.log("Modify:    %s", modType)
-console.log("Endpoint:  %s/account/%s/restrictions", url, initiator.publicKey)
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Subject:   %s", entType)
+consola.info("Property:  %s", propType)
+consola.info("Modify:    %s", modType)
+consola.info("Endpoint:  %s/account/%s/restrictions", url, initiator.publicKey)
+consola.info("")
 
 const entityType = TransactionType[entType]
 

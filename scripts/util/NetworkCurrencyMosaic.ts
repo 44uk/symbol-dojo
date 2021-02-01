@@ -1,9 +1,10 @@
 /**
- * Replace NetworkCurrencyMosaic.NAMESPACE_ID workaround.
+ * Workaround:
+ * Replace NetworkCurrencyMosaic.NAMESPACE_ID.
  */
 import {
-  NamespaceId,
-  NetworkCurrencyMosaic,
-} from "nem2-sdk"
+  Currency
+} from "symbol-sdk"
 
-NetworkCurrencyMosaic.NAMESPACE_ID = new NamespaceId("nem.xem")
+// @ts-ignore
+Currency.PUBLIC.mosaicId= new MosaicId("5B66E76BECAD0860")

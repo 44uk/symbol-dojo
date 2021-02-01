@@ -1,3 +1,5 @@
+import consola from "consola"
+import { Observable } from "rxjs"
 import {
   Address,
   Listener,
@@ -5,54 +7,58 @@ import {
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionAnnounceResponse,
-} from "nem2-sdk"
-import { Observable } from "rxjs"
+  TransactionType,
+  NamespaceHttp,
+} from "symbol-sdk"
 
 type IHookFunc = (listener: Listener, info?: any) => any
 interface IHook {
   onOpen?: IHookFunc
   onStatus?: IHookFunc
+  onCosignatureAdded?: IHookFunc
   onUnconfirmed?: IHookFunc
   onConfirmed?: IHookFunc
   onAggregateBondedAdded?: IHookFunc
-  onCosignatureAdded?: IHookFunc
 }
 
 export const listener = (url: string, address: Address, hooks: IHook = {}) => {
   const excerptAddress = address.plain().slice(0,6)
   const nextObserver = (label: string, hook?: IHookFunc) => (info: any) => {
     try {
-      console.log("[%s] %s...\n%s\n", label, excerptAddress, JSON.stringify(info))
+      consola.info("[%s] %s...\n%s\n", label, excerptAddress, JSON.stringify(info))
     }  catch (error) {
-      // console.error({error})
+      // consola.error({error})
     }
     finally {
       typeof hook === "function" && hook(listener, info)
     }
   }
-  const errorObserver = (error: any) => console.error(error)
+  const errorObserver = (error: any) => consola.error(error)
+
   // リスナーオブジェクトを用意
-  const listener = new Listener(url)
+  const listener = new Listener(url, new NamespaceHttp(url))
   // リスナーを開いて接続を試みる
-  listener.open().then(() => {
-    hooks.onOpen && hooks.onOpen(listener)
-    // 接続されたら各アクションの監視を定義
-    listener
-      .status(address)
-      .subscribe(nextObserver("STATUS", hooks.onStatus), errorObserver)
-    listener
-      .unconfirmedAdded(address)
-      .subscribe(nextObserver("UNCONFIRMED", hooks.onUnconfirmed), errorObserver)
-    listener
-      .confirmed(address)
-      .subscribe(nextObserver("CONFIRMED", hooks.onConfirmed), errorObserver)
-    listener
-      .aggregateBondedAdded(address)
-      .subscribe(nextObserver("AGGREGATE_BONDED_ADDED", hooks.onAggregateBondedAdded), errorObserver)
-    listener
-      .cosignatureAdded(address)
-      .subscribe(nextObserver("COSIGNATURE_ADDED", hooks.onCosignatureAdded), errorObserver)
-  })
+  listener.open()
+    .then(() => {
+      hooks.onOpen && hooks.onOpen(listener)
+      // 接続されたら各アクションの監視を定義
+      listener
+        .status(address)
+        .subscribe(nextObserver("STATUS", hooks.onStatus), errorObserver)
+      listener
+        .cosignatureAdded(address)
+        .subscribe(nextObserver("COSIGNATURE_ADDED", hooks.onCosignatureAdded), errorObserver)
+      listener
+        .unconfirmedAdded(address)
+        .subscribe(nextObserver("UNCONFIRMED", hooks.onUnconfirmed), errorObserver)
+      listener
+        .confirmed(address)
+        .subscribe(nextObserver("CONFIRMED", hooks.onConfirmed), errorObserver)
+      listener
+        .aggregateBondedAdded(address)
+        .subscribe(nextObserver("AGGREGATE_BONDED_ADDED", hooks.onAggregateBondedAdded), errorObserver)
+    })
+    .catch(error => consola.error({ error }))
   return listener
 }
 
@@ -77,41 +83,39 @@ export const announceAggregateBondedCosignature = (url: string, tx: CosignatureS
 
 // 発信用の便利関数
 const announceUtil = (
-  observable: Observable<TransactionAnnounceResponse>,
+  observable$: Observable<TransactionAnnounceResponse>,
   url: string,
   tx: SignedTransaction | CosignatureSignedTransaction,
   ...subscriber: any[]
 ) => {
   if (0 < subscriber.length && subscriber.length <= 3) {
-    return observable.subscribe(...subscriber)
+    return observable$.subscribe(...subscriber)
   }
   // `announce`メソッドに署名済みトランザクションオブジェクトを渡す
   // `subscribe`メソッドで処理が開始される
-  return observable.subscribe(
-    () => {
-      // 流れてくるレスポンスは常に成功しか返さないので、
-      // `tx`の情報を出力する。
-      console.log("[Transaction announced]")
+  return observable$.subscribe(
+    resp => {
+      // 流れてくるレスポンスは常に成功しか返さないので`tx`の情報を出力する。
+      consola.info("[Transaction announced]")
       if(tx instanceof SignedTransaction) {
-        console.log("Endpoint: %s/transaction/%s", url, tx.hash)
-        console.log("Type:     %s", tx.type)
-        console.log("Hash:     %s", tx.hash)
-        console.log("Signer:   %s", tx.signerPublicKey)
+        consola.info("Endpoint: %s/transaction/%s", url, tx.hash)
+        consola.info("Type:     %s", TransactionType[tx.type])
+        consola.info("Hash:     %s", tx.hash)
+        consola.info("Signer:   %s", tx.signerPublicKey)
+        consola.info("Payload:  %s", tx.payload)
       } else {
-        console.log("Endpoint:   %s/transaction/%s", url, tx.parentHash)
-        console.log("Type:       %s", "CosignatureSigned")
-        console.log("ParentHash: %s", tx.parentHash)
-        console.log("Signer:     %s", tx.signerPublicKey)
+        consola.info("Endpoint:   %s/transaction/%s", url, tx.parentHash)
+        consola.info("Type:       %s", "COSIGNATURE_SIGNED")
+        consola.info("ParentHash: %s", tx.parentHash)
+        consola.info("Signer:     %s", tx.signerPublicKey)
       }
-      console.log("")
+      consola.info("")
     },
     error => {
-      console.log(
+      consola.info(
         "Error: %s",
         error.response !== undefined ? error.response.text : error
       )
     }
   )
 }
-
-export const p = console.log.bind(console)

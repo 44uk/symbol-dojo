@@ -8,11 +8,11 @@ import {
   AccountMetadataTransaction,
   KeyGenerator,
   AggregateTransaction
-} from "nem2-sdk"
+} from "symbol-sdk"
 import * as util from "../util/util"
 import { env } from "../util/env"
 
-if(env.PRIVATE_KEY === undefined) {
+if(env.INITIATOR_KEY === undefined) {
   throw new Error("You need to be set env variable PRIVATE_KEY")
 }
 if(env.GENERATION_HASH === undefined) {
@@ -21,7 +21,7 @@ if(env.GENERATION_HASH === undefined) {
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
 
@@ -34,10 +34,10 @@ const key = KeyGenerator.generateUInt64Key("KeyName")
 // const value "http://placehold.jp/100x100.png"
 const value = "KeyValueA"
 
-console.log("Initiator: %s", initiator.address.pretty())
-console.log("Endpoint:  %s/account/%s", url, initiator.address.plain())
-console.log("Endpoint:  %s/metadata/account/%s", url, initiator.address.plain())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
+consola.info("Endpoint:  %s/metadata/account/%s", url, initiator.address.plain())
+consola.info("")
 
 const metaTx = AccountMetadataTransaction.create(
   Deadline.create(),
@@ -58,6 +58,6 @@ const signedTx = initiator.sign(aggregateTx, env.GENERATION_HASH)
 
 util.listener(url, initiator.address, {
   onOpen: () => util.announce(url, signedTx),
-  onStatus: (listener, info) => { listener.close() console.log(info) },
+  onStatus: (listener, info) => { listener.close() consola.info(info) },
   onConfirmed: (listener) => listener.close()
 })

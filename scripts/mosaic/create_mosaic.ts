@@ -1,5 +1,7 @@
+import { from } from "rxjs"
+import { concatMap, map, mergeMap } from "rxjs/operators"
 /**
- * $ node mosaic/create_mosaic.js 10000
+ * $ ts-node mosaic/create_mosaic.ts BLOCK_COUNT
  */
 import {
   Account,
@@ -9,49 +11,61 @@ import {
   MosaicDefinitionTransaction,
   UInt64,
   Deadline
-} from "nem2-sdk"
-import * as util from "../util/util"
+} from "symbol-sdk"
 import { env } from "../util/env"
+import { repositoryFactory } from "../util/repository"
 
 const url = env.API_URL
 const initiator = Account.createFromPrivateKey(
-  env.PRIVATE_KEY,
+  env.INITIATOR_KEY,
   env.NETWORK_TYPE
 )
+const repo = repositoryFactory(url)
 
-const blocks = process.argv[2] ? parseInt(process.argv[2]) : 0 // NOTE: 現在の仕様だと1blockにつき、1cat.currencyかかる
-const nonce = MosaicNonce.createRandom()
-const mosId = MosaicId.createFromNonce(nonce, initiator.publicAccount)
+const duration = parseInt(process.argv[2]) || 0
+// const nonce = MosaicNonce.createFromHex()
+// const nonce = new MosaicNonce(Uint8Array.from([0, 0, 0, ]))
+const nonce = MosaicNonce.createRandom() // ネットワーク上で一意なIDをもたせるためのランダム値
+const id = MosaicId.createFromNonce(nonce, initiator.address)
 const flags = MosaicFlags.create(
   true, // SupplyMutable
   true, // Transferable
-  true  // Restrictable
+  true, // Restrictable
 )
+const divisibility = 0
 
-console.log("Initiator:    %s", initiator.address.pretty())
-console.log("Endpoint:     %s/account/%s", url, initiator.address.plain())
-console.log("Mosaic Nonce: %s", nonce)
-console.log("Mosaic Hex:   %s", mosId.toHex())
-console.log("Blocks:       %s", blocks !== 0 ? blocks : "Infinity ∞")
-console.log("Endpoint:     %s/mosaic/%s", url, mosId.toHex())
-console.log("")
+consola.info("Initiator: %s", initiator.address.pretty())
+consola.info("Endpoint:  %s/accounts/%s", url, initiator.address.plain())
+consola.info("Nonce:     %s", nonce.nonce)
+consola.info("MosaicHex: %s", id.toHex())
+consola.info("Duration:  %s", duration !== 0 ? duration : "non-expiring")
+consola.info("Endpoint:  %s/mosaics/%s", url, id.toHex())
+consola.info("")
 
 const definitionTx = MosaicDefinitionTransaction.create(
   Deadline.create(),
   nonce,
-  mosId,
+  id,
   flags,
-  0,
-  UInt64.fromUint(blocks),
+  divisibility,
+  UInt64.fromUint(duration),
   env.NETWORK_TYPE,
-  UInt64.fromUint(50000)
-)
-
+).setMaxFee(120) as MosaicDefinitionTransaction
 const signedTx = initiator.sign(definitionTx, env.GENERATION_HASH)
 
-util.listener(url, initiator.address, {
-  onOpen: () => {
-    util.announce(url, signedTx)
-  },
-  onConfirmed: (listener, _) => listener.close()
-})
+
+
+from(repo.listener.open())
+  .pipe(
+    mergeMap(() => repo.transaction.announce(signedTx)),
+    concatMap(() => repo.listener.confirmed(initiator.address, signedTx.hash)),
+  )
+  .subscribe(
+    resp => {
+      consola.info("Hash: %s",
+        resp.transactionInfo?.hash,
+      )
+    },
+    error => consola.error(error),
+    () => repo.listener.close()
+  )

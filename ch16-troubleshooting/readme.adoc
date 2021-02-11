@@ -1,0 +1,57 @@
+== symbol-service-bootstrapのトラブルシュート
+
+Dockerのノード群が正しく起動しない場合の問題解決へのヒントをまとめました。
+
+
+=== Dockerのノード群のログを確認する
+
+`./cmds/start-all` で開始したのノード群のログを確認すると、問題の原因解明に役立ちます。
+また、質問やバグレポートをする場合にもログがあると回答する人の助けになります。
+
+[source,shell]
+----
+$ cd cmds/docker/ && docker-compose logs -f
+----
+
+
+=== ブロックチェーンを初期化する
+
+何か問題が発生し、ブロック生成が進まなくなってしまったり、チェーンを初期化したい場合のスクリプトが用意されています。
+
+[source,shell]
+----
+$ ./cmds/stop-all # 稼働させている場合は一度停止する
+$ ./cmds/clean-data
+----
+
+初期化後に `./cmds/start-all` を実行して立ち上げ直します。
+`./cmds/clean-data` を実行しても問題がある場合は、すべてを初期化する `./cmds/clean-all` を実行してください。
+
+[source,shell]
+----
+$ ./cmds/stop-all
+$ ./cmds/clean-all
+----
+
+`./cmds/clean-all` は生成された設定も削除するため、初期配布アカウントが再作成されることを念頭においてください。
+
+
+=== ノード群を停止後、動かそうとすると動かない
+
+正しくコンテナが終了しなかった場合、ロックファイルが残る場合があります。
+`./data/__NODE_NAME__/server.lock` を削除してから立ち上げてください。
+
+
+=== cleanしても動作しない
+
+`dragon` や `elephant` などの過去バージョンを動作させたため、Dockerイメージの組み合わせに齟齬が起きている場合があります。
+一度イメージとコンテナもすべて削除して、やり直します。
+
+なお、次の例は `docker` で始まるイメージとコンテナ名を削除します。
+実行前にはご自身の環境を確認ください。
+
+[source,shell]
+----
+$ docker rmi -f `docker images -f 'reference=docker*' --format '{{.Repository}}:{{.Tag}}'`
+$ docker rm -f `docker ps -a -f 'name=docker' --format '{{.ID}}'`
+----

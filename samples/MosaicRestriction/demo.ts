@@ -18,25 +18,12 @@ import {
   RepositoryFactoryHttp,
   UInt64,
 } from 'symbol-sdk'
-import { forkJoin, from } from 'rxjs'
 
 import { env } from '../util/env'
-import { createAnnounceUtil } from '../util/announce'
+import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
 
-async function main() {
-  const url = env.GATEWAY_URL
-  const repoFactory = new RepositoryFactoryHttp(url)
-
-  const props = await forkJoin({
-    currencies: repoFactory.getCurrencies(),
-    epochAdjustment: repoFactory.getEpochAdjustment(),
-    generationHash: repoFactory.getGenerationHash(),
-    networkType: repoFactory.getNetworkType(),
-    nodePublicKey: repoFactory.getNodePublicKey(),
-    transactionFees: repoFactory.createNetworkRepository().getTransactionFees().toPromise()
-  }).toPromise()
-
-  const deadline = (hour  = 2) => Deadline.create(props.epochAdjustment, hour)
+async function main(props: INetworkStaticProps) {
+  const deadline = (hour = 2) => Deadline.create(props.epochAdjustment, hour)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
 
@@ -66,24 +53,13 @@ async function main() {
     props.networkType,
   )
 
-  const key = KeyGenerator.generateUInt64Key('KYC'.toLowerCase())
-  const mosaicGlobalRestrictionTx = MosaicGlobalRestrictionTransaction.create(
-    deadline(),
-    mosaicDefinitionTx.mosaicId,
-    key,
-    UInt64.fromUint(0),
-    MosaicRestrictionType.NONE,
-    UInt64.fromUint(1),
-    MosaicRestrictionType.EQ,
-    props.networkType
-  )
-
   const mosaicRestrictionService = new MosaicRestrictionTransactionService(
-    repoFactory.createRestrictionMosaicRepository(),
-    repoFactory.createNamespaceRepository()
+    props.factory.createRestrictionMosaicRepository(),
+    props.factory.createNamespaceRepository()
   )
 
-  const mosaicGlobalRestrictionTx2 = await mosaicRestrictionService.createMosaicGlobalRestrictionTransaction(
+  const key = KeyGenerator.generateUInt64Key('KYC'.toLowerCase())
+  const mosaicGlobalRestrictionTx = await mosaicRestrictionService.createMosaicGlobalRestrictionTransaction(
     deadline(),
     props.networkType,
     mosaicDefinitionTx.mosaicId,
@@ -96,19 +72,20 @@ async function main() {
     deadline(),
     [ mosaicDefinitionTx,
       mosaicSupplyChangeTx,
-      mosaicGlobalRestrictionTx2 ].map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
+      mosaicGlobalRestrictionTx ].map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
     props.networkType,
     [],
-  ).setMaxFeeForAggregate(props.transactionFees.minFeeMultiplier, 0)
+  ).setMaxFeeForAggregate(props.minFeeMultiplier, 0)
 
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
 
-  const announceUtil = createAnnounceUtil(repoFactory)
+  const announceUtil = createAnnounceUtil(props.factory)
 
   consola.info('announce: %s, signer: %s',
     signedTx.hash,
     signedTx.getSignerAddress().plain(),
   )
+
   announceUtil(signedTx)
     .subscribe(
       resp => {
@@ -116,8 +93,8 @@ async function main() {
           resp.transactionInfo?.hash,
           resp.transactionInfo?.height.compact(),
         )
-        consola.info('%s/transactions/confirmed/%s', env.GATEWAY_URL, signedTx.hash)
-        consola.info('%s/transactionStatus/%s', env.GATEWAY_URL, signedTx.hash)
+        consola.info('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+        consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
       },
       resp => {
         consola.info(resp)
@@ -125,9 +102,10 @@ async function main() {
         //   resp.address.plain(),
         //   resp.code
         // )
-        consola.info('%s/transactionStatus/%s', env.GATEWAY_URL, signedTx.hash)
+        consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
       }
     )
 }
 
-main()
+networkStaticPropsUtil(env.GATEWAY_URL).toPromise()
+  .then(props => main(props))

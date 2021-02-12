@@ -30,7 +30,7 @@
     "hi-base32": "^0.5.0",
     "js-sha3": "git+https://github.com/Propine/js-sha3.git",
     "rxjs": "^6.6.3",
-    "symbol-sdk": "0.23.1",
+    "symbol-sdk": "^0.23.2-alpha-202102111153",
     "utf8": "^3.0.0"
   },
   "devDependencies": {

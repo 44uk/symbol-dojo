@@ -5,76 +5,87 @@ import consola from "consola"
 import {
   Account,
   Address,
-  Currency,
   PlainMessage,
   TransferTransaction,
-  Deadline,
 } from "symbol-sdk"
-import { env } from "../util/env"
 
-import * as util from "../util/util"
+import { env } from '../util/env'
+import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
+import { createDeadline } from '../util'
 
-const url = env.API_URL
-const initiator = Account.createFromPrivateKey(
-  env.INITIATOR_KEY,
-  env.NETWORK_TYPE
-)
+async function main(props: INetworkStaticProps) {
+  const deadline = createDeadline(props.epochAdjustment)
 
-// アドレス文字列からアドレスオブジェクトを作る
-const recipient = Address.createFromRawAddress(process.argv[2])
-const amount = parseInt(process.argv[3]) || 0
+  const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
 
-// 確認用の情報を出力
-consola.info("Initiator: %s", initiator.address.pretty())
-consola.info("Endpoint:  %s/account/%s", url, initiator.address.plain())
-consola.info("Recipient: %s", recipient.pretty())
-consola.info("Endpoint:  %s/account/%s", url, recipient.plain())
-consola.info("")
+  // アドレス文字列からアドレスオブジェクトを作る
+  const recipient = initiatorAccount.address
+  const amount = 10
+  // const recipient = Address.createFromRawAddress(process.argv[2])
+  // const amount = parseInt(process.argv[3]) || 0
 
-// 送信するモザイク配列
-// ここでは`NetworkCurrencyMosaic`すなわち`nem.xem`モザイクオブジェクトを準備
-// モザイクIDで作る場合は以下のようにする。
-// 可分性の情報が無いので、量は絶対値で指定する必要がある。
-// const mosaics = [new Mosaic(new MosaicId("__MOSAIC_ID__"), UInt64.fromUint(absoluteAmount))]
-// const mosaics = [NetworkCurrencyMosaic.createRelative(amount)]
-const mosaics = [Currency.PUBLIC.createRelative(amount)]
+  // 確認用にアカウントの情報を出力
+  consola.info("Initiator: %s", initiatorAccount.address.pretty())
+  consola.info("Endpoint:  %s/accounts/%s", props.url, initiatorAccount.address.plain())
+  consola.info("Recipient: %s", recipient.pretty())
+  consola.info("Endpoint:  %s/accounts/%s", props.url, recipient.plain())
+  consola.info("")
 
-// メッセージオブジェクトを作成
-// 空メッセージを送る場合は、空文字を渡しても良いですが、`EmptyMessage`クラスも用意されています。
-const message = PlainMessage.create("Hello!")
+  // 送信するモザイク配列
+  const mosaics = [
+    props.currency.createRelative(amount)
+  ]
 
-// トランザクションオブジェクトを作成
-// Deadline.create() デフォルトでは2時間。引数の単位は`時間`です。(第二引数で単位を変えられる)
-// 仕様では24時間より大きくできないとされているので、`24`を渡すとエラーになります。
-// Deadline.create(1439, jsJoda.ChronoUnit.MINUTES) // ex) 23時間59分
-const transferTx = TransferTransaction.create(
-  Deadline.create(env.EPOCH_ADJUSTMENT, 23),
-  recipient,
-  mosaics,
-  message,
-  env.NETWORK_TYPE,
-).setMaxFee(300)
+  // メッセージオブジェクトを作成
+  const message = PlainMessage.create("Hello!")
 
-// 最大手数料とは、トランザクションに対して支払うことができる最大の手数料をさします。
-// ネットワークの混雑具合で増減するため、ブロックに取り込まれるまでは実際の手数料は確定しません。
-// 最小手数料は、トランザクションのバイトサイズ*FeeMultiplierで算出されます。
-// この手数料以上を指定しなければ支払わなければブロックは取り込まれません。
-consola.info("TxByteSize: %d", transferTx.size)
-consola.info("")
+  // トランザクションオブジェクトを作成
+  // Deadline.create() デフォルトでは2時間。引数の単位は`時間`です。(第二引数で単位を変えられる)
+  // 仕様では24時間より大きくできないとされているので、`24`を渡すとエラーになります。
+  // Deadline.create(1439, jsJoda.ChronoUnit.MINUTES) // ex) 23時間59分
+  const transferTx = TransferTransaction.create(
+    deadline(),
+    recipient,
+    mosaics,
+    message,
+    props.networkType
+  ).setMaxFee(props.minFeeMultiplier)
 
-// `setMaxFee`メソッドは`FeeMultiplier`を引数に受け取り、
-// トランザクションバイトサイズと乗算され、手数料が設定済みのトランザクションオブジェクトを返却します。
-// つまり、渡したFeeMultiplierに置いて、最小の手数料が設定されます。
-// const feeSetTx = transferTx.setMaxFee(100)
+  // 最大手数料とは、トランザクションに対して支払うことができる最大の手数料をさします。
+  // ネットワークの混雑具合で増減するため、ブロックに取り込まれるまでは実際の手数料は確定しません。
+  // 最小手数料は、トランザクションのバイトサイズ*FeeMultiplierで算出されます。
+  // この手数料以上を指定しなければ支払わなければブロックは取り込まれません。
+  consola.info("TxByteSize: %d", transferTx.size)
+  consola.info("")
 
-// トランザクションに署名をする
-const signedTx = initiator.sign(transferTx, env.GENERATION_HASH)
+  // `setMaxFee`メソッドは`FeeMultiplier`を引数に受け取り、
+  // トランザクションバイトサイズと乗算され、手数料が設定済みのトランザクションオブジェクトを返却します。
+  // つまり、渡したFeeMultiplierにおいて、最小の手数料が設定されます。
+  // const feeSetTx = transferTx.setMaxFee(100)
 
-// トランザクション成功/失敗,未承認,承認のモニタリング接続
-util.listener(url, initiator.address, {
-  onOpen: () => {
-    // 署名済みトランザクションを発信
-    util.announce(url, signedTx)
-  },
-  onConfirmed: (listener) => listener.close()
-})
+  // トランザクションに署名をする
+  const signedTx = initiatorAccount.sign(transferTx, props.generationHash)
+
+  consola.info('announce: %s, signer: %s',
+    signedTx.hash,
+    signedTx.getSignerAddress().plain(),
+  )
+  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
+  const announceUtil = createAnnounceUtil(props.factory)
+  announceUtil(signedTx)
+    .subscribe(
+      resp => {
+        consola.success('confirmed: %s, height: %d',
+          resp.transactionInfo?.hash,
+          resp.transactionInfo?.height.compact(),
+        )
+        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+      },
+      error => {
+        consola.error(error)
+      }
+    )
+}
+
+networkStaticPropsUtil(env.GATEWAY_URL).toPromise()
+  .then(props => main(props))

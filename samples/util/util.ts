@@ -1,5 +1,6 @@
 import consola from "consola"
 import { from, Observable } from "rxjs"
+import { ChronoUnit } from '@js-joda/core'
 import {
   Address,
   Listener,
@@ -21,7 +22,7 @@ import {
   MetadataTransactionService,
   AggregateTransactionService,
   MosaicRestrictionTransactionService,
-  MosaicAmountView
+  Deadline
 } from "symbol-sdk"
 
 function createRepositoryFactory(url: string, config?: RepositoryFactoryConfig) {
@@ -62,6 +63,12 @@ function createRepositoryFactory(url: string, config?: RepositoryFactoryConfig) 
     factory,
     repo,
     service
+  }
+}
+
+export function createDeadline(epochAdjustment: number) {
+  return function(deadline?: number, chronoUnit?: ChronoUnit) {
+    return Deadline.create(epochAdjustment, deadline, chronoUnit)
   }
 }
 

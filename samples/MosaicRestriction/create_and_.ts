@@ -4,26 +4,24 @@ import consola from 'consola'
 import {
   Account,
   AggregateTransaction,
-  Deadline,
   KeyGenerator,
   MosaicDefinitionTransaction,
   MosaicFlags,
-  MosaicGlobalRestrictionTransaction,
   MosaicId,
   MosaicNonce,
   MosaicRestrictionTransactionService,
   MosaicRestrictionType,
   MosaicSupplyChangeAction,
   MosaicSupplyChangeTransaction,
-  RepositoryFactoryHttp,
   UInt64,
 } from 'symbol-sdk'
 
 import { env } from '../util/env'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
+import { createDeadline } from '../util'
 
 async function main(props: INetworkStaticProps) {
-  const deadline = (hour = 2) => Deadline.create(props.epochAdjustment, hour)
+  const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
 
@@ -79,13 +77,12 @@ async function main(props: INetworkStaticProps) {
 
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
 
-  const announceUtil = createAnnounceUtil(props.factory)
-
   consola.info('announce: %s, signer: %s',
     signedTx.hash,
     signedTx.getSignerAddress().plain(),
   )
-
+  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
+  const announceUtil = createAnnounceUtil(props.factory)
   announceUtil(signedTx)
     .subscribe(
       resp => {
@@ -94,15 +91,13 @@ async function main(props: INetworkStaticProps) {
           resp.transactionInfo?.height.compact(),
         )
         consola.info('%s/transactions/confirmed/%s', props.url, signedTx.hash)
-        consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
       },
       resp => {
-        consola.info(resp)
+        consola.error(resp)
         // consola.info('error: %s, address: %s, ',
         //   resp.address.plain(),
         //   resp.code
         // )
-        consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
       }
     )
 }

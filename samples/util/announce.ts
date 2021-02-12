@@ -1,6 +1,8 @@
+import consola from 'consola'
 import { forkJoin, from, Observable } from "rxjs"
-import { finalize, map, mergeMap } from "rxjs/operators"
+import { finalize, map, mergeMap, tap } from "rxjs/operators"
 import { Currency, NetworkType, RepositoryFactoryHttp, SignedTransaction, TransactionService } from "symbol-sdk"
+import { humanReadable as hr } from "../util"
 
 export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
   const transactionService = new TransactionService(
@@ -48,6 +50,23 @@ export function networkStaticPropsUtil(url: string): Observable<INetworkStaticPr
       map(props => ({ ...props,
         url,
         factory,
-      }))
+      })),
+      tap(props => {
+        consola.info('-- [NetworkStaticProps] %s', '-'.repeat(56))
+        consola.info('URL: %s', props.url)
+        consola.info('NetworkType: %s(%d)',
+          hr.networkType(props.networkType),
+          props.networkType
+        )
+        consola.info('Currency: %s(%s)',
+          props.currency.namespaceId?.fullName,
+          props.currency.mosaicId?.toHex()
+        )
+        consola.info('EpochAdj: %d', props.epochAdjustment)
+        consola.info('GenHash: %s', props.generationHash)
+        consola.info('MinFeeMul: %s', props.minFeeMultiplier)
+        consola.info('NodePubKey: %s', props.nodePublicKey)
+        consola.info('%s', '-'.repeat(80))
+      })
     )
 }

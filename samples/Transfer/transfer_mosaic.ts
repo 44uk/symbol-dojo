@@ -10,6 +10,7 @@ import {
 } from "symbol-sdk"
 
 import { env } from '../util/env'
+import { printTx } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
 import { createDeadline } from '../util'
 
@@ -17,12 +18,13 @@ async function main(props: INetworkStaticProps) {
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
+  const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
+  const aliceAddress = aliceAccount.address.pretty()
 
   // アドレス文字列からアドレスオブジェクトを作る
-  const recipient = initiatorAccount.address
-  const amount = 10
-  // const recipient = Address.createFromRawAddress(process.argv[2])
-  // const amount = parseInt(process.argv[3]) || 0
+  const recipient = Address.createFromRawAddress(aliceAddress)
+  // 送信するモザイクオブジェクトを作る
+  const xymMosaic = props.currency.createRelative(1)
 
   // 確認用にアカウントの情報を出力
   consola.info("Initiator: %s", initiatorAccount.address.pretty())
@@ -32,9 +34,7 @@ async function main(props: INetworkStaticProps) {
   consola.info("")
 
   // 送信するモザイク配列
-  const mosaics = [
-    props.currency.createRelative(amount)
-  ]
+  const mosaics = [ xymMosaic ]
 
   // メッセージオブジェクトを作成
   const message = PlainMessage.create("Hello!")
@@ -53,9 +53,18 @@ async function main(props: INetworkStaticProps) {
 
   // 最大手数料とは、トランザクションに対して支払うことができる最大の手数料をさします。
   // ネットワークの混雑具合で増減するため、ブロックに取り込まれるまでは実際の手数料は確定しません。
-  // 最小手数料は、トランザクションのバイトサイズ*FeeMultiplierで算出されます。
+  // 最小手数料は、トランザクションの `トランザクションバイトサイズ * ネットワークの最小手数料乗数` で算出されます。
   // この手数料以上を指定しなければ支払わなければブロックは取り込まれません。
-  consola.info("TxByteSize: %d", transferTx.size)
+  // 最小手数料は `transferTx.size * props.minFeeMultiplier` で算出できます。
+  // オブジェクト作成時点では `size` メソッドを叩けないため、
+  // `setMaxFee` はそのオブジェクトのサイズに引数で渡した `Multipler` を乗じた手数料をセットしたオブジェクトを返却します。
+  consola.info("%d(TxByteSize) * %d(FeeMul) = %d(MaxFee) (%s:%d)",
+    transferTx.size,
+    props.minFeeMultiplier,
+    transferTx.maxFee,
+    props.currency.namespaceId?.fullName,
+    transferTx.maxFee.compact() / Math.pow(10, props.currency.divisibility)
+  )
   consola.info("")
 
   // `setMaxFee`メソッドは`FeeMultiplier`を引数に受け取り、
@@ -66,19 +75,17 @@ async function main(props: INetworkStaticProps) {
   // トランザクションに署名をする
   const signedTx = initiatorAccount.sign(transferTx, props.generationHash)
 
-  consola.info('announce: %s, signer: %s',
+  consola.info('announce: %s, signer: %s, maxFee: %d',
     signedTx.hash,
     signedTx.getSignerAddress().plain(),
+    transferTx.maxFee
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
   const announceUtil = createAnnounceUtil(props.factory)
   announceUtil(signedTx)
     .subscribe(
       resp => {
-        consola.success('confirmed: %s, height: %d',
-          resp.transactionInfo?.hash,
-          resp.transactionInfo?.height.compact(),
-        )
+        printTx(resp)
         consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
       },
       error => {

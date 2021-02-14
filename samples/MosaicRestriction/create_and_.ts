@@ -77,9 +77,10 @@ async function main(props: INetworkStaticProps) {
 
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
 
-  consola.info('announce: %s, signer: %s',
+  consola.info('announce: %s, signer: %s, maxFee: %d',
     signedTx.hash,
     signedTx.getSignerAddress().plain(),
+    aggregateTx.maxFee
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
   const announceUtil = createAnnounceUtil(props.factory)

@@ -4,6 +4,11 @@ export interface IEnvVars {
   NODE_ENV: string
   GATEWAY_URL: string
   INITIATOR_KEY: string
+  ALICE_KEY: string
+  BOB_KEY: string
+  CAROL_KEY: string
+  DAVE_KEY: string
+  ELLEN_KEY: string
 }
 
 dotenv.config()
@@ -26,4 +31,9 @@ export const env = {
   NODE_ENV: envVars.NODE_ENV,
   GATEWAY_URL: envVars.GATEWAY_URL || DEFAULT_VARS.GATEWAY_URL,
   INITIATOR_KEY: envVars.INITIATOR_KEY,
+  ALICE_KEY: envVars.ALICE_KEY,
+  BOB_KEY: envVars.BOB_KEY,
+  CAROL_KEY: envVars.CAROL_KEY,
+  DAVE_KEY: envVars.DAVE_KEY,
+  ELLEN_KEY: envVars.ELLEN_KEY,
 } as IEnvVars

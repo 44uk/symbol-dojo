@@ -1,7 +1,7 @@
 import consola from 'consola'
 import { forkJoin, from, Observable } from "rxjs"
 import { finalize, map, mergeMap, tap } from "rxjs/operators"
-import { Currency, NetworkType, RepositoryFactoryHttp, SignedTransaction, TransactionService } from "symbol-sdk"
+import { Currency, NetworkType, RepositoryFactoryHttp, SignedTransaction, TransactionService, TransactionType } from "symbol-sdk"
 import { humanReadable as hr } from "../util"
 
 export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
@@ -10,11 +10,20 @@ export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
     factory.createReceiptRepository()
   )
   const listener = factory.createListener()
-  return function(signedTx: SignedTransaction) {
+  return function(signedTx: SignedTransaction, hashLockSignedTx?: SignedTransaction) {
     signedTx.type
     return from(listener.open())
       .pipe(
-        mergeMap(() => transactionService.announce(signedTx, listener)),
+        mergeMap(() => {
+          if(signedTx.type === TransactionType.AGGREGATE_BONDED) {
+            if(hashLockSignedTx) {
+              return transactionService.announceHashLockAggregateBonded(hashLockSignedTx, signedTx, listener)
+            } else {
+              return transactionService.announceAggregateBonded(signedTx, listener)
+            }
+          }
+          return transactionService.announce(signedTx, listener)
+        }),
         finalize(() => listener.close())
       )
   }

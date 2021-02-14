@@ -4,57 +4,54 @@
 import consola from "consola"
 import {
   Account,
+  Address,
   AggregateTransaction,
-  EmptyMessage,
-  HashLockTransaction,
   PlainMessage,
   TransferTransaction,
-  UInt64,
 } from "symbol-sdk"
 
 import { env } from '../util/env'
-import { printTx } from '../util/print'
+import { printTx } from "../util/print"
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
 import { createDeadline } from '../util'
-import { EmptyError } from "rxjs"
 
 async function main(props: INetworkStaticProps) {
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
-  const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
 
-  // 送信するモザイクオブジェクトを作る
+  const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
+  const bobAccount   = Account.createFromPrivateKey(env.BOB_KEY  , props.networkType)
+  const carolAccount = Account.createFromPrivateKey(env.CAROL_KEY, props.networkType)
+
+  const recipients = [
+    aliceAccount.address,
+    bobAccount.address,
+    carolAccount.address
+  ]
+
   const xymMosaic = props.currency.createRelative(1)
 
   // 送信するモザイク配列
   const mosaics = [ xymMosaic ]
 
   // メッセージオブジェクトを作成
-  const message = PlainMessage.create("Hi, Alice. Pay my money back!")
+  const message = PlainMessage.create("Thank you for your kindness!")
 
-  const fromCreditor = TransferTransaction.create(
+  const transferTxes = recipients.map(recipient => TransferTransaction.create(
     deadline(),
-    aliceAccount.address,
-    [],
+    recipient,
+    mosaics,
     message,
     props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
+  ))
 
-  const fromDebtor = TransferTransaction.create(
+  const aggregateTx = AggregateTransaction.createComplete(
     deadline(),
-    initiatorAccount.address,
-    mosaics,
-    EmptyMessage,
-    props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
-
-  const aggregateTx = AggregateTransaction.createBonded(
-    deadline(),
-    [ fromCreditor.toAggregate(initiatorAccount.publicAccount),
-      fromDebtor.toAggregate(aliceAccount.publicAccount) ],
-    props.networkType
-  ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
+    transferTxes.map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
+    props.networkType,
+    [],
+  ).setMaxFeeForAggregate(props.minFeeMultiplier, 0)
 
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
 
@@ -64,25 +61,8 @@ async function main(props: INetworkStaticProps) {
     aggregateTx.maxFee
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
-
-  const hashLockTx = HashLockTransaction.create(
-    deadline(),
-    props.currency.createRelative(10),
-    UInt64.fromUint(5000),
-    signedTx,
-    props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
-
-  const signedHLTx = initiatorAccount.sign(hashLockTx, props.generationHash)
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedHLTx.hash,
-    signedHLTx.getSignerAddress().plain(),
-    hashLockTx.maxFee
-  )
-  consola.info('%s/transactionStatus/%s', props.url, signedHLTx.hash)
-
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil(signedTx, signedHLTx)
+  announceUtil(signedTx)
     .subscribe(
       resp => {
         printTx(resp)

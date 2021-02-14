@@ -22,6 +22,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
+    "generate:env": "ts-node util/generateEnv.ts",
     "prettier": "prettier --write '**/*.{ts,js,json,md,html}'"
   },
   "dependencies": {

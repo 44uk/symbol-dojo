@@ -10,7 +10,7 @@ import {
 } from "symbol-sdk"
 
 import { env } from '../util/env'
-import { printTx } from '../util/print'
+import { prettyPrint } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
 import { createDeadline } from '../util'
 
@@ -24,7 +24,7 @@ async function main(props: INetworkStaticProps) {
   // アドレス文字列からアドレスオブジェクトを作る
   const recipient = Address.createFromRawAddress(aliceAddress)
   // 送信するモザイクオブジェクトを作る
-  const xymMosaic = props.currency.createRelative(1)
+  const xymMosaic = props.currency.createRelative(100)
 
   // 確認用にアカウントの情報を出力
   consola.info("Initiator: %s", initiatorAccount.address.pretty())
@@ -82,10 +82,10 @@ async function main(props: INetworkStaticProps) {
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil(signedTx)
+  announceUtil.announce(signedTx)
     .subscribe(
       resp => {
-        printTx(resp)
+        prettyPrint(resp)
         consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
       },
       error => {

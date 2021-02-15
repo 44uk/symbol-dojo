@@ -5,30 +5,31 @@ import consola from "consola"
 import {
   Account,
   AggregateTransaction,
+  TransactionSearchCriteria,
+  CosignatureTransaction,
   EmptyMessage,
   HashLockTransaction,
   PlainMessage,
   TransferTransaction,
   UInt64,
+  TransactionGroup,
+  TransactionType,
+  Transaction,
 } from "symbol-sdk"
 
 import { env } from '../util/env'
-import { printTx } from '../util/print'
+import { prettyPrint } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
 import { createDeadline } from '../util'
-import { EmptyError } from "rxjs"
+import { EmptyError, from, of } from "rxjs"
+import { first, map, mergeMap, tap } from "rxjs/operators"
+import { Signer } from "crypto"
 
 async function main(props: INetworkStaticProps) {
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
   const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
-
-  // 送信するモザイクオブジェクトを作る
-  const xymMosaic = props.currency.createRelative(1)
-
-  // 送信するモザイク配列
-  const mosaics = [ xymMosaic ]
 
   // メッセージオブジェクトを作成
   const message = PlainMessage.create("Hi, Alice. Pay my money back!")
@@ -41,10 +42,11 @@ async function main(props: INetworkStaticProps) {
     props.networkType
   ).setMaxFee(props.minFeeMultiplier)
 
+  const xymMosaic = props.currency.createRelative(100)
   const fromDebtor = TransferTransaction.create(
     deadline(),
     initiatorAccount.address,
-    mosaics,
+    [ xymMosaic ],
     EmptyMessage,
     props.networkType
   ).setMaxFee(props.minFeeMultiplier)
@@ -68,7 +70,7 @@ async function main(props: INetworkStaticProps) {
   const hashLockTx = HashLockTransaction.create(
     deadline(),
     props.currency.createRelative(10),
-    UInt64.fromUint(5000),
+    UInt64.fromUint(300), // 300ブロック=およそ5分
     signedTx,
     props.networkType
   ).setMaxFee(props.minFeeMultiplier)
@@ -82,15 +84,39 @@ async function main(props: INetworkStaticProps) {
   consola.info('%s/transactionStatus/%s', props.url, signedHLTx.hash)
 
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil(signedTx, signedHLTx)
+
+  announceUtil.announce(signedTx, signedHLTx)
+    .pipe(
+      // map(aggregateTx)
+    )
     .subscribe(
       resp => {
-        printTx(resp)
+        prettyPrint(resp)
         consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+        whenPartial(props, aliceAccount)
       },
       error => {
         consola.error(error)
       }
+    )
+}
+
+function whenPartial(props: INetworkStaticProps, cosigner: Account) {
+  const announceUtil = createAnnounceUtil(props.factory)
+
+  props.factory.createTransactionRepository().search({
+    type: [ TransactionType.AGGREGATE_BONDED ],
+    group: TransactionGroup.Partial,
+    address: cosigner.address,
+  })
+    .pipe(
+      mergeMap(results => from(results.data)),
+      map(tx => CosignatureTransaction.create(tx as AggregateTransaction)),
+      map(cosignTx => cosigner.signCosignatureTransaction(cosignTx)),
+      mergeMap(signedCoTx => announceUtil.cosign(signedCoTx)),
+    )
+    .subscribe(
+      resp => prettyPrint(resp)
     )
 }
 

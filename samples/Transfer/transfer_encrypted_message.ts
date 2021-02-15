@@ -4,55 +4,42 @@
 import consola from "consola"
 import {
   Account,
-  AggregateTransaction,
-  PlainMessage,
+  EncryptedMessage,
   TransferTransaction,
 } from "symbol-sdk"
 
 import { env } from '../util/env'
+import { prettyPrint } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
-import { createDeadline, prettyPrint } from '../util'
+import { createDeadline } from '../util'
 
 async function main(props: INetworkStaticProps) {
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
-
   const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
-  const bobAccount   = Account.createFromPrivateKey(env.BOB_KEY  , props.networkType)
-  const carolAccount = Account.createFromPrivateKey(env.CAROL_KEY, props.networkType)
 
-  const recipients = [
+  // 暗号化メッセージオブジェクトを作成
+  const message = EncryptedMessage.create(
+    "I’m sick of not having the courage to be an absolute nobody",
+    aliceAccount.publicAccount,
+    initiatorAccount.privateKey
+  )
+
+  const transferTx = TransferTransaction.create(
+    deadline(),
     aliceAccount.address,
-    bobAccount.address,
-    carolAccount.address
-  ]
-
-  const xymMosaic = props.currency.createRelative(10)
-
-  // メッセージオブジェクトを作成
-
-  const transferTxes = recipients.map(recipient => TransferTransaction.create(
-    deadline(),
-    recipient,
-    [ xymMosaic ],
-    PlainMessage.create("Thank you for your kindness!"),
-    props.networkType
-  ))
-
-  const aggregateTx = AggregateTransaction.createComplete(
-    deadline(),
-    transferTxes.map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
-    props.networkType,
     [],
-  ).setMaxFeeForAggregate(props.minFeeMultiplier, 0)
+    message,
+    props.networkType
+  ).setMaxFee(props.minFeeMultiplier)
 
-  const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
+  const signedTx = initiatorAccount.sign(transferTx, props.generationHash)
 
   consola.info('announce: %s, signer: %s, maxFee: %d',
     signedTx.hash,
     signedTx.getSignerAddress().plain(),
-    aggregateTx.maxFee
+    transferTx.maxFee
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
   const announceUtil = createAnnounceUtil(props.factory)
@@ -61,6 +48,15 @@ async function main(props: INetworkStaticProps) {
       resp => {
         prettyPrint(resp)
         consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+
+        // @ts-ignore
+        const encrypted = resp.message as EncryptedMessage
+        const decrypted = EncryptedMessage.decrypt(
+          encrypted,
+          aliceAccount.privateKey,
+          initiatorAccount.publicAccount
+        )
+        prettyPrint(decrypted)
       },
       error => {
         consola.error(error)

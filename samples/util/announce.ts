@@ -1,17 +1,26 @@
 import consola from 'consola'
 import { forkJoin, from, Observable } from "rxjs"
 import { finalize, map, mergeMap, tap } from "rxjs/operators"
-import { Currency, NetworkType, RepositoryFactoryHttp, SignedTransaction, TransactionService, TransactionType } from "symbol-sdk"
+import { CosignatureSignedTransaction, Currency, NetworkType, RepositoryFactoryHttp, SignedTransaction, TransactionService, TransactionType } from "symbol-sdk"
 import { humanReadable as hr } from "../util"
 
 export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
+  const transactionRepo = factory.createTransactionRepository()
   const transactionService = new TransactionService(
-    factory.createTransactionRepository(),
+    transactionRepo,
     factory.createReceiptRepository()
   )
   const listener = factory.createListener()
-  return function(signedTx: SignedTransaction, hashLockSignedTx?: SignedTransaction) {
-    signedTx.type
+
+  function cosign(signedCoTx: CosignatureSignedTransaction) {
+    return from(listener.open())
+      .pipe(
+        mergeMap(() => transactionRepo.announceAggregateBondedCosignature(signedCoTx)),
+        finalize(() => listener.close())
+      )
+  }
+
+  function announce(signedTx: SignedTransaction, hashLockSignedTx?: SignedTransaction) {
     return from(listener.open())
       .pipe(
         mergeMap(() => {
@@ -27,6 +36,8 @@ export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
         finalize(() => listener.close())
       )
   }
+
+  return { announce, cosign }
 }
 
 export interface INetworkStaticProps {

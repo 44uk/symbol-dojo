@@ -1,121 +1,126 @@
-/**
- * 0. Install `symbol-sdk`
- * 1. Prepare an account with some `nem.xem`.
- * 2. Run this script.
- * 3. See outgoings.
- *
- * Ex)
- * PRIVATE_KEY=AAAA... API_URL=http://13.114.200.132:3000 node reproduce.js
- */
-const nem = require('symbol-sdk');
-const crypto = require('crypto');
+require("utf8")
+const {
+    Account,
+    Deadline,
+    AggregateTransaction,
+    TransferTransaction,
+    HashLockTransaction,
+    CosignatureTransaction,
+    EmptyMessage,
+    PlainMessage,
+    RepositoryFactoryHttp,
+    TransactionService,
+    UInt64
+} = require("symbol-sdk")
+const { forkJoin } = require("rxjs")
+const { tap, map, mergeMap, finalize } = require("rxjs/operators")
+const { inspect } = require('util')
 
-const url = env.API_URL || 'http://localhost:3000';
-const privateKey = env.INITIATOR_KEY;
-const initiator = nem.Account.createFromPrivateKey(privateKey, nem.NetworkType.MIJIN_TEST)
-const recipient = nem.Account.generateNewAccount(nem.NetworkType.MIJIN_TEST)
-const nsString = crypto.randomBytes(8).toString('hex') // get random string for namespace
-const nsId = new nem.NamespaceId(nsString);
+const GATEWAY_URL  = 'http://api-01.ap-northeast-1.testnet.symboldev.network:3000'
+const PROVIDER_KEY = '49035383BFB5D8D2DD4D4CEDE0283CDCA4744C67BECFAA8659DBFB897BB39DA1'
+// pub:  8B26F80D9F6B943FA4E20764DCD0239D353A63436A1CCDB3A02F51652FB81C7F
+// addr: TBQCAS-XNAYHC-S4UB7D-5P4VAX-G4SY46-CE72W7-UBI
 
-console.log('Initiator: %s', initiator.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, initiator.address.plain());
-console.log('Outgoing:  %s/account/%s/transactions/outgoing', url, initiator.publicKey);
+function pp(object) {
+    console.log(inspect(object, { depth: null }))
+}
 
-console.log('Recipient: %s', recipient.address.pretty());
-console.log('Endpoint:  %s/account/%s', url, recipient.address.plain());
-console.log('incoming:  %s/account/%s/transactions/incoming', url, recipient.publicKey);
+function createDeadline(adj) {
+  return (hour) => Deadline.create(adj, hour)
+}
 
-console.log('Namespace: %s', nsString);
-console.log('Endpoint:  %s/namespace/%s', url, nsId.toHex());
-console.log('');
+async function main(url) {
+  // get properties
+  const factory = new RepositoryFactoryHttp(url)
+  const networkRepo = factory.createNetworkRepository()
+  const props = await forkJoin({
+    currency: factory.getCurrencies().pipe(
+      map(({ currency }) => currency)
+    ),
+    epochAdjustment: factory.getEpochAdjustment(),
+    generationHash: factory.getGenerationHash(),
+    networkType: factory.getNetworkType(),
+    nodePublicKey: factory.getNodePublicKey(),
+    minFeeMultiplier: networkRepo.getTransactionFees().pipe(
+      map(({ minFeeMultiplier }) => minFeeMultiplier)
+    )
+  }).toPromise()
+  pp(props)
 
-// recognize recipient address
-const transfer0Tx = nem.TransferTransaction.create(
-  nem.Deadline.create(),
-  recipient.address,
-  [],
-  nem.PlainMessage.create('Recognize recipient address for network.'),
-  nem.NetworkType.MIJIN_TEST
-);
+  const deadline = createDeadline(props.epochAdjustment)
 
-// register namespace
-const nsRegisterTx = nem.RegisterNamespaceTransaction.createRootNamespace(
-  nem.Deadline.create(),
-  nsString,
-  nem.UInt64.fromUint(10),
-  nem.NetworkType.MIJIN_TEST
-)
+  // involved accounts
+  const providerAccount = Account.createFromPrivateKey(PROVIDER_KEY, props.networkType)
+  const aliceAccount = Account.generateNewAccount(props.networkType)
+  const bobAccount   = Account.generateNewAccount(props.networkType)
 
-// alias account
-const aliasTx = nem.AddressAliasTransaction.create(
-  nem.Deadline.create(),
-  nem.AliasActionType.Link,
-  nsId,
-  recipient.address,
-  nem.NetworkType.MIJIN_TEST
-);
+  // P -(xym for fee)-> A -(message)-> B
+  const messageTx = TransferTransaction.create(
+    deadline(),
+    bobAccount.address,
+    [],
+    PlainMessage.create("A message from Alice to Bob."),
+    props.networkType
+  ).setMaxFee(props.minFeeMultiplier)
 
-// set Address as recipient
-const transfer1Tx = nem.TransferTransaction.create(
-  nem.Deadline.create(),
-  recipient.address,
-  [nem.NetworkCurrencyMosaic.createRelative(1)],
-  nem.PlainMessage.create('Send to myself via address.'),
-  nem.NetworkType.MIJIN_TEST
-);
+  const transferTx = TransferTransaction.create(
+    deadline(),
+    aliceAccount.address,
+    [], // [ props.currency.createAbsolute(messageTx.maxFee) ], // xym for fee
+    EmptyMessage,
+    props.networkType,
+  )
 
-// set NamespaceId as recipient
-const transfer2Tx = nem.TransferTransaction.create(
-  nem.Deadline.create(),
-  nsId,
-  [nem.NetworkCurrencyMosaic.createRelative(1)],
-  nem.PlainMessage.create('Send to myself via namespace.'),
-  nem.NetworkType.MIJIN_TEST
-);
+  // aggregate them
+  const aggregateTx = AggregateTransaction.createBonded(
+    deadline(),
+    [ transferTx.toAggregate(providerAccount.publicAccount),
+      messageTx.toAggregate(aliceAccount.publicAccount) ],
+    props.networkType
+  ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
 
-const nsHttp = new nem.NamespaceHttp(url);
-const txHttp = new nem.TransactionHttp(url)
-const listener = new nem.Listener(url)
-let counter = 0
-listener.open().then(() => {
-  listener.status(initiator.address).subscribe(res => console.log(res))
-  listener.confirmed(initiator.address).subscribe(tx => {
-    switch (tx.type) {
-      case nem.TransactionType.TRANSFER:
-        console.log('Transferred.')
-        counter++
-        break;
-      case nem.TransactionType.REGISTER_NAMESPACE:
-        console.log('Namespace registered.')
-        txHttp.announce(initiator.sign(aliasTx)).subscribe()
-        break;
-      case nem.TransactionType.ADDRESS_ALIAS:
-        console.log('Address aliased.')
-        txHttp.announce(initiator.sign(transfer1Tx)).subscribe()
-        txHttp.announce(initiator.sign(transfer2Tx)).subscribe()
-        break;
-      default:
-        console.log(tx)
-        break;
-    }
-    if (counter === 1) {
-      txHttp.announce(initiator.sign(nsRegisterTx)).subscribe()
-    }
+  const signedTx = providerAccount.sign(aggregateTx, props.generationHash)
 
-    if (counter >= 3) {
-      nsHttp.getLinkedAddress(nsId).subscribe(address => {
-          console.log('')
-          console.log('Namespace: %s', nsId.fullName);
-          console.log('Aliased:   %s', address.pretty());
-          console.log('')
-        },
-        err => console.error('Error: ', err)
-      );
+  // for aggregateBonded
+  const hashLockTx = HashLockTransaction.create(
+    deadline(),
+    props.currency.createRelative(10),
+    UInt64.fromUint(300),
+    signedTx,
+    props.networkType
+  ).setMaxFee(props.minFeeMultiplier)
 
-      console.log('')
-      console.log('See transfer transactions.')
-      //listener.close()
-    }
-  })
-  txHttp.announce(initiator.sign(transfer0Tx)).subscribe()
-})
+  const signedHLTx = providerAccount.sign(hashLockTx, props.generationHash)
+  console.info('%s:  %s/transactionStatus/%s', 'HashLock', url, signedHLTx.hash)
+
+  const listener = factory.createListener()
+  const transactionRepo = factory.createTransactionRepository()
+  const transactionService = new TransactionService(
+    transactionRepo,
+    factory.createReceiptRepository()
+  )
+
+  listener.open()
+    .then(() => {
+      transactionService.announceHashLockAggregateBonded(signedHLTx, signedTx, listener)
+        .pipe(
+          tap(resp =>  {
+            console.info('%s:  %s/transactions/confirmed/%s', 'HashLock', url, signedHLTx.hash)
+            console.info('%s: %s/transactionStatus/%s', 'Aggregate', url, signedTx.hash)
+          }),
+          mergeMap(aggregateTx => {
+            const coTx = CosignatureTransaction.create(aggregateTx)
+            const signedCoTx = aliceAccount.signCosignatureTransaction(coTx)
+            return transactionRepo.announceAggregateBondedCosignature(signedCoTx)
+          }),
+          finalize(() => listener.close())
+        )
+        .subscribe(
+          () => {
+            console.info('%s: %s/transactions/confirmed/%s', 'Aggregate', url, signedTx.hash)
+          }
+        )
+    })
+}
+
+main(GATEWAY_URL).then(() => {})

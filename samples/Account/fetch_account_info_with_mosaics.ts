@@ -10,6 +10,7 @@ import { forkJoin } from "rxjs"
 
 import { env } from '../util/env'
 import { networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
+import { prettyPrint } from '../util'
 
 async function main(props: INetworkStaticProps) {
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
@@ -26,7 +27,7 @@ async function main(props: INetworkStaticProps) {
   })
     .subscribe(
       resp => {
-        consola.info(resp)
+        prettyPrint(resp)
       },
       error => consola.error(error)
     )

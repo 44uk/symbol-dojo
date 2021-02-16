@@ -16,6 +16,7 @@ import {
 import { env } from '../util/env'
 import { createDeadline } from '../util'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
+import { mergeMap, tap } from 'rxjs/operators'
 
 async function main(props: INetworkStaticProps) {
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
@@ -36,7 +37,7 @@ async function main(props: INetworkStaticProps) {
     divisibility,
     duration,
     props.networkType,
-  )
+  ).setMaxFee(props.minFeeMultiplier) as MosaicDefinitionTransaction
 
   // supplyMutableがfalseであっても、初回だけは変更が可能
   const delta = 1000000;
@@ -46,33 +47,36 @@ async function main(props: INetworkStaticProps) {
     MosaicSupplyChangeAction.Increase,
     UInt64.fromUint(delta * Math.pow(10, divisibility)),
     props.networkType,
-  )
+  ).setMaxFee(props.minFeeMultiplier)
 
-  const aggregateTx = AggregateTransaction.createComplete(
-    deadline(),
-    [ definitionTx,
-      supplyChangeTx ].map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
-    props.networkType,
-    [],
-  ).setMaxFeeForAggregate(props.minFeeMultiplier, 0)
-
-  const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
+  const signedTx1 = initiatorAccount.sign(definitionTx, props.generationHash)
+  const signedTx2 = initiatorAccount.sign(supplyChangeTx, props.generationHash)
 
   consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedTx.hash,
-    signedTx.getSignerAddress().plain(),
-    aggregateTx.maxFee
+    signedTx1.hash,
+    signedTx1.getSignerAddress().plain(),
+    definitionTx.maxFee
   )
-  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
+  consola.info('announce: %s, signer: %s, maxFee: %d',
+    signedTx2.hash,
+    signedTx2.getSignerAddress().plain(),
+    supplyChangeTx.maxFee
+  )
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil.announce(signedTx)
+  consola.info('%s/transactionStatus/%s', props.url, signedTx1.hash)
+  announceUtil.announce(signedTx1)
+    .pipe(
+      tap(() => consola.info('%s/transactionStatus/%s', props.url, signedTx2.hash)),
+      mergeMap(() => announceUtil.announce(signedTx2))
+    )
     .subscribe(
       resp => {
         consola.success('confirmed: %s, height: %d',
           resp.transactionInfo?.hash,
           resp.transactionInfo?.height.compact(),
         )
-        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+        consola.success('%s/transactions/confirmed/%s', props.url, signedTx1.hash)
+        consola.success('%s/transactions/confirmed/%s', props.url, signedTx2.hash)
       },
       error => {
         consola.error(error)

@@ -8,8 +8,10 @@ import {
   MosaicFlags,
   MosaicId,
   MosaicNonce,
+  MosaicService,
   MosaicSupplyChangeAction,
   MosaicSupplyChangeTransaction,
+  TransactionService,
   UInt64,
 } from 'symbol-sdk'
 
@@ -17,51 +19,30 @@ import { env } from '../util/env'
 import { createDeadline } from '../util'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
 
-async function main(props: INetworkStaticProps) {
+const MOSAIC_HEX = ''
+
+async function main(props: INetworkStaticProps, mosaicHex: string) {
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
   const deadline = createDeadline(props.epochAdjustment)
 
-  const nonce = MosaicNonce.createRandom()
-  const isSupplyMutable = true
-  const isTransferable = true
-  const isRestrictable = true
-  const divisibility = 0
-  const duration = UInt64.fromUint(1000)
+  const mosaicId = new MosaicId(mosaicHex)
+  const mosaicInfo = await props.factory.createMosaicRepository().getMosaic(mosaicId).toPromise()
 
-  const definitionTx = MosaicDefinitionTransaction.create(
-    deadline(),
-    nonce,
-    MosaicId.createFromNonce(nonce, initiatorAccount.address),
-    MosaicFlags.create(isSupplyMutable, isTransferable, isRestrictable),
-    divisibility,
-    duration,
-    props.networkType,
-  )
-
-  // supplyMutableがfalseであっても、初回だけは変更が可能
-  const delta = 1000000;
+  const delta = 1000000
   const supplyChangeTx = MosaicSupplyChangeTransaction.create(
     deadline(),
-    definitionTx.mosaicId,
+    mosaicId,
     MosaicSupplyChangeAction.Increase,
-    UInt64.fromUint(delta * Math.pow(10, divisibility)),
+    UInt64.fromUint(delta * Math.pow(10, mosaicInfo.divisibility)),
     props.networkType,
-  )
+  ).setMaxFee(props.minFeeMultiplier)
 
-  const aggregateTx = AggregateTransaction.createComplete(
-    deadline(),
-    [ definitionTx,
-      supplyChangeTx ].map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
-    props.networkType,
-    [],
-  ).setMaxFeeForAggregate(props.minFeeMultiplier, 0)
-
-  const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
+  const signedTx = initiatorAccount.sign(supplyChangeTx, props.generationHash)
 
   consola.info('announce: %s, signer: %s, maxFee: %d',
     signedTx.hash,
     signedTx.getSignerAddress().plain(),
-    aggregateTx.maxFee
+    supplyChangeTx.maxFee
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
   const announceUtil = createAnnounceUtil(props.factory)
@@ -81,4 +62,4 @@ async function main(props: INetworkStaticProps) {
 }
 
 networkStaticPropsUtil(env.GATEWAY_URL).toPromise()
-  .then(props => main(props))
+  .then(props => main(props, MOSAIC_HEX))

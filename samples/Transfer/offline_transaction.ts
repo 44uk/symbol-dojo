@@ -1,4 +1,70 @@
 /**
+ * $ ts-node transfer/create_mosaic_transfer.ts RECIPIENT_ADDRESS 1
+ */
+import consola from "consola"
+import {
+  Account,
+  Address,
+  PlainMessage,
+  TransferTransaction,
+} from "symbol-sdk"
+
+import { env } from '../util/env'
+import { prettyPrint } from '../util/print'
+import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
+import { createDeadline } from '../util'
+
+async function main(props: INetworkStaticProps) {
+  const deadline = createDeadline(props.epochAdjustment)
+
+  const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
+
+  const transferTx = TransferTransaction.create(
+    deadline(),
+    initiatorAccount.address,
+    mosaics,
+    PlainMessage.create('Signed with offline.'),
+    props.networkType
+  ).setMaxFee(props.minFeeMultiplier)
+
+  const signedTx = initiatorAccount.sign(transferTx, props.generationHash)
+
+  consola.info('announce: %s, signer: %s, maxFee: %d',
+    signedTx.hash,
+    signedTx.getSignerAddress().plain(),
+    transferTx.maxFee
+  )
+  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
+  const announceUtil = createAnnounceUtil(props.factory)
+  announceUtil.announce(signedTx)
+    .subscribe(
+      resp => {
+        prettyPrint(resp)
+        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+      },
+      error => {
+        consola.error(error)
+      }
+    )
+}
+
+networkStaticPropsUtil(env.GATEWAY_URL).toPromise()
+  .then(props => main(props))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
  * $ ts-node transfer/offline_transfer.ts RECIPIENT_ADDRESS
  */
 import {

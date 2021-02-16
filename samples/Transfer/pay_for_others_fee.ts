@@ -12,6 +12,7 @@ import {
   MosaicId,
   PlainMessage,
   TransactionGroup,
+  TransactionMapping,
   TransactionType,
   TransferTransaction,
   UInt64,
@@ -36,74 +37,59 @@ async function main(props: INetworkStaticProps) {
   const messageTx = TransferTransaction.create(
     deadline(),
     bobAccount.address,
-    [ new Mosaic(new MosaicId('3DFDD22B638FD112'), UInt64.fromUint(100)) ],
+    [], // [ new Mosaic(new MosaicId('3DFDD22B638FD112'), UInt64.fromUint(100)) ],
     message,
     props.networkType
   ).setMaxFee(props.minFeeMultiplier)
 
-  const transferTx = TransferTransaction.create(
+  const feeTransferTx = TransferTransaction.create(
     deadline(),
     aliceAccount.address,
-    [],
-    //[ props.currency.createAbsolute(messageTx.maxFee) ],
+    [], // [ props.currency.createAbsolute(messageTx.maxFee) ],
     EmptyMessage,
     props.networkType,
-  ) // .setMaxFee(props.minFeeMultiplier)
-
-  console.log(messageTx.signature)
-  const signedMsgTx = aliceAccount.sign(messageTx, props.generationHash)
+  )
 
   const aggregateTx = AggregateTransaction.createComplete(
     deadline(),
-    [ transferTx.toAggregate(initiatorAccount.publicAccount),
+    [ feeTransferTx.toAggregate(initiatorAccount.publicAccount),
       messageTx.toAggregate(aliceAccount.publicAccount) ],
     props.networkType,
     [],
-    UInt64.fromUint(20000),
   ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
-
-
-  // const aggregateTx = AggregateTransaction.createBonded(
-  //   deadline(),
-  //   [ transferTx.toAggregate(initiatorAccount.publicAccount),
-  //     messageTx.toAggregate(aliceAccount.publicAccount) ],
-  //   props.networkType
-  // ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
-
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
 
+  // -------------------------------------------------------------------------------
+
+  const signedTxDTO = signedTx.toDTO()
+  const signedCoTx = CosignatureTransaction.signTransactionPayload(
+    aliceAccount,
+    signedTxDTO.payload,
+    props.generationHash
+  )
+  const restoredAggregateTx = TransactionMapping.createFromPayload(signedTxDTO.payload) as AggregateTransaction
+
+  const collectedSignedTx = initiatorAccount.signTransactionGivenSignatures(
+    restoredAggregateTx,
+    [signedCoTx],
+    props.generationHash
+  )
+
+  // -------------------------------------------------------------------------------
+
   consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedTx.hash,
-    signedTx.getSignerAddress().plain(),
-    transferTx.maxFee
+    collectedSignedTx.hash,
+    collectedSignedTx.getSignerAddress().plain(),
+    aggregateTx.maxFee
   )
   consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
 
-  const hashLockTx = HashLockTransaction.create(
-    deadline(),
-    props.currency.createRelative(10),
-    UInt64.fromUint(300),
-    signedTx,
-    props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
-
-  const signedHLTx = initiatorAccount.sign(hashLockTx, props.generationHash)
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedHLTx.hash,
-    signedHLTx.getSignerAddress().plain(),
-    hashLockTx.maxFee
-  )
-  consola.info('%s/transactionStatus/%s', props.url, signedHLTx.hash)
-
-  listenConfirmed(props, initiatorAccount, aliceAccount)
-
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil.announce(signedTx, signedHLTx)
+  announceUtil.announce(collectedSignedTx)
     .subscribe(
       resp => {
         prettyPrint(resp)
         consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
-        whenPartial(props, aliceAccount)
       },
       error => {
         consola.error(error)
@@ -111,41 +97,6 @@ async function main(props: INetworkStaticProps) {
     )
 }
 
-function whenPartial(props: INetworkStaticProps, cosigner: Account) {
-  const announceUtil = createAnnounceUtil(props.factory)
-
-  props.factory.createTransactionRepository().search({
-    type: [ TransactionType.AGGREGATE_BONDED ],
-    group: TransactionGroup.Partial,
-    address: cosigner.address,
-  })
-    .pipe(
-      mergeMap(results => from(results.data)),
-      map(tx => CosignatureTransaction.create(tx as AggregateTransaction)),
-      map(cosignTx => cosigner.signCosignatureTransaction(cosignTx)),
-      mergeMap(signedCoTx => announceUtil.cosign(signedCoTx)),
-    )
-    .subscribe(
-      resp => prettyPrint(resp)
-    )
-}
-
-function listenConfirmed(props: INetworkStaticProps, initiator: Account, cosigner: Account) {
-  const listener = props.factory.createListener()
-
-  listener.open()
-    .then(() => {
-      consola.success('Start listening to be confirmed')
-      listener.cosignatureAdded(initiator.address)
-        .subscribe(
-          resp => console.debug('initiator confirmed')
-        )
-      listener.cosignatureAdded(cosigner.address)
-        .subscribe(
-          resp => console.debug('cosigner confirmed')
-        )
-    })
-}
-
 networkStaticPropsUtil(env.GATEWAY_URL).toPromise()
   .then(props => main(props))
+  .catch(error => consola.error(error))

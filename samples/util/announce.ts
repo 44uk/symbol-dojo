@@ -10,9 +10,9 @@ export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
     transactionRepo,
     factory.createReceiptRepository()
   )
-  const listener = factory.createListener()
 
   function cosign(signedCoTx: CosignatureSignedTransaction) {
+    const listener = factory.createListener()
     return from(listener.open())
       .pipe(
         mergeMap(() => transactionRepo.announceAggregateBondedCosignature(signedCoTx)),
@@ -21,6 +21,7 @@ export function createAnnounceUtil(factory: RepositoryFactoryHttp) {
   }
 
   function announce(signedTx: SignedTransaction, hashLockSignedTx?: SignedTransaction) {
+    const listener = factory.createListener()
     return from(listener.open())
       .pipe(
         mergeMap(() => {
@@ -64,7 +65,8 @@ export function networkStaticPropsUtil(url: string): Observable<INetworkStaticPr
     nodePublicKey: factory.getNodePublicKey(),
     minFeeMultiplier: networkRepo.getTransactionFees().pipe(
       map(({ minFeeMultiplier }) => minFeeMultiplier)
-    )
+    ),
+    configuration: networkRepo.getNetworkProperties()
   })
     .pipe(
       map(props => ({ ...props,
@@ -72,6 +74,7 @@ export function networkStaticPropsUtil(url: string): Observable<INetworkStaticPr
         factory,
       })),
       tap(props => {
+        props.configuration.chain
         consola.info('-- [NetworkStaticProps] %s', '-'.repeat(56))
         consola.info('URL: %s', props.url)
         consola.info('NetworkType: %s(%d)',

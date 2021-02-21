@@ -11,9 +11,10 @@ import {
 
 import { env } from '../util/env'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
-import { createDeadline, prettyPrint } from '../util'
+import { createDeadline, prettyPrint, txPrinter } from '../util'
 
 async function main(props: INetworkStaticProps) {
+  const txPrint = txPrinter(props.url)
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
@@ -28,10 +29,8 @@ async function main(props: INetworkStaticProps) {
     carolAccount.address
   ]
 
-  const xymMosaic = props.currency.createRelative(10)
-
-  // メッセージオブジェクトを作成
-
+  // 3つのアカウント向けの転送トランザクションを生成
+  const xymMosaic = props.currency.createRelative(100)
   const transferTxes = recipients.map(recipient => TransferTransaction.create(
     deadline(),
     recipient,
@@ -40,6 +39,8 @@ async function main(props: INetworkStaticProps) {
     props.networkType
   ))
 
+  // 3つのトランザクションをアグリゲートコンプリートで集約
+  // `toAggregate` にはそのトランザクションに署名すべきアカウントの公開アカウントを渡す
   const aggregateTx = AggregateTransaction.createComplete(
     deadline(),
     transferTxes.map(tx => tx.toAggregate(initiatorAccount.publicAccount)),
@@ -49,18 +50,14 @@ async function main(props: INetworkStaticProps) {
 
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
 
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedTx.hash,
-    signedTx.getSignerAddress().plain(),
-    aggregateTx.maxFee
-  )
-  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
+  txPrint.info(signedTx)
+  txPrint.status(signedTx)
   const announceUtil = createAnnounceUtil(props.factory)
   announceUtil.announce(signedTx)
     .subscribe(
       resp => {
+        txPrint.url(signedTx)
         prettyPrint(resp)
-        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
       },
       error => {
         consola.error(error)

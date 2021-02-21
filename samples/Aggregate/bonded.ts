@@ -4,44 +4,38 @@
 import consola from "consola"
 import {
   Account,
-  AggregateTransaction,
-  TransactionSearchCriteria,
-  CosignatureTransaction,
   EmptyMessage,
-  HashLockTransaction,
   PlainMessage,
+  AggregateTransaction,
+  HashLockTransaction,
   TransferTransaction,
   UInt64,
-  TransactionGroup,
-  TransactionType,
-  Transaction,
 } from "symbol-sdk"
+import { mergeMap } from "rxjs/operators"
 
 import { env } from '../util/env'
-import { prettyPrint } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
-import { createDeadline } from '../util'
-import { EmptyError, from, of } from "rxjs"
-import { first, map, mergeMap, tap } from "rxjs/operators"
-import { Signer } from "crypto"
+import { createDeadline, txPrinter } from '../util'
+import { cosignBondedWithAccount } from "../util/helper"
 
 async function main(props: INetworkStaticProps) {
+  const txPrint = txPrinter(props.url)
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
   const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
 
-  // メッセージオブジェクトを作成
+  // Alice 宛のメッセージ付きトランザクションを生成
   const message = PlainMessage.create("Hi, Alice. Pay my money back!")
-
   const fromCreditor = TransferTransaction.create(
     deadline(),
     aliceAccount.address,
     [],
     message,
     props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
+  )
 
+  // Initiator 宛の転送トランザクションを生成
   const xymMosaic = props.currency.createRelative(100)
   const fromDebtor = TransferTransaction.create(
     deadline(),
@@ -49,24 +43,26 @@ async function main(props: INetworkStaticProps) {
     [ xymMosaic ],
     EmptyMessage,
     props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
+  )
 
   const aggregateTx = AggregateTransaction.createBonded(
     deadline(),
-    [ fromCreditor.toAggregate(initiatorAccount.publicAccount),
-      fromDebtor.toAggregate(aliceAccount.publicAccount) ],
+    [
+      // 署名者は Initiator としてメッセージを送信する。
+      fromCreditor.toAggregate(initiatorAccount.publicAccount),
+      // 署名者は Alice として XYM を送信する。
+      fromDebtor.toAggregate(aliceAccount.publicAccount)
+    ],
     props.networkType
   ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
 
+  // Initiator が要求するシチュエーションのため、Initiator が署名する。
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
+  txPrint.info(signedTx)
+  txPrint.status(signedTx)
 
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedTx.hash,
-    signedTx.getSignerAddress().plain(),
-    aggregateTx.maxFee
-  )
-  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
-
+  // 他アカウントの署名を求めるアグリゲートボンデッドの場合は、
+  // HashLock トランザクションが予め承認済みになっている必要がある。
   const hashLockTx = HashLockTransaction.create(
     deadline(),
     props.currency.createRelative(10),
@@ -75,48 +71,26 @@ async function main(props: INetworkStaticProps) {
     props.networkType
   ).setMaxFee(props.minFeeMultiplier)
 
+  // 署名した人がロック分の 10 XYM を負担するが、このトランザクションは誰が署名してもよい。
   const signedHLTx = initiatorAccount.sign(hashLockTx, props.generationHash)
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedHLTx.hash,
-    signedHLTx.getSignerAddress().plain(),
-    hashLockTx.maxFee
-  )
-  consola.info('%s/transactionStatus/%s', props.url, signedHLTx.hash)
+  txPrint.info(signedHLTx)
+  txPrint.status(signedHLTx)
 
   const announceUtil = createAnnounceUtil(props.factory)
-
   announceUtil.announce(signedTx, signedHLTx)
     .pipe(
-      // map(aggregateTx)
+      mergeMap(() => {
+        txPrint.url(signedHLTx)
+        return cosignBondedWithAccount(props, aliceAccount)
+      })
     )
     .subscribe(
       resp => {
-        prettyPrint(resp)
-        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
-        whenPartial(props, aliceAccount)
+        txPrint.url(signedTx)
       },
       error => {
         consola.error(error)
       }
-    )
-}
-
-function whenPartial(props: INetworkStaticProps, cosigner: Account) {
-  const announceUtil = createAnnounceUtil(props.factory)
-
-  props.factory.createTransactionRepository().search({
-    type: [ TransactionType.AGGREGATE_BONDED ],
-    group: TransactionGroup.Partial,
-    address: cosigner.address,
-  })
-    .pipe(
-      mergeMap(results => from(results.data)),
-      map(tx => CosignatureTransaction.create(tx as AggregateTransaction)),
-      map(cosignTx => cosigner.signCosignatureTransaction(cosignTx)),
-      mergeMap(signedCoTx => announceUtil.cosign(signedCoTx)),
-    )
-    .subscribe(
-      resp => prettyPrint(resp)
     )
 }
 

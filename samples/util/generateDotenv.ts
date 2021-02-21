@@ -19,14 +19,16 @@ ${name}=${account.privateKey}
 # address:   ${account.address.pretty()}`
   }
 
-  fs.writeFileSync(ENV_PATH, `
-GATEWAY_URL=${GATEWAY_URL}
+  fs.writeFileSync(ENV_PATH,
+`GATEWAY_URL=${GATEWAY_URL}
 ${generateAccountBlock('INITIATOR_KEY')}
 ${generateAccountBlock('ALICE_KEY')}
 ${generateAccountBlock('BOB_KEY')}
 ${generateAccountBlock('CAROL_KEY')}
 ${generateAccountBlock('DAVE_KEY')}
-${generateAccountBlock('ELLEN_KEY')}`)
+${generateAccountBlock('ELLEN_KEY')}
+${generateAccountBlock('FRANK_KEY')}`
+  )
 }
 
 networkStaticPropsUtil(GATEWAY_URL).toPromise()

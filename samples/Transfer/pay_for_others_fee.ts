@@ -7,25 +7,19 @@ import {
   AggregateTransaction,
   CosignatureTransaction,
   EmptyMessage,
-  HashLockTransaction,
-  Mosaic,
-  MosaicId,
   PlainMessage,
-  TransactionGroup,
+  SignedTransaction,
   TransactionMapping,
-  TransactionType,
   TransferTransaction,
-  UInt64,
 } from "symbol-sdk"
 
 import { env } from '../util/env'
 import { prettyPrint } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
-import { createDeadline } from '../util'
-import { map, mergeMap } from "rxjs/operators"
-import { from } from "rxjs"
+import { createDeadline, txPrinter } from '../util'
 
 async function main(props: INetworkStaticProps) {
+  const txPrint = txPrinter(props.url)
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
@@ -42,9 +36,10 @@ async function main(props: INetworkStaticProps) {
     props.networkType
   ).setMaxFee(props.minFeeMultiplier)
 
-  const feeTransferTx = TransferTransaction.create(
+  // 署名するトランザクションがないと `Failure_Aggregate_Ineligible_Cosignatories` となってしまう。
+  const dummyTx = TransferTransaction.create(
     deadline(),
-    aliceAccount.address,
+    initiatorAccount.address,
     [], // [ props.currency.createAbsolute(messageTx.maxFee) ],
     EmptyMessage,
     props.networkType,
@@ -52,44 +47,52 @@ async function main(props: INetworkStaticProps) {
 
   const aggregateTx = AggregateTransaction.createComplete(
     deadline(),
-    [ feeTransferTx.toAggregate(initiatorAccount.publicAccount),
-      messageTx.toAggregate(aliceAccount.publicAccount) ],
+    [ messageTx.toAggregate(aliceAccount.publicAccount),
+      dummyTx.toAggregate(initiatorAccount.publicAccount) ],
     props.networkType,
     [],
   ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
+
   const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
+  const signedTxDTO = signedTx.toDTO()
 
   // -------------------------------------------------------------------------------
 
-  const signedTxDTO = signedTx.toDTO()
+  // DTO形式でデータを受け取ることを想定
+  const restoredAggregateTx = TransactionMapping.createFromPayload(signedTxDTO.payload) as AggregateTransaction
+
   const signedCoTx = CosignatureTransaction.signTransactionPayload(
     aliceAccount,
     signedTxDTO.payload,
     props.generationHash
   )
-  const restoredAggregateTx = TransactionMapping.createFromPayload(signedTxDTO.payload) as AggregateTransaction
 
   const collectedSignedTx = initiatorAccount.signTransactionGivenSignatures(
     restoredAggregateTx,
-    [signedCoTx],
+    [ signedCoTx ],
     props.generationHash
   )
+  const collectedSignedTxDTO = collectedSignedTx.toDTO()
 
   // -------------------------------------------------------------------------------
 
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    collectedSignedTx.hash,
-    collectedSignedTx.getSignerAddress().plain(),
-    aggregateTx.maxFee
+  // DTO形式でデータを受け取ることを想定
+  const restoredCollectionSignedTx = new SignedTransaction(
+    collectedSignedTxDTO.payload,
+    collectedSignedTxDTO.hash,
+    collectedSignedTxDTO.signerPublicKey,
+    collectedSignedTxDTO.type,
+    collectedSignedTxDTO.networkType
   )
-  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
 
+  txPrint.info(signedTx)
+  txPrint.status(signedTx)
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil.announce(collectedSignedTx)
+  announceUtil.announce(restoredCollectionSignedTx)
     .subscribe(
       resp => {
+        txPrint.url(signedTx)
         prettyPrint(resp)
-        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
       },
       error => {
         consola.error(error)

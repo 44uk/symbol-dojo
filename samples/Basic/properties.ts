@@ -6,7 +6,8 @@ import {
 } from "symbol-sdk"
 import { forkJoin } from "rxjs"
 
-import { env, humanReadable as hr } from "../util"
+import { env } from "../util/env"
+import { humanReadable as hr } from "../util"
 
 const url = env.GATEWAY_URL
 const repoFactory = new RepositoryFactoryHttp(url)

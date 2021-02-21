@@ -19,11 +19,11 @@ async function main() {
   const repoFactory = new RepositoryFactoryHttp(url)
 
   const props = await forkJoin({
-      currency: repoFactory.getCurrencies().pipe(map(currencies => currencies.currency)),
-      epochAdjustment: repoFactory.getEpochAdjustment(),
-      generationHash: repoFactory.getGenerationHash(),
-      networkType: repoFactory.getNetworkType(),
-      transactionFees: repoFactory.createNetworkRepository().getTransactionFees().toPromise()
+    currency: repoFactory.getCurrencies().pipe(map(currencies => currencies.currency)),
+    epochAdjustment: repoFactory.getEpochAdjustment(),
+    generationHash: repoFactory.getGenerationHash(),
+    networkType: repoFactory.getNetworkType(),
+    transactionFees: repoFactory.createNetworkRepository().getTransactionFees().toPromise()
   }).toPromise()
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)

@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "symbol-dojo-examples",
+  "name": "symbol-dojo-samples",
   "version": "0.0.1",
-  "description": "Symbol Dojo - Example scripts for learning symbol-sdk.",
+  "description": "Symbol Dojo - Sample scripts for learning symbol-sdk.",
   "keywords": [
     "nem",
     "nem2",
@@ -22,7 +22,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "generate:env": "ts-node util/generateEnv.ts",
+    "generate:dotenv": "ts-node util/generateDotenv.ts",
     "prettier": "prettier --write '**/*.{ts,js,json,md,html}'"
   },
   "dependencies": {
@@ -32,12 +32,13 @@
     "hi-base32": "^0.5.0",
     "js-sha3": "git+https://github.com/Propine/js-sha3.git",
     "rxjs": "^6.6.3",
-    "symbol-sdk": "^0.23.2-alpha-202102111153",
-    "utf8": "^3.0.0"
+    "symbol-sdk": "^0.23.3-alpha-202102181227",
+    "utf8": "^3.0.0",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
-    "@types/node": "^14.14.27",
+    "@types/node": "^14.14.30",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "ts-jest": "^26.5.1",

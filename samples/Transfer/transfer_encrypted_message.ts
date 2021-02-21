@@ -9,11 +9,11 @@ import {
 } from "symbol-sdk"
 
 import { env } from '../util/env'
-import { prettyPrint } from '../util/print'
 import { createAnnounceUtil, networkStaticPropsUtil, INetworkStaticProps } from '../util/announce'
-import { createDeadline } from '../util'
+import { createDeadline, prettyPrint, txPrinter } from '../util'
 
 async function main(props: INetworkStaticProps) {
+  const txPrint = txPrinter(props.url)
   const deadline = createDeadline(props.epochAdjustment)
 
   const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
@@ -36,18 +36,14 @@ async function main(props: INetworkStaticProps) {
 
   const signedTx = initiatorAccount.sign(transferTx, props.generationHash)
 
-  consola.info('announce: %s, signer: %s, maxFee: %d',
-    signedTx.hash,
-    signedTx.getSignerAddress().plain(),
-    transferTx.maxFee
-  )
-  consola.info('%s/transactionStatus/%s', props.url, signedTx.hash)
+  txPrint.info(signedTx)
+  txPrint.status(signedTx)
   const announceUtil = createAnnounceUtil(props.factory)
   announceUtil.announce(signedTx)
     .subscribe(
       resp => {
         prettyPrint(resp)
-        consola.success('%s/transactions/confirmed/%s', props.url, signedTx.hash)
+        txPrint.url(signedTx)
 
         // @ts-ignore
         const encrypted = resp.message as EncryptedMessage

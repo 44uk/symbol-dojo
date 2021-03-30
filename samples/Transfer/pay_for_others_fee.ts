@@ -5,11 +5,13 @@ import consola from "consola"
 import {
   Account,
   AggregateTransaction,
+  CosignatureSignedTransaction,
   CosignatureTransaction,
   EmptyMessage,
   PlainMessage,
   SignedTransaction,
   TransactionMapping,
+  TransactionType,
   TransferTransaction,
 } from "symbol-sdk"
 
@@ -22,73 +24,94 @@ async function main(props: INetworkStaticProps) {
   const txPrint = txPrinter(props.url)
   const deadline = createDeadline(props.epochAdjustment)
 
-  const initiatorAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
-  const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
-  const bobAccount = Account.createFromPrivateKey(env.BOB_KEY, props.networkType)
+  const providerAccount = Account.createFromPrivateKey(env.INITIATOR_KEY, props.networkType)
 
-  const message = PlainMessage.create("A message from Alice to Bob.")
+  const aliceAccount = Account.createFromPrivateKey(env.ALICE_KEY, props.networkType)
+  const bobAccount   = Account.createFromPrivateKey(env.BOB_KEY  , props.networkType)
+
+  // on Alice side ------------------------------------------------
 
   const messageTx = TransferTransaction.create(
     deadline(),
     bobAccount.address,
-    [], // [ new Mosaic(new MosaicId('3DFDD22B638FD112'), UInt64.fromUint(100)) ],
-    message,
+    [],
+    PlainMessage.create("A message from Alice to Bob signed by the Provider."),
     props.networkType
-  ).setMaxFee(props.minFeeMultiplier)
+  ).toAggregate(aliceAccount.publicAccount)
+
+  // Webシステムへ送信する
+  const serializedTx = messageTx.serialize()
+
+
+  // on Provider side ------------------------------------------------
+
+  // HTTPリクエストで受信した想定
+  const requestedTx = TransactionMapping.createFromPayload(serializedTx)
 
   // 署名するトランザクションがないと `Failure_Aggregate_Ineligible_Cosignatories` となってしまう。
   const dummyTx = TransferTransaction.create(
     deadline(),
-    initiatorAccount.address,
-    [], // [ props.currency.createAbsolute(messageTx.maxFee) ],
+    providerAccount.address,
+    [],
     EmptyMessage,
     props.networkType,
-  )
+  ).toAggregate(providerAccount.publicAccount)
 
   const aggregateTx = AggregateTransaction.createComplete(
     deadline(),
-    [ messageTx.toAggregate(aliceAccount.publicAccount),
-      dummyTx.toAggregate(initiatorAccount.publicAccount) ],
+    [ requestedTx, dummyTx ],
     props.networkType,
     [],
   ).setMaxFeeForAggregate(props.minFeeMultiplier, 1)
 
-  const signedTx = initiatorAccount.sign(aggregateTx, props.generationHash)
-  const signedTxDTO = signedTx.toDTO()
+  // 一度レスポンスとして返却する
+  const { payload: signedTxPayload } = providerAccount.sign(aggregateTx, props.generationHash)
 
-  // -------------------------------------------------------------------------------
 
-  // DTO形式でデータを受け取ることを想定
-  const restoredAggregateTx = TransactionMapping.createFromPayload(signedTxDTO.payload) as AggregateTransaction
+  // on Alice side ------------------------------------------------
+
+  const compositedTx = TransactionMapping.createFromPayload(signedTxPayload) as AggregateTransaction
+  const originalTx = compositedTx.innerTransactions
+    .find(tx => tx.type === messageTx.type)
+    // TODO: createFromPayloadで作られるトランザクションで失われている情報があり一致しない。
+    // TODO: バグなのか、やり方が間違っているのか要調査
+    // .find(tx => tx.serialize() === messageTx.serialize())
+  // console.log('%s', originalTx!.serialize())
+  // console.log('%s', messageTx.serialize())
+
+  // TODO: ここで自分がリクエストしたトランザクションと一致することは必ず確認しなければならない。
+  if(! originalTx) {
+    throw new Error('It might be tampered your transaction.')
+  }
 
   const signedCoTx = CosignatureTransaction.signTransactionPayload(
     aliceAccount,
-    signedTxDTO.payload,
+    signedTxPayload,
     props.generationHash
   )
 
-  const collectedSignedTx = initiatorAccount.signTransactionGivenSignatures(
-    restoredAggregateTx,
-    [ signedCoTx ],
-    props.generationHash
+  const serializedCoTx = JSON.stringify(signedCoTx)
+
+
+  // on Provider side ------------------------------------------------
+
+  const parsedCoTxDTO = JSON.parse(serializedCoTx)
+  const restoredCoTx = new CosignatureSignedTransaction(
+    parsedCoTxDTO.parentHash,
+    parsedCoTxDTO.signature,
+    parsedCoTxDTO.signerPublicKey
   )
-  const collectedSignedTxDTO = collectedSignedTx.toDTO()
 
-  // -------------------------------------------------------------------------------
-
-  // DTO形式でデータを受け取ることを想定
-  const restoredCollectionSignedTx = new SignedTransaction(
-    collectedSignedTxDTO.payload,
-    collectedSignedTxDTO.hash,
-    collectedSignedTxDTO.signerPublicKey,
-    collectedSignedTxDTO.type,
-    collectedSignedTxDTO.networkType
+  const signedTx = providerAccount.signTransactionGivenSignatures(
+    aggregateTx,
+    [ restoredCoTx ],
+    props.generationHash
   )
 
   txPrint.info(signedTx)
   txPrint.status(signedTx)
   const announceUtil = createAnnounceUtil(props.factory)
-  announceUtil.announce(restoredCollectionSignedTx)
+  announceUtil.announce(signedTx)
     .subscribe(
       resp => {
         txPrint.url(signedTx)
